@@ -1,7 +1,7 @@
 (defvar after-make-console-frame-hooks '()
-  "Hooks to run after creating a new TTY frame")
+  "Hooks to run after creating a new TTY frame.")
 (defvar after-make-window-system-frame-hooks '()
-  "Hooks to run after creating a new window-system frame")
+  "Hooks to run after creating a new frame on the variable `window-system'.")
 
 (defun run-after-make-frame-hooks (frame)
   "Run configured hooks in response to the newly-created FRAME.
@@ -20,6 +20,5 @@ Selectively runs either `after-make-console-frame-hooks' or
 (add-hook 'after-init-hook
           (lambda () (when sanityinc/initial-frame
                   (run-after-make-frame-hooks sanityinc/initial-frame))))
-
 
 (provide 'init-frame-hooks)

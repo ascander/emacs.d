@@ -1,6 +1,9 @@
 (when *is-a-mac*
   (setq mac-command-modifier 'meta)
+  (setq mac-right-command-modifier 'super)
   (setq mac-option-modifier 'none)
+  (setq mac-right-option-modifier 'left)
+  (setq mac-function-modifier 'hyper)   ; Just in case we ever need this
   ;; Make mouse wheel / trackpad scrolling less jerky
   (setq mouse-wheel-scroll-amount '(1
                                     ((shift) . 5)
@@ -15,6 +18,5 @@
     (define-key nxml-mode-map (kbd "M-h") nil))
   (global-set-key (kbd "M-ˍ") 'ns-do-hide-others) ;; what describe-key reports for cmd-option-h
   )
-
 
 (provide 'init-osx-keys)

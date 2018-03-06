@@ -1,12 +1,10 @@
 (setq-default dired-dwim-target t)
+(setq-default dired-listing-switches "-alh")
 
 ;; Prefer g-prefixed coreutils version of standard utilities when available
 (let ((gls (executable-find "gls")))
-  (when gls (setq insert-directory-program gls)))
-
-(when (maybe-require-package 'diredfl)
-  (after-load 'dired
-    (diredfl-global-mode)))
+  (when gls (setq insert-directory-program gls
+                  dired-listing-switches (concat dired-listing-switches " --group-directories-first -v"))))
 
 (after-load 'dired
   (setq dired-recursive-deletes 'top)
@@ -18,5 +16,9 @@
 (when (maybe-require-package 'diff-hl)
   (after-load 'dired
     (add-hook 'dired-mode-hook 'diff-hl-dired-mode)))
+
+(when (maybe-require-package 'stripe-buffer)
+  (after-load 'dired
+    (add-hook 'dired-mode-hook 'stripe-buffer-mode)))
 
 (provide 'init-dired)

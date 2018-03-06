@@ -1,11 +1,4 @@
 ;; -*- lexical-binding: t -*-
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-(package-initialize)
-
 (setq debug-on-error t)
 
 ;;; This file bootstraps the configuration, which is divided into
@@ -70,7 +63,7 @@
 (require 'init-recentf)
 (require 'init-smex)
 (require 'init-ivy)
-;;(require 'init-helm)
+;; (require 'init-helm)
 (require 'init-hippie-expand)
 (require 'init-company)
 (require 'init-windows)
