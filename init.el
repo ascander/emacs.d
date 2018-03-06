@@ -1,4 +1,11 @@
 ;; -*- lexical-binding: t -*-
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (setq debug-on-error t)
 
 ;;; This file bootstraps the configuration, which is divided into
@@ -31,7 +38,6 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (require 'init-utils)
 (require 'init-site-lisp) ;; Must come before elpa, as it may provide package.el
-;; Calls (package-initialize)
 (require 'init-elpa)      ;; Machinery for installing required packages
 (require 'init-exec-path) ;; Set up $PATH
 
@@ -82,68 +88,67 @@
 
 (require 'init-projectile)
 
-(require 'init-compile)
-;;(require 'init-crontab)
-(require 'init-textile)
-(require 'init-markdown)
-(require 'init-csv)
-(require 'init-erlang)
-(require 'init-javascript)
-(require 'init-php)
-(require 'init-org)
-(require 'init-nxml)
-(require 'init-html)
-(require 'init-css)
-(require 'init-haml)
-(require 'init-http)
-(require 'init-python)
-(require 'init-haskell)
-(require 'init-elm)
-(require 'init-purescript)
-(require 'init-ruby)
-(require 'init-rails)
-(require 'init-sql)
-(require 'init-rust)
-(require 'init-toml)
-(require 'init-yaml)
-(require 'init-docker)
-(require 'init-terraform)
-;;(require 'init-nix)
-(maybe-require-package 'nginx-mode)
+; (require 'init-compile)
+; ;;(require 'init-crontab)
+; (require 'init-textile)
+; (require 'init-markdown)
+; (require 'init-csv)
+; (require 'init-erlang)
+; (require 'init-javascript)
+; (require 'init-php)
+; (require 'init-org)
+; (require 'init-nxml)
+; (require 'init-html)
+; (require 'init-css)
+; (require 'init-haml)
+; (require 'init-http)
+; (require 'init-python)
+; (require 'init-haskell)
+; (require 'init-elm)
+; (require 'init-purescript)
+; (require 'init-ruby)
+; (require 'init-rails)
+; (require 'init-sql)
+; (require 'init-rust)
+; (require 'init-toml)
+; (require 'init-yaml)
+; (require 'init-docker)
+; (require 'init-terraform)
+; ;;(require 'init-nix)
+; (maybe-require-package 'nginx-mode)
 
-(require 'init-paredit)
-(require 'init-lisp)
-(require 'init-slime)
-(require 'init-clojure)
-(require 'init-clojure-cider)
-(require 'init-common-lisp)
+; (require 'init-paredit)
+; (require 'init-lisp)
+; (require 'init-slime)
+; (require 'init-clojure)
+; (require 'init-clojure-cider)
+; (require 'init-common-lisp)
 
-(when *spell-check-support-enabled*
-  (require 'init-spelling))
+; (when *spell-check-support-enabled*
+;   (require 'init-spelling))
 
-(require 'init-misc)
+; (require 'init-misc)
 
-(require 'init-folding)
-(require 'init-dash)
+; (require 'init-folding)
+; (require 'init-dash)
 
-;;(require 'init-twitter)
-;; (require 'init-mu)
-(require 'init-ledger)
-;; Extra packages which don't require any configuration
+; ;;(require 'init-twitter)
+; ;; (require 'init-mu)
+; (require 'init-ledger)
+; ;; Extra packages which don't require any configuration
 
-(require-package 'gnuplot)
-(require-package 'lua-mode)
-(require-package 'htmlize)
-(require-package 'dsvn)
-(when *is-a-mac*
-  (require-package 'osx-location))
-(maybe-require-package 'regex-tool)
-(maybe-require-package 'dotenv-mode)
+; (require-package 'gnuplot)
+; (require-package 'lua-mode)
+; (require-package 'htmlize)
+; (require-package 'dsvn)
+; (when *is-a-mac*
+;   (require-package 'osx-location))
+; (maybe-require-package 'regex-tool)
+; (maybe-require-package 'dotenv-mode)
 
-(when (maybe-require-package 'uptimes)
-  (setq-default uptimes-keep-count 200)
-  (add-hook 'after-init-hook (lambda () (require 'uptimes))))
-
+; (when (maybe-require-package 'uptimes)
+;   (setq-default uptimes-keep-count 200)
+;   (add-hook 'after-init-hook (lambda () (require 'uptimes))))
 
 ;;----------------------------------------------------------------------------
 ;; Allow access from emacsclient
@@ -158,19 +163,15 @@
 (when (file-exists-p custom-file)
   (load custom-file))
 
-
 ;;----------------------------------------------------------------------------
 ;; Locales (setting them earlier in this file doesn't work in X)
 ;;----------------------------------------------------------------------------
 (require 'init-locales)
 
-
 ;;----------------------------------------------------------------------------
 ;; Allow users to provide an optional "init-local" containing personal settings
 ;;----------------------------------------------------------------------------
 (require 'init-local nil t)
-
-
 
 (provide 'init)
 
