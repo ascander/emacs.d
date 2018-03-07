@@ -1,9 +1,36 @@
+;;; init-org.el --- Part of my Emacs setup           -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2018  Ascander Dost
+
+;; Author: Ascander Dost <dostinthemachine@gmail.com>
+;; Keywords: convenience
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; This file contains `org-mode' settings.
+
+;;; Code:
+
 (maybe-require-package 'org-fstree)
 (when *is-a-mac*
   (maybe-require-package 'grab-mac-link))
 
 (maybe-require-package 'org-cliplink)
 
+;; Key bindings
 (define-key global-map (kbd "C-c l") 'org-store-link)
 (define-key global-map (kbd "C-c a") 'org-agenda)
 
@@ -19,44 +46,39 @@
       org-export-kill-product-buffer-when-displayed t
       org-tags-column 80)
 
-
 ;; Lots of stuff from http://doc.norang.ca/org-mode.html
 
 ;; TODO: fail gracefully
-(defun sanityinc/grab-ditaa (url jar-name)
-  "Download URL and extract JAR-NAME as `org-ditaa-jar-path'."
-  ;; TODO: handle errors
-  (message "Grabbing " jar-name " for org.")
-  (let ((zip-temp (make-temp-name "emacs-ditaa")))
-    (unwind-protect
-        (progn
-          (when (executable-find "unzip")
-            (url-copy-file url zip-temp)
-            (shell-command (concat "unzip -p " (shell-quote-argument zip-temp)
-                                   " " (shell-quote-argument jar-name) " > "
-                                   (shell-quote-argument org-ditaa-jar-path)))))
-      (when (file-exists-p zip-temp)
-        (delete-file zip-temp)))))
+;; (defun sanityinc/grab-ditaa (url jar-name)
+;;   "Download URL and extract JAR-NAME as `org-ditaa-jar-path'."
+;;   ;; TODO: handle errors
+;;   (message "Grabbing " jar-name " for org.")
+;;   (let ((zip-temp (make-temp-name "emacs-ditaa")))
+;;     (unwind-protect
+;;         (progn
+;;           (when (executable-find "unzip")
+;;             (url-copy-file url zip-temp)
+;;             (shell-command (concat "unzip -p " (shell-quote-argument zip-temp)
+;;                                    " " (shell-quote-argument jar-name) " > "
+;;                                    (shell-quote-argument org-ditaa-jar-path)))))
+;;       (when (file-exists-p zip-temp)
+;;         (delete-file zip-temp)))))
 
-(after-load 'ob-ditaa
-  (unless (and (boundp 'org-ditaa-jar-path)
-               (file-exists-p org-ditaa-jar-path))
-    (let ((jar-name "ditaa0_9.jar")
-          (url "http://jaist.dl.sourceforge.net/project/ditaa/ditaa/0.9/ditaa0_9.zip"))
-      (setq org-ditaa-jar-path (expand-file-name jar-name (file-name-directory user-init-file)))
-      (unless (file-exists-p org-ditaa-jar-path)
-        (sanityinc/grab-ditaa url jar-name)))))
+;; (after-load 'ob-ditaa
+;;   (unless (and (boundp 'org-ditaa-jar-path)
+;;                (file-exists-p org-ditaa-jar-path))
+;;     (let ((jar-name "ditaa0_9.jar")
+;;           (url "http://jaist.dl.sourceforge.net/project/ditaa/ditaa/0.9/ditaa0_9.zip"))
+;;       (setq org-ditaa-jar-path (expand-file-name jar-name (file-name-directory user-init-file)))
+;;       (unless (file-exists-p org-ditaa-jar-path)
+;;         (sanityinc/grab-ditaa url jar-name)))))
 
-(after-load 'ob-plantuml
-  (let ((jar-name "plantuml.jar")
-        (url "http://jaist.dl.sourceforge.net/project/plantuml/plantuml.jar"))
-    (setq org-plantuml-jar-path (expand-file-name jar-name (file-name-directory user-init-file)))
-    (unless (file-exists-p org-plantuml-jar-path)
-      (url-copy-file url org-plantuml-jar-path))))
-
-
-
-
+;; (after-load 'ob-plantuml
+;;   (let ((jar-name "plantuml.jar")
+;;         (url "http://jaist.dl.sourceforge.net/project/plantuml/plantuml.jar"))
+;;     (setq org-plantuml-jar-path (expand-file-name jar-name (file-name-directory user-init-file)))
+;;     (unless (file-exists-p org-plantuml-jar-path)
+;;       (url-copy-file url org-plantuml-jar-path))))
 
 (maybe-require-package 'writeroom-mode)
 
@@ -64,8 +86,7 @@
   "Set up a buffer for prose editing.
 This enables or modifies a number of settings so that the
 experience of editing prose is a little more like that of a
-typical word processor."
-  nil " Prose" nil
+typical word processor."  nil " Prose" nil
   (if prose-mode
       (progn
         (when (fboundp 'writeroom-mode)
@@ -100,7 +121,7 @@ typical word processor."
 
 
 (setq org-support-shift-select t)
-
+
 ;;; Capturing
 
 (global-set-key (kbd "C-c c") 'org-capture)
@@ -112,8 +133,6 @@ typical word processor."
          "* %? :NOTE:\n%U\n%a\n" :clock-resume t)
         ))
 
-
-
 ;;; Refiling
 
 (setq org-refile-use-cache nil)
@@ -154,7 +173,6 @@ typical word processor."
 ;; Allow refile to create parent tasks with confirmation
 (setq org-refile-allow-creating-parent-nodes 'confirm)
 
-
 ;;; To-do settings
 
 (setq org-todo-keywords
@@ -167,12 +185,9 @@ typical word processor."
       (quote (("NEXT" :inherit warning)
               ("PROJECT" :inherit font-lock-string-face))))
 
-
-
 ;;; Agenda views
 
 (setq-default org-agenda-clockreport-parameter-plist '(:link t :maxlevel 3))
-
 
 (let ((active-project-match "-INBOX/PROJECT"))
 
@@ -260,7 +275,6 @@ typical word processor."
 
 (add-hook 'org-agenda-mode-hook 'hl-line-mode)
 
-
 ;;; Org clock
 
 ;; Save the running clock and all clock history when exiting Emacs, load it on startup
@@ -281,12 +295,13 @@ typical word processor."
       '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
 
 
-
 ;;; Show the clocked-in task - if any - in the header line
 (defun sanityinc/show-org-clock-in-header-line ()
+  "Show Org clock in header line."
   (setq-default header-line-format '((" " org-mode-line-string " "))))
 
 (defun sanityinc/hide-org-clock-from-header-line ()
+  "Hide Org clock in header line."
   (setq-default header-line-format nil))
 
 (add-hook 'org-clock-in-hook 'sanityinc/show-org-clock-in-header-line)
@@ -297,8 +312,6 @@ typical word processor."
   (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
   (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu))
 
-
-
 (when (and *is-a-mac* (file-directory-p "/Applications/org-clock-statusbar.app"))
   (add-hook 'org-clock-in-hook
             (lambda () (call-process "/usr/bin/osascript" nil 0 nil "-e"
@@ -307,27 +320,15 @@ typical word processor."
             (lambda () (call-process "/usr/bin/osascript" nil 0 nil "-e"
                                 "tell application \"org-clock-statusbar\" to clock out"))))
 
-
-
-;; TODO: warn about inconsistent items, e.g. TODO inside non-PROJECT
-;; TODO: nested projects!
-
-
-
-;;; Archiving
-
+;; Archiving
 (setq org-archive-mark-done nil)
 (setq org-archive-location "%s_archive::* Archive")
 
-
-
-
-
-(require-package 'org-pomodoro)
-(setq org-pomodoro-keep-killed-pomodoro-time t)
-(after-load 'org-agenda
-  (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro))
-
+;; Pomodoro
+;; (require-package 'org-pomodoro)
+;; (setq org-pomodoro-keep-killed-pomodoro-time t)
+;; (after-load 'org-agenda
+;;   (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro))
 
 ;; ;; Show iCal calendars in the org agenda
 ;; (when (and *is-a-mac* (require 'org-mac-iCal nil t))
@@ -377,5 +378,5 @@ typical word processor."
      (sql . nil)
      (sqlite . t))))
 
-
 (provide 'init-org)
+;;; init-org.el ends here
