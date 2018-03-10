@@ -1,8 +1,9 @@
-;;; init.el --- Part of my Emacs setup               -*- lexical-binding: t; -*-
-
+;;; init.el --- Ascander Dost's Emacs configuration -*- lexical-binding: t; -*-
+;; 
 ;; Copyright (C) 2018  Ascander Dost
 
-;; Author: Ascander Dost;; -*- lexical-binding: t -*- <ascander@gigan>
+;; Author: Ascander Dost
+;; URL: https://github.com/ascander/emacs.d
 ;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -26,32 +27,17 @@
 
 ;;; Code:
 
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-;; (package-initialize)
-
+;; Debugging
 (setq debug-on-error t)
+(setq message-log-max 10000)
 
-;;; This file bootstraps the configuration, which is divided into
-;;; a number of other files.
-
-(let ((minver "24.3"))
-  (when (version< emacs-version minver)
-    (error "Your Emacs is too old -- this config requires v%s or higher" minver)))
-(when (version< emacs-version "24.5")
-  (message "Your Emacs is old, and some functionality in this config will be disabled. Please upgrade if possible."))
-
-(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-(require 'init-benchmarking) ;; Measure startup time
-
-(defconst *spell-check-support-enabled* nil) ;; Enable with t if you prefer
-(defconst *is-a-mac* (eq system-type 'darwin))
+(defconst *spell-check-support-enabled* nil)   ; enable with `t'
+(defconst *is-a-mac* (eq system-type 'darwin)) ; are we on a mac?
 
 ;;----------------------------------------------------------------------------
 ;; Adjust garbage collection thresholds during startup, and thereafter
 ;;----------------------------------------------------------------------------
+
 (let ((normal-gc-cons-threshold (* 20 1024 1024))
       (init-gc-cons-threshold (* 128 1024 1024)))
   (setq gc-cons-threshold init-gc-cons-threshold)
@@ -59,60 +45,140 @@
             (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
 
 ;;----------------------------------------------------------------------------
-;; Bootstrap config
+;; Configure package management
 ;;----------------------------------------------------------------------------
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(require 'init-utils)
-(require 'init-site-lisp) ;; Must come before elpa, as it may provide package.el
-(require 'init-elpa)      ;; Machinery for installing required packages
-(require 'init-exec-path) ;; Set up $PATH
 
-;;----------------------------------------------------------------------------
-;; Allow users to provide an optional "init-preload-local.el"
-;;----------------------------------------------------------------------------
-(require 'init-preload-local nil t)
+;; Don't load old bytecode
+(setq load-prefer-newer t)
+
+(require 'package)
+(setq package-enable-at-startup nil)
+(setq package-archives
+      ;; Package archives, the usual suspects
+      '(("GNU ELPA"     . "http://elpa.gnu.org/packages/")
+        ("MELPA Stable" . "https://stable.melpa.org/packages/")
+        ("MELPA"        . "https://melpa.org/packages/"))
+      ;; Prefer MELPA Stable over GNU over MELPA.
+      package-archive-priorities
+      '(("MELPA Stable" . 10)
+        ("GNU ELPA"     . 5)
+        ("MELPA"        . 0)))
+
+(package-initialize)
+
+;; Install 'use-package' if necessary
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; Enable 'use-package'
+(eval-when-compile
+  (require 'use-package))
+
+;; ---------------------------------------------------------------------------
+;; Customization, Environment, and OS settings
+;; ---------------------------------------------------------------------------
+
+(use-package validate                   ; validate options
+  :ensure t)
+
+(defconst *custom-file* (locate-user-emacs-file "custom.el")
+  "File used to store settings from Customization UI.")
+
+(use-package cus-edit                   ; customize interface
+  :defer t
+  :config
+  (validate-setq custom-file *custom-file*
+                 custom-buffer-done-kill nil
+                 custom-buffer-verbose-help nil
+                 custom-unlispify-tag-names nil
+                 custom-unlispify-menu-entries nil)
+  :init (load *custom-file* 'no-error 'no-message))
+
+(use-package exec-path-from-shell
+  :ensure t
+  :if (and *is-a-mac* (display-graphic-p))
+  :config
+  (progn
+    (when (string-match-p "/zsh$" (getenv "SHELL"))
+      ;; Use a non-interactive login shell. This loads environment
+      ;; variables from `.zprofile'.
+      (validate-setq exec-path-from-shell-arguments '("-l")))
+
+    (validate-setq exec-path-from-shell-variables
+                   '("JAVA_OPTS"        ; Java options
+                     "SBT_OPTS"         ; SBT options
+                     "EMAIL"            ; My email address
+                     "PATH"             ; Executables
+                     "MANPATH"          ; Man pages
+                     "INFOPATH"         ; Info directories
+                     "LANG"             ; Language
+                     "LC_CTYPE"         ; Character set
+                     ))
+
+    ;; Initialize Emacs' environment from the shell
+    (exec-path-from-shell-initialize)
+
+    ;; Tell Emacs who I am
+    (validate-setq user-email-address (getenv "EMAIL"))
+
+    ;; Re-initialize the `info-directory-list' from $INFOPATH. Since
+    ;; `package.el' already initializes info, we need to explicitly
+    ;; add the $INFOPATH directories to `info-directory-list'. Reverse
+    ;; the list of info paths to prepend them in proper order.
+    (with-eval-after-load 'info
+      (dolist (dir (nreverse (parse-colon-path (getenv "INFOPATH"))))
+        (when dir
+          (add-to-list 'Info-directory-list dir))))))
 
 ;;----------------------------------------------------------------------------
 ;; Load configs for specific features and modes
 ;;----------------------------------------------------------------------------
 
-(require-package 'wgrep)
-(require-package 'diminish)
-(require-package 'scratch)
-(require-package 'command-log-mode)
+(use-package init-osx                   ; my specific settings for OS X
+  :if *is-a-mac*
+  :load-path "lisp/")
 
-(require 'init-frame-hooks)
-(require 'init-xterm)
-(require 'init-themes)
-(require 'init-osx-keys)
-(require 'init-gui-frames)
-(require 'init-dired)
-(require 'init-isearch)
-(require 'init-grep)
-(require 'init-uniquify)
-(require 'init-ibuffer)
-(require 'init-flycheck)
+;; (use-package init-ui                    ; general UI settings
+;;   :load-path "lisp/")
 
-(require 'init-recentf)
-(require 'init-smex)
-(require 'init-ivy)
-;; (require 'init-helm)
-(require 'init-hippie-expand)
-(require 'init-company)
-(require 'init-windows)
-(require 'init-sessions)
-(require 'init-fonts)
-(require 'init-mmm)
+;; (require-package 'wgrep)
+;; (require-package 'diminish)
+;; (require-package 'scratch)
+;; (require-package 'command-log-mode)
 
-(require 'init-editing-utils)
-(require 'init-whitespace)
+;; (require 'init-frame-hooks)
+;; (require 'init-xterm)
+;; (require 'init-themes)
+;; (require 'init-osx-keys)
+;; (require 'init-gui-frames)
+;; (require 'init-dired)
+;; (require 'init-isearch)
+;; (require 'init-grep)
+;; (require 'init-uniquify)
+;; (require 'init-ibuffer)
+;; (require 'init-flycheck)
 
-(require 'init-vc)
-(require 'init-darcs)
-(require 'init-git)
-(require 'init-github)
+;; (require 'init-recentf)
+;; (require 'init-smex)
+;; (require 'init-ivy)
+;; ;; (require 'init-helm)
+;; (require 'init-hippie-expand)
+;; (require 'init-company)
+;; (require 'init-windows)
+;; (require 'init-sessions)
+;; (require 'init-fonts)
+;; (require 'init-mmm)
 
-(require 'init-projectile)
+;; (require 'init-editing-utils)
+;; (require 'init-whitespace)
+
+;; (require 'init-vc)
+;; (require 'init-darcs)
+;; (require 'init-git)
+;; (require 'init-github)
+
+;; (require 'init-projectile)
 
 ; (require 'init-compile)
 ; ;;(require 'init-crontab)
@@ -122,8 +188,8 @@
 ; (require 'init-erlang)
 ; (require 'init-javascript)
 ; (require 'init-php)
-(require 'init-org)
-(require 'init-scala)
+;; (require 'init-org)
+;; (require 'init-scala)
 ; (require 'init-nxml)
 ; (require 'init-html)
 ; (require 'init-css)
@@ -180,30 +246,31 @@
 ;;----------------------------------------------------------------------------
 ;; Allow access from emacsclient
 ;;----------------------------------------------------------------------------
-(require 'server)
-(unless (server-running-p)
-  (server-start))
+;; (require 'server)
+;; (unless (server-running-p)
+;;   (server-start))
 
 ;;----------------------------------------------------------------------------
 ;; Variables configured via the interactive 'customize' interface
 ;;----------------------------------------------------------------------------
-(when (file-exists-p custom-file)
-  (load custom-file))
+;; (when (file-exists-p custom-file)
+;;   (load custom-file))
 
 ;;----------------------------------------------------------------------------
 ;; Locales (setting them earlier in this file doesn't work in X)
 ;;----------------------------------------------------------------------------
-(require 'init-locales)
+;; (require 'init-locales)
 
 ;;----------------------------------------------------------------------------
 ;; Allow users to provide an optional "init-local" containing personal settings
 ;;----------------------------------------------------------------------------
-(require 'init-local nil t)
+;; (require 'init-local nil t)
 
 (provide 'init)
 ;;; init.el ends here
 
 ;; Local Variables:
+;; indent-tabs-mode: nil
 ;; coding: utf-8
 ;; no-byte-compile: t
 ;; End:
