@@ -135,12 +135,14 @@
 ;; Load configs for specific features and modes
 ;;----------------------------------------------------------------------------
 
-(use-package init-osx                   ; my specific settings for OS X
-  :if *is-a-mac*
-  :load-path "lisp/")
+;; Add files in my `.emacs.d/lisp' directory
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-;; (use-package init-ui                    ; general UI settings
-;;   :load-path "lisp/")
+;; General look & feel
+(use-package init-osx)
+(use-package init-ui)
+(use-package init-themes)
+(use-package init-fonts)
 
 ;; (require-package 'wgrep)
 ;; (require-package 'diminish)
@@ -149,8 +151,6 @@
 
 ;; (require 'init-frame-hooks)
 ;; (require 'init-xterm)
-;; (require 'init-themes)
-;; (require 'init-osx-keys)
 ;; (require 'init-gui-frames)
 ;; (require 'init-dired)
 ;; (require 'init-isearch)
@@ -167,7 +167,6 @@
 ;; (require 'init-company)
 ;; (require 'init-windows)
 ;; (require 'init-sessions)
-;; (require 'init-fonts)
 ;; (require 'init-mmm)
 
 ;; (require 'init-editing-utils)

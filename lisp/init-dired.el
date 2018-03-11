@@ -1,5 +1,5 @@
 (setq-default dired-dwim-target t)
-(setq-default dired-listing-switches "-alh")
+(setq-default dired-listing-switches "-alhF")
 
 ;; Prefer g-prefixed coreutils version of standard utilities when available
 (let ((gls (executable-find "gls")))

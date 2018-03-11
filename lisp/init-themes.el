@@ -1,39 +1,60 @@
-(require-package 'color-theme-sanityinc-solarized)
-(require-package 'color-theme-sanityinc-tomorrow)
+;;; init-themes.el --- Color theme settings          -*- lexical-binding: t; -*-
 
-;; If you don't customize it, this is the theme you get.
-(setq-default custom-enabled-themes '(sanityinc-solarized-dark))
+;; Copyright (C) 2018  Ascander Dost
 
-;; Ensure that themes will be applied even if they have not been customized
-(defun reapply-themes ()
-  "Forcibly load the themes listed in `custom-enabled-themes'."
-  (dolist (theme custom-enabled-themes)
-    (unless (custom-theme-p theme)
-      (load-theme theme)))
-  (custom-set-variables `(custom-enabled-themes (quote ,custom-enabled-themes))))
+;; Author: Ascander Dost <dostinthemachine@gmail.com>
+;; Keywords: convenience
 
-(add-hook 'after-init-hook 'reapply-themes)
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; This file contains color theme settings.
+
+;;; Code:
+
+(use-package solarized-theme			; I always come back to you
+  :ensure solarized-theme
+  :config
+  (validate-setq
+   solarized-use-variable-pitch nil	; no variable sized fonts
+   solarized-use-less-bold t		; less bold
+   solarized-use-more-italic t		; more italics
+   solarized-distinct-doc-face t	; make docstrings stand out more
+   solarized-emphasize-indicators nil	; less colors for gutters
+   ;; Avoid all font size changes
+   solarized-height-minus-1 1.0
+   solarized-height-plus-1 1.0
+   solarized-height-plus-2 1.0
+   solarized-height-plus-3 1.0
+   solarized-height-plus-4 1.0)
+  
+  (load-theme 'solarized-dark 'no-confirm))
 
 ;;------------------------------------------------------------------------------
 ;; Toggle between light and dark
 ;;------------------------------------------------------------------------------
+
 (defun light ()
   "Activate a light color theme."
   (interactive)
-  (setq custom-enabled-themes '(sanityinc-solarized-light))
-  (reapply-themes))
+  (load-theme 'solarized-light))
 
 (defun dark ()
   "Activate a dark color theme."
   (interactive)
-  (setq custom-enabled-themes '(sanityinc-solarized-dark))
-  (reapply-themes))
-
-
-(when (maybe-require-package 'dimmer)
-  (setq-default dimmer-fraction 0.1)
-  (add-hook 'after-init-hook 'dimmer-mode))
-
+  (load-theme 'solarized-dark))
 
 (provide 'init-themes)
+;;; init-themes.el ends here

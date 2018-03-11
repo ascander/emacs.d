@@ -1,9 +1,9 @@
-;;; init-fonts.el --- Part of my Emacs configuration  -*- lexical-binding: t; -*-
+;;; init-fonts.el --- Default font settings          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Ascander Dost
 
 ;; Author: Ascander Dost <dostinthemachine@gmail.com>
-;; Keywords: convenience, faces
+;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,35 +20,19 @@
 
 ;;; Commentary:
 
-;; Font settings are in this file.
+;; This file contains font settings.
 
 ;;; Code:
 
 ;; Default fonts
 (set-face-attribute 'default nil
-                    :family "Iosevka Type"
-                    :height 120)
+                    :family "Iosevka Type" :height 120)
 
 (set-face-attribute 'variable-pitch nil
-                    :family "Fira Sans"
-                    :height 130
-                    :weight 'regular)
+                    :family "Fira Sans" :height 130 :weight 'regular)
 
-;;; Changing font sizes
-(require-package 'default-text-scale)
-(add-hook 'after-init-hook 'default-text-scale-mode)
-
-
-(defun sanityinc/maybe-adjust-visual-fill-column ()
-  "Readjust visual fill column when the global font size is modified.
-This is helpful for writeroom-mode, in particular."
-  ;; TODO: submit as patch
-  (if visual-fill-column-mode
-      (add-hook 'after-setting-font-hook 'visual-fill-column--adjust-window nil t)
-    (remove-hook 'after-setting-font-hook 'visual-fill-column--adjust-window t)))
-
-(add-hook 'visual-fill-column-mode-hook
-          'sanityinc/maybe-adjust-visual-fill-column)
+(use-package face-remap			; face mapping
+  :bind (("C-c w z" . text-scale-adjust)))
 
 (provide 'init-fonts)
 ;;; init-fonts.el ends here
