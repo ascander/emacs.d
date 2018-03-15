@@ -88,10 +88,6 @@
   :init (beacon-mode 1)
   :diminish beacon-mode)
 
-(use-package stripe-buffer		; add stripes to a buffer
-  :ensure t
-  :init (add-hook 'dired-mode-hook #'stripe-buffer-mode))
-
 (use-package nlinum			; display line numbers in margin
   :ensure t
   :bind (("C-c t l" . nlinum-mode)))

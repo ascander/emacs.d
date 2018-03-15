@@ -1,84 +1,108 @@
-;; TODO: link commits from vc-log to magit-show-commit
-;; TODO: smerge-mode
-(require-package 'git-blamed)
-(require-package 'gitignore-mode)
-(require-package 'gitconfig-mode)
-(maybe-require-package 'git-timemachine)
+;;; init-git.el --- Git integration settings         -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2018  Ascander Dost
 
-(when (maybe-require-package 'magit)
-  (setq-default magit-diff-refine-hunk t)
+;; Author: Ascander Dost <dostinthemachine@gmail.com>
+;; Keywords: convenience
 
-  ;; Hint: customize `magit-repository-directories' so that you can use C-u M-F12 to
-  ;; quickly open magit on any one of your projects.
-  (global-set-key [(meta f12)] 'magit-status)
-  (global-set-key (kbd "C-x g") 'magit-status)
-  (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup))
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-(after-load 'magit
-  (define-key magit-status-mode-map (kbd "C-M-<up>") 'magit-section-up)
-  (add-hook 'magit-popup-mode-hook 'sanityinc/no-trailing-whitespace))
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
-(require-package 'fullframe)
-(after-load 'magit
-  (fullframe magit-status magit-mode-quit-window))
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(when (maybe-require-package 'git-commit)
-  (add-hook 'git-commit-mode-hook 'goto-address-mode))
+;;; Commentary:
 
-
-(when *is-a-mac*
-  (after-load 'magit
-    (add-hook 'magit-mode-hook (lambda () (local-unset-key [(meta h)])))))
+;; Settings for Git and version control.
 
+;;; Code:
 
-
-;; Convenient binding for vc-git-grep
-(after-load 'vc
-  (define-key vc-prefix-map (kbd "f") 'vc-git-grep))
+(use-package diff-hl			; highlight diffs in the fringe
+  :ensure t
+  :defer t
+  :init
+  (global-diff-hl-mode)				  ; always be highlighting
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode) ; in dired, too
 
+  ;; Fall back to display margin if the fringe is unavailable
+  (unless (display-graphic-p)
+    (diff-hl-margin-mode))
 
-
-;;; git-svn support
+  ;; Refresh `diff-hl' after Magit operations
+  (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
-;; (when (maybe-require-package 'magit-svn)
-;;   (require-package 'magit-svn)
-;;   (autoload 'magit-svn-enabled "magit-svn")
-;;   (defun sanityinc/maybe-enable-magit-svn-mode ()
-;;     (when (magit-svn-enabled)
-;;       (magit-svn-mode)))
-;;   (add-hook 'magit-status-mode-hook #'sanityinc/maybe-enable-magit-svn-mode))
+(use-package magit                      ; the correct Git client
+  :ensure t
+  :bind (("C-c g c" . magit-clone)
+         ("C-c g s" . magit-status)
+         ("C-c g b" . magit-blame)
+         ("C-c g l" . magit-log-buffer-line)
+         ("C-c g p" . magit-pull))
+  :config
+  (validate-setq
+   magit-save-repository-buffers 'dontask
+   magit-refs-show-commit-count 'all
+   magit-branch-prefer-remote-upstream '("master")
+   magit-branch-adjust-remote-upstream-alist '(("origin/master" "master"))
+   magit-revision-show-gravatars nil
+   magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
 
-(after-load 'compile
-  (dolist (defn (list '(git-svn-updated "^\t[A-Z]\t\\(.*\\)$" 1 nil nil 0 1)
-                      '(git-svn-needs-update "^\\(.*\\): needs update$" 1 nil nil 2 1)))
-    (add-to-list 'compilation-error-regexp-alist-alist defn)
-    (add-to-list 'compilation-error-regexp-alist (car defn))))
+  ;; Show refined hunks during diffs
+  (set-default 'magit-diff-refine-hunk t)
 
-(defvar git-svn--available-commands nil "Cached list of git svn subcommands")
-(defun git-svn--available-commands ()
-  (or git-svn--available-commands
-      (setq git-svn--available-commands
-            (sanityinc/string-all-matches
-             "^  \\([a-z\\-]+\\) +"
-             (shell-command-to-string "git svn help") 1))))
+  ;; Set Magit's repo dirs for `magit-status' from Projectile's known
+  ;; projects. Initialize the `magit-repository-directories'
+  ;; immediately after Projectile was loaded, and update it every time
+  ;; we switched projects, because the new project might have been
+  ;; unknown before
+  (defun ascander/magit-set-repo-dirs-from-projectile ()
+    "Set `magit-repo-dirs' from known Projectile projects."
+    (let ((project-dirs (bound-and-true-p projectile-known-projects)))
+      ;; Remove trailing slashes from project directories, because
+      ;; Magit adds trailing slashes again, which breaks the
+      ;; presentation in the Magit prompt.
+      (validate-setq magit-repository-directories
+                     (mapcar #'directory-file-name project-dirs))))
 
-(autoload 'vc-git-root "vc-git")
+  (with-eval-after-load 'projectile
+    (ascander/magit-set-repo-dirs-from-projectile))
 
-(defun git-svn (dir command)
-  "Run a git svn subcommand in DIR."
-  (interactive (list (read-directory-name "Directory: ")
-                     (completing-read "git-svn command: " (git-svn--available-commands) nil t nil nil (git-svn--available-commands))))
-  (let* ((default-directory (vc-git-root dir))
-         (compilation-buffer-name-function (lambda (major-mode-name) "*git-svn*")))
-    (compile (concat "git svn " command))))
+  (add-hook 'projectile-switch-project-hook
+            #'ascander/magit-set-repo-dirs-from-projectile)
 
-
-(maybe-require-package 'git-messenger)
-;; Though see also vc-annotate's "n" & "p" bindings
-(after-load 'vc
-  (setq git-messenger:show-detail t)
-  (define-key vc-prefix-map (kbd "p") #'git-messenger:popup-message))
+  ;; Refresh `magit-status' after saving a buffer
+  (add-hook 'after-save-hook #'magit-after-save-refresh-status))
 
+(use-package git-commit                 ; git commit message mode
+  :ensure t
+  :defer t
+  :config
+  ;; Oh, really?  Come on… I know what I'm doing…
+  (remove-hook 'git-commit-finish-query-functions
+               #'git-commit-check-style-conventions))
+
+(use-package gitconfig-mode             ; git configuration mode
+  :ensure t
+  :defer t)
+
+(use-package gitignore-mode             ; .gitignore mode
+  :ensure t
+  :defer t)
+
+(use-package gitattributes-mode         ; git attributes mode
+  :ensure t
+  :defer t)
+
+(use-package git-timemachine            ; go back in Git time
+  :ensure t
+  :bind (("C-c g t" . git-timemachine)))
 
 (provide 'init-git)
+;;; init-git.el ends here

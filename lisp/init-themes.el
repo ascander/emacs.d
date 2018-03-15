@@ -20,11 +20,12 @@
 
 ;;; Commentary:
 
-;; This file contains color theme settings.
+;; This file contains color theme settings
 
 ;;; Code:
 
 (use-package solarized-theme			; I always come back to you
+  ;; :disabled t
   :ensure solarized-theme
   :config
   (validate-setq
@@ -41,6 +42,13 @@
    solarized-height-plus-4 1.0)
   
   (load-theme 'solarized-dark 'no-confirm))
+
+(use-package base16-theme		; base16 color themes
+  :disabled t
+  :ensure t
+  :config
+  (validate-setq base16-highlight-mode-line 'contrast)
+  (load-theme 'base16-oceanicnext t))
 
 ;;------------------------------------------------------------------------------
 ;; Toggle between light and dark

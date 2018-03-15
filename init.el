@@ -131,6 +131,10 @@
         (when dir
           (add-to-list 'Info-directory-list dir))))))
 
+;; Time execution of initialization
+(add-hook 'after-init-hook (lambda () (message "Time to load init file: %s"
+                                               (emacs-init-time))))
+
 ;;----------------------------------------------------------------------------
 ;; Load configs for specific features and modes
 ;;----------------------------------------------------------------------------
@@ -138,11 +142,17 @@
 ;; Add files in my `.emacs.d/lisp' directory
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-;; General look & feel
 (use-package init-osx)
 (use-package init-ui)
 (use-package init-themes)
 (use-package init-fonts)
+(use-package init-files)
+(use-package init-dired)
+(use-package init-projectile)
+(use-package init-org)
+
+(use-package init-git)
+(use-package init-scala)
 
 ;; (require-package 'wgrep)
 ;; (require-package 'diminish)

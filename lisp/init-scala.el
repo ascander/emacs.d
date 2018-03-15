@@ -1,9 +1,9 @@
-;;; init-scala.el --- Part of my Emacs setup         -*- lexical-binding: t; -*-
+;;; init-scala.el --- Scala development settings     -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Ascander Dost
 
 ;; Author: Ascander Dost <dostinthemachine@gmail.com>
-;; Keywords: convenience, languages
+;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,45 +20,76 @@
 
 ;;; Commentary:
 
-;; This file contains settings for working in Scala.
+;; This file contains settings for Scala development.
 
 ;;; Code:
 
-;; Major mode for editing Scala
-(maybe-require-package 'scala-mode)
+(use-package scala-mode			; major mode for editing Scala
+  :ensure t
+  :defer t
+  :config
+  ;; Indentation preferences
+  (validate-setq scala-indent:default-run-on-strategy
+		 scala-indent:operator-strategy)
 
-(after-load 'scala-mode
-  ;; indentation preferences
-  (setq scala-indent:default-run-on-strategy
-        scala-indent:operator-strategy))
+  ;; Newline behaves correctly in multiline comments
+  (defun ascander/scala-mode-newline-comments ()
+    "Insert a leading asterisk in multiline comments."
+    (interactive)
+    (newline-and-indent)
+    (scala-indent:insert-asterisk-on-multiline-comment))
 
-(defun ascander/scala-mode-newline-comments ()
-  "Insert a leading asterisk in Scaladoc comments."
-  (interactive)
-  (newline-and-indent)
-  (scala-indent:insert-asterisk-on-multiline-comment))
+  (define-key scala-mode-map (kbd "RET")
+    #'ascander/scala-mode-newline-comments))
 
-(after-load 'scala-mode
-  (define-key scala-mode-map (kbd "RET") 'ascander/scala-mode-newline-comments)
-  (define-key scala-mode-map (kbd "C-c m e") 'ensime))
+(use-package sbt-mode			; interactive support for Satan's Build Tool
+  :ensure t
+  :defer t
+  :bind (:map scala-mode-map
+	      ("C-c m b c" . sbt-command)
+	      ("C-c m b r" . sbt-run-previous-command))
+  :config
+  
+  (defun ascander/scala-pop-to-sbt (new-frame)
+    "Start an SBT REPL for this project, optionally in a NEW-FRAME.
 
-;; Interactive support for Satan's Build Tool
-(maybe-require-package 'sbt-mode)
+Select the SBT REPL for the current project in a new window. If
+  the REPL is not yet running, start it. With prefix argument,
+  select the REPL in a new frame instead."
+    (interactive "P")
+    ;; Start SBT when not running, taken from `sbt:command'
+    (when (not (comint-check-proc (sbt:buffer-name)))
+      (sbt:run-sbt))
 
-;; disable smartparens mode in SBT buffers because it hangs while
-;; trying to find matching delimiters
-(add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
-                                 (smartparens-mode -1))))
+    (let ((display-buffer-overriding-action
+	   (if new-frame '(display-buffer-pop-up-frame) nil)))
+      (pop-to-buffer (sbt:buffer-name))))
 
-;; ENhanced Scala Interaction Mode for Emacs
-(maybe-require-package 'ensime)
+  (with-eval-after-load 'scala-mode
+    (bind-key "C-c m s" #'ascander/scala-pop-to-sbt scala-mode-map))
 
-(after-load 'ensime
-  (setq ensime-startup-notification nil)
-  (define-key ensime-mode-map (kbd "C-c m E") 'ensime-reload)
-  (define-key ensime-mode-map (kbd "<f5>") 'ensime-sbt-do-compile))
+  ;; Disable smartparens mode in SBT buffers, because it frequently
+  ;; hangs while trying ot find matching delimiters.
+  (add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
+					(smartparens-mode -1)))))
 
-(add-hook 'scala-mode-hook #'ensime-mode)
+(use-package ensime			; enhanced Scala interaction mode for Emacs
+  :ensure t
+  :after scala-mode
+  :bind (:map ensime-mode-map
+	      ("C-c m E" . ensime-reload)
+	      ("<f5>" . ensime-sbt-do-compile)
+	      :map scala-mode-map ("C-c m e" . ensime))
+  :config
+  ;; Shut up, Ensime
+  (validate-setq ensime-startup-notification nil)
+  
+  ;; Enable Ensime for all Scala buffers
+  (add-hook 'scala-mode-hook #'ensime-mode)
+  )
+
 
 (provide 'init-scala)
 ;;; init-scala.el ends here
+
+

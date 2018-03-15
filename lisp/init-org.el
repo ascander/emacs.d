@@ -1,4 +1,4 @@
-;;; init-org.el --- Part of my Emacs setup           -*- lexical-binding: t; -*-
+;;; init-org.el --- Org mode configuration           -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Ascander Dost
 
@@ -24,74 +24,70 @@
 
 ;;; Code:
 
-(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+(use-package org			; the almighty Org mode
+  :ensure t
+  :mode (("\\.org$" . org-mode))
+  :bind (("C-c l"   . org-store-link)
+	 ("C-c a"   . org-agenda)
+	 ("C-c b"   . ascander/org-insert-checkbox)
+         ("C-c c"   . org-capture))
+  :config
+  ;; Miscellaneous preferences
+  (validate-setq
+   org-src-fontify-natively t
+   org-log-done 'time
+   org-fast-tag-selection-include-todo t
+   org-use-fast-todo-selection t
+   org-startup-truncated nil
+   org-tags-column 80)
 
-;; Additional link grabbing packages
-(when *is-a-mac*
-  (maybe-require-package 'grab-mac-link))
-(maybe-require-package 'org-cliplink)
+  ;; TODO task states
+  (setq
+   org-todo-keywords
+   '((sequence "TODO(t)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELED(c)")))
 
-;; Fancy org bullets
-(maybe-require-package 'org-bullets)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  ;; Agenda files
+  (validate-setq org-agenda-files '("~/org/inbox.org"
+                                    "~/org/gtd.org"
+                                    "~/org/tickler.org"))
 
-;; Keybindings
-(define-key global-map (kbd "C-c l") 'org-store-link)
-(define-key global-map (kbd "C-c a") 'org-agenda)
+  ;; Capture settings
+  (setq org-capture-templates '(("t" "Todo [inbox]" entry
+                                 (file+headline "~/org/inbox.org" "Tasks")
+                                 "** TODO %i%?")
+                                ("T" "Tickler" entry
+                                 (file+headline "~/org/tickler.org" "Tickler")
+                                 "** %i%? \n %U")))  
 
-;; Miscellaneous preferences
-(setq org-log-done t
-      org-fast-tag-selection-include-todo t
-      org-use-fast-todo-selection t
-      org-startup-truncated nil
-      org-tags-column 80)
+  ;; Refile targets include non-inbox files (including `someday.org')
+  (setq org-refile-targets '(("~/org/gtd.org" :maxlevel . 3)
+                             ("~/org/someday.org" :level . 1)
+                             ("~/org/tickler.org" :maxlevel . 2)))
 
-;; Default locations
-(setq org-directory (expand-file-name "~/org")
-      org-default-notes-file (concat org-directory "gtd.org")
-      org-agenda-files '("~/org"))
+  ;; Checkboxes
+  (defun ascander/org-insert-checkbox ()
+    "Insert a checkbox."
+    (interactive)
+    (insert "[ ] "))
 
-;; TODO preferences
-(setq org-todo-keywords
-      '((sequence "IDEA(i)" "TODO(t)" "STARTED(s)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)")
-        (sequence "|" "CANCELED(c)" "DELEGATED(l)" "SOMEDAY(f)")))
+  ;; Disable priorities
+  (validate-setq org-enable-priority-commands nil)
 
-(setq org-tag-persistent-alist
-      '((:startgroup . nil)
-        ("HOME"      . ?h)
-        ("WORK"      . ?k)
-        ("PERSONAL"  . ?p)
-        (:endgroup   . nil)
-        (:startgroup . nil)
-        ("PROJECT"   . ?r)
-        ("BACKLOG"   . ?g)
-        ("EXPLORE"   . ?x)
-        ("OTHER"      .?o)
-        (:endgroup   . nil)
-        (:startgroup . nil)
-        ("EASY"      . ?e)
-        ("MEDIUM"    . ?m)
-        ("HARD"      . ?a)
-        (:endgroup   . nil)
-        ("URGENT"    . ?u)
-        ("KEY"       . ?k)
-        ("BONUS"     . ?b)))
+  ;; Put new stuff at the top
+  (validate-setq org-reverse-note-order t))
 
-;; Disable priorities
-(setq org-enable-priority-commands nil)
+(use-package org-bullets		; fancy utf-8 bullets for org mode
+  :defer t
+  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
-;; Capture settings
-(global-set-key (kbd "C-c c") 'org-capture)
-
-(setq org-reverse-note-order t)
-
-(setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/org/refile.org" "Tasks")
-         "* TODO %?\nAdded: %U\n" :prepend t :kill-buffer t)
-        ("i" "Idea" entry (file+headline "~/org/refile.org" "Someday/Maybe")
-         "* IDEA %?\nAdded: %U\n" :prepend t :kill-buffer t)
-        ("h" "Home" entry (file+headline "~/org/refile.org" "Home")
-         "* TODO %?\nAdded: %U\n" :prepend t :kill-buffer t)))
+(use-package org-cliplink            ; insert links from the clipboard
+  :ensure t
+  :bind ("C-c o i" . org-cliplink))
 
 (provide 'init-org)
 ;;; init-org.el ends here
+
+;; Local Variables:
+;; coding: utf-8
+;; indent-tabs-mode: nil
+;; End:
