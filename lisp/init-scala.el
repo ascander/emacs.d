@@ -40,7 +40,21 @@
     (scala-indent:insert-asterisk-on-multiline-comment))
 
   (define-key scala-mode-map (kbd "RET")
-    #'ascander/scala-mode-newline-comments))
+    #'ascander/scala-mode-newline-comments)
+
+  ;; Navigate by `def' declarations
+  (defun ascander/next-def ()
+    "Move to the next def."
+    (interactive)
+    (search-forward "def "))
+
+  (defun ascander/prev-def ()
+    "Move to the previous def."
+    (interactive)
+    (search-backward "def "))
+
+  (define-key scala-mode-map (kbd "M-<up>") #'ascander/prev-def)
+  (define-key scala-mode-map (kbd "M-<down>") #'ascander/next-def))
 
 (use-package sbt-mode			; interactive support for Satan's Build Tool
   :ensure t
@@ -76,8 +90,10 @@ Select the SBT REPL for the current project in a new window. If
 (use-package ensime			; enhanced Scala interaction mode for Emacs
   :ensure t
   :after scala-mode
+  :diminish (ensime-mode . " Ⓔ")
   :bind (:map ensime-mode-map
-	      ("C-c m E" . ensime-reload)
+              ("C-c m E" . ensime-reload)
+              ("C-c m x" . ensime-disconnect)
 	      ("<f5>" . ensime-sbt-do-compile)
 	      :map scala-mode-map ("C-c m e" . ensime))
   :config
@@ -86,8 +102,19 @@ Select the SBT REPL for the current project in a new window. If
   
   ;; Enable Ensime for all Scala buffers
   (add-hook 'scala-mode-hook #'ensime-mode)
-  )
 
+  ;; Workaround for Yasnippet in `ensime-mode'. See comments in
+  ;; https://github.com/ensime/ensime-emacs/issues/474 for discussion.
+  (defun ascander/yas-advise-indent-function (function-symbol)
+    (eval `(defadvice ,function-symbol (around yas-try-expand-first activate)
+             ,(format
+               "Try to expand a snippet before point, then call `%s' as usual"
+               function-symbol)
+             (let ((yas-fallback-behavior nil))
+               (unless (and (interactive-p)
+                            (yas-expand))
+                 ad-do-it)))))
+  (ascander/yas-advise-indent-function 'ensime-company-complete-or-indent))
 
 (provide 'init-scala)
 ;;; init-scala.el ends here

@@ -150,8 +150,15 @@
 (use-package init-dired)
 (use-package init-projectile)
 (use-package init-org)
+(use-package init-keys)
+(use-package init-editing)
+(use-package init-windows)
+(use-package init-ivy)
+(use-package init-modeline)
 
 (use-package init-git)
+(use-package init-prog)
+(use-package init-company)
 (use-package init-scala)
 
 ;; (require-package 'wgrep)

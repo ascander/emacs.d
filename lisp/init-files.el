@@ -44,16 +44,6 @@
 (when (display-graphic-p)
   (validate-setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 
-
-(use-package autorevert			; auto-revert buffers of changed files
-  :init (global-auto-revert-mode)
-  :config
-  (validate-setq auto-revert-verbose nil
-		 global-auto-revert-non-file-buffers t)
-  (when *is-a-mac*
-    (validate-setq auto-revert-use-notify nil))
-  :diminish auto-revert-mode)
-
 (use-package ignoramus			; ignore uninteresting files everywhere
   :ensure t
   :config

@@ -29,11 +29,13 @@
   :ensure solarized-theme
   :config
   (validate-setq
+   x-underline-at-descent-line t        ; draw the mode line underline lower
    solarized-use-variable-pitch nil	; no variable sized fonts
    solarized-use-less-bold t		; less bold
    solarized-use-more-italic t		; more italics
    solarized-distinct-doc-face t	; make docstrings stand out more
    solarized-emphasize-indicators nil	; less colors for gutters
+   solarized-high-contrast-mode-line t  ; make active/inactive mode line stand out more
    ;; Avoid all font size changes
    solarized-height-minus-1 1.0
    solarized-height-plus-1 1.0

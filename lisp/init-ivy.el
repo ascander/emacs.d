@@ -1,81 +1,78 @@
-;;; -*- lexical-binding: t -*-
-(when (maybe-require-package 'ivy)
-  (add-hook 'after-init-hook 'ivy-mode)
-  (after-load 'ivy
-    (setq-default ivy-use-virtual-buffers t
-                  ivy-virtual-abbreviate 'fullpath
-                  ivy-count-format ""
-                  projectile-completion-system 'ivy
-                  ivy-magic-tilde nil
-                  ivy-dynamic-exhibit-delay-ms 150
-                  ivy-initial-inputs-alist
-                  '((man . "^")
-                    (woman . "^")))
+;;; init-ivy.el --- Command completion framework and settings  -*- lexical-binding: t; -*-
 
-    ;; IDO-style directory navigation
-    (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done)
-    (dolist (k '("C-j" "C-RET"))
-      (define-key ivy-minibuffer-map (kbd k) #'ivy-immediate-done))
+;; Copyright (C) 2018  Ascander Dost
 
-    (define-key ivy-minibuffer-map (kbd "<up>") #'ivy-previous-line-or-history)
+;; Author: Ascander Dost <dostinthemachine@gmail.com>
+;; Keywords: convenience
 
-    (when (maybe-require-package 'diminish)
-      (diminish 'ivy-mode)))
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-  (defun sanityinc/enable-ivy-flx-matching ()
-    "Make `ivy' matching work more like IDO."
-    (interactive)
-    (require-package 'flx)
-    (setq-default ivy-re-builders-alist
-                  '((t . ivy--regex-fuzzy)))))
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
-(when (maybe-require-package 'ivy-historian)
-  (add-hook 'after-init-hook (lambda () (ivy-historian-mode t))))
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(when (maybe-require-package 'counsel)
-  (setq-default counsel-mode-override-describe-bindings t)
-  (when (maybe-require-package 'diminish)
-    (after-load 'counsel
-      (diminish 'counsel-mode)))
-  (add-hook 'after-init-hook 'counsel-mode)
+;;; Commentary:
 
-  (when (maybe-require-package 'projectile)
-    (let ((search-function
-           (cond
-            ((executable-find "rg") 'counsel-rg)
-            ((executable-find "ag") 'counsel-ag)
-            ((executable-find "pt") 'counsel-pt)
-            ((executable-find "ack") 'counsel-ack))))
-      (when search-function
-        (defun sanityinc/counsel-search-project (initial-input &optional use-current-dir)
-          "Search using `counsel-ag' from the project root for INITIAL-INPUT.
-If there is no project root, or if the prefix argument
-USE-CURRENT-DIR is set, then search from the current directory
-instead."
-          (interactive (list (thing-at-point 'symbol)
-                             current-prefix-arg))
-          (let ((current-prefix-arg)
-                (dir (if use-current-dir
-                         default-directory
-                       (condition-case err
-                           (projectile-project-root)
-                         (error default-directory)))))
-            (funcall search-function initial-input dir)))))
-    (global-set-key (kbd "M-?") 'sanityinc/counsel-search-project)))
+;; This file contains Ivy and related settings.
 
+;;; Code:
 
-(when (maybe-require-package 'swiper)
-  (after-load 'ivy
-    (defun sanityinc/swiper-at-point (sym)
-      "Use `swiper' to search for the symbol at point."
-      (interactive (list (thing-at-point 'symbol)))
-      (swiper sym))
+(use-package ivy                        ; minibuffer completion framework
+  :ensure t
+  :init (ivy-mode 1)
+  :bind
+  (:map ivy-mode-map
+        ("C-'" . ivy-avy))
+  :config
+  (validate-setq ivy-use-virtual-buffers t
+                 ivy-count-format ""
+                 ivy-initial-inputs-alist nil)
+  :diminish ivy-mode)
 
-    (define-key ivy-mode-map (kbd "M-s /") 'sanityinc/swiper-at-point)))
+(use-package counsel                    ; Ivy-powered commands
+  :ensure t
+  :init (counsel-mode 1)
+  :bind (([remap execute-extended-command] . counsel-M-x)
+         ([remap find-file]                . counsel-find-file)
+         ([remap describe-function]        . counsel-describe-function)
+         ([remap describe-variable]        . counsel-describe-variable)
+         ([remap info-lookup-symbol]       . counsel-info-lookup-symbol)
+         ([remap completion-at-point]      . counsel-company)
+         ("C-c f L"                        . counsel-load-library)
+         ("C-c f r"                        . counsel-recentf)
+         ("C-c i 8"                        . counsel-unicode-char)
+         ("C-c r g"                        . counsel-rg)
+         ("C-c j t"                        . counsel-imenu)
+         ("C-c g L"                        . counsel-git-log))
+  :diminish counsel-mode)
 
-
-(when (maybe-require-package 'ivy-xref)
-  (setq xref-show-xrefs-function 'ivy-xref-show-xrefs))
-
+(use-package swiper                     ; isearch with overview
+  :ensure t
+  :defer t
+  :bind (([remap isearch-forward] . swiper)))
 
 (provide 'init-ivy)
+;;; init-ivy.el ends here
+
+;; (when (maybe-require-package 'ivy-historian)
+;;   (add-hook 'after-init-hook (lambda () (ivy-historian-mode t))))
+
+;; (when (maybe-require-package 'swiper)
+;;   (after-load 'ivy
+;;     (defun sanityinc/swiper-at-point (sym)
+;;       "Use `swiper' to search for the symbol at point."
+;;       (interactive (list (thing-at-point 'symbol)))
+;;       (swiper sym))
+
+;;     (define-key ivy-mode-map (kbd "M-s /") 'sanityinc/swiper-at-point)))
+
+
+;; (when (maybe-require-package 'ivy-xref)
+;;   (setq xref-show-xrefs-function 'ivy-xref-show-xrefs))
