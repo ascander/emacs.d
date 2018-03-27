@@ -29,7 +29,11 @@
   :config
   (require 'spaceline-config)
   (validate-setq
-   powerline-default-separator 'utf-8
+   powerline-default-separator 'wave
+   powerline-height 20
+   spaceline-highlight-face-func 'spaceline-highlight-face-modified
+   spaceline-separator-dir-left '(left . left)
+   spaceline-separator-dir-right '(right . right)
    spaceline-buffer-encoding-abbrev-p nil
    spaceline-buffer-size-p nil)
   (spaceline-emacs-theme))

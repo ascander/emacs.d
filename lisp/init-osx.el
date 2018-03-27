@@ -26,10 +26,11 @@
 
 ;; Keybindings
 (when *is-a-mac*
-  (validate-setq mac-option-modifier 'none          ; the default 'meta' key
-		 mac-command-modifier 'meta	    ; but this is so much easier to use
-		 mac-right-command-modifier 'super  ; in case you need this key
-		 mac-function-modifier 'hyper))	    ; in case you need this key
+  (validate-setq mac-option-modifier 'super        ; option is harder to reach
+		 mac-command-modifier 'meta        ; so ⌘ is the correct meta
+		 mac-right-command-modifier 'none  ; let os x use this
+                 mac-right-option-modifier 'none   ; for inputting utf-8 chars
+		 mac-function-modifier 'hyper))    ; in case you ever need this
 
 ;; TODO - keep or remove this
 ;; (when *is-a-mac*

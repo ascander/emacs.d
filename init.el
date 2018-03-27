@@ -27,16 +27,19 @@
 
 ;;; Code:
 
-;; Debugging
+;; (defconst *spell-check-support-enabled* nil)   ; enable with `t'
+(defconst *is-a-mac* (eq system-type 'darwin)) ; are we on a mac?
+
+;; -----------------------------------------------------------------------------
+;; Init debugging
+;; -----------------------------------------------------------------------------
+
 (setq debug-on-error t)
 (setq message-log-max 10000)
 
-(defconst *spell-check-support-enabled* nil)   ; enable with `t'
-(defconst *is-a-mac* (eq system-type 'darwin)) ; are we on a mac?
-
-;;----------------------------------------------------------------------------
+;; -----------------------------------------------------------------------------
 ;; Adjust garbage collection thresholds during startup, and thereafter
-;;----------------------------------------------------------------------------
+;; -----------------------------------------------------------------------------
 
 (let ((normal-gc-cons-threshold (* 20 1024 1024))
       (init-gc-cons-threshold (* 128 1024 1024)))
@@ -44,15 +47,14 @@
   (add-hook 'after-init-hook
             (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
 
-;;----------------------------------------------------------------------------
+;; -----------------------------------------------------------------------------
 ;; Configure package management
-;;----------------------------------------------------------------------------
-
-;; Don't load old bytecode
-(setq load-prefer-newer t)
+;; -----------------------------------------------------------------------------
 
 (require 'package)
-(setq package-enable-at-startup nil)
+(setq-default
+ load-prefer-newer t                    ; prefer the newest version of a file
+ package-enable-at-startup nil)         ; activate packages after initialization
 (setq package-archives
       ;; Package archives, the usual suspects
       '(("GNU ELPA"     . "http://elpa.gnu.org/packages/")
@@ -63,37 +65,35 @@
       '(("MELPA Stable" . 10)
         ("GNU ELPA"     . 5)
         ("MELPA"        . 0)))
-
 (package-initialize)
 
-;; Install 'use-package' if necessary
+;; Install `use-package' if necessary
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 
-;; Enable 'use-package'
-(eval-when-compile
-  (require 'use-package))
+(eval-when-compile (require 'use-package))
+(require 'bind-key)
 
 ;; ---------------------------------------------------------------------------
 ;; Customization, Environment, and OS settings
 ;; ---------------------------------------------------------------------------
 
-(use-package validate                   ; validate options
+(use-package validate                   ; Validate options
   :ensure t)
 
+;; Location of the `custom.el' file.
 (defconst *custom-file* (locate-user-emacs-file "custom.el")
   "File used to store settings from Customization UI.")
 
-(use-package cus-edit                   ; customize interface
-  :defer t
+(use-package cus-edit                   ; Customize interface
+  :init (load *custom-file* 'no-error 'no-message)
   :config
   (validate-setq custom-file *custom-file*
                  custom-buffer-done-kill nil
                  custom-buffer-verbose-help nil
                  custom-unlispify-tag-names nil
-                 custom-unlispify-menu-entries nil)
-  :init (load *custom-file* 'no-error 'no-message))
+                 custom-unlispify-menu-entries nil))
 
 (use-package exec-path-from-shell
   :ensure t
@@ -169,7 +169,6 @@
 ;; (require 'init-frame-hooks)
 ;; (require 'init-xterm)
 ;; (require 'init-gui-frames)
-;; (require 'init-dired)
 ;; (require 'init-isearch)
 ;; (require 'init-grep)
 ;; (require 'init-uniquify)
@@ -179,7 +178,6 @@
 ;; (require 'init-recentf)
 ;; (require 'init-smex)
 ;; (require 'init-ivy)
-;; ;; (require 'init-helm)
 ;; (require 'init-hippie-expand)
 ;; (require 'init-company)
 ;; (require 'init-windows)

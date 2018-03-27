@@ -38,6 +38,9 @@
   (when (fboundp 'menu-bar-mode)
     (menu-bar-mode -1)))
 
+;; Don't use the SRGB colorspace; it makes poweline separators look weird
+(setq-default ns-use-srgb-colorspace nil)
+
 ;; No blinking, ringing, startup screens or scratch messages.
 (blink-cursor-mode -1)			
 (validate-setq ring-bell-function #'ignore
@@ -47,11 +50,6 @@
 ;; Opt out from the startup message in the echo area by simply
 ;; disabling this ridiculously bizarre thing entirely.
 (fset 'display-startup-echo-area-message #'ignore)
-
-;; Fullscreen mode
-(when (and *is-a-mac* (fboundp 'toggle-frame-fullscreen))
-  ;; Command-Option-f to toggle fullscreen mode
-  (global-set-key (kbd "M-ƒ") 'toggle-frame-fullscreen))
 
 ;; Opacity
 (defun ascander/adjust-opacity (frame incr)
@@ -74,21 +72,17 @@
                    (abbreviate-file-name (buffer-file-name))
                  "%b"))))
 
-;; ---------------------------------------------------------------------------
-;; UI packages
-;; ---------------------------------------------------------------------------
-
-(use-package dimmer			; highlight the current buffer
+(use-package dimmer			; Highlight the current buffer
   :ensure t
   :config
   (add-hook 'after-init-hook 'dimmer-mode))
 
-(use-package beacon			; highlight cursor in buffer
+(use-package beacon			; Highlight cursor in buffer
   :ensure t
   :init (beacon-mode 1)
   :diminish beacon-mode)
 
-(use-package nlinum			; display line numbers in margin
+(use-package nlinum			; Display line numbers in margin
   :ensure t
   :bind (("C-c t l" . nlinum-mode)))
 

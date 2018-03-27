@@ -25,7 +25,7 @@
 ;;; Code:
 
 (use-package frame                      ; frames
-  :bind (("M-ƒ" . toggle-frame-fullscreen))
+  :bind (("M-s-f" . toggle-frame-fullscreen))
   :init (progn
           ;; Kill `suspend-frame'
           (global-set-key (kbd "C-z") nil)
