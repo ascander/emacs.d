@@ -34,7 +34,9 @@
   :ensure t
   :defer t
   :bind
-  (("C-c s %" . highlight-symbol-query-replace)
+  (("M-s-n"   . highlight-symbol-next)
+   ("M-s-p"   . highlight-symbol-prev)
+   ("C-c s %" . highlight-symbol-query-replace)
    ("C-c s n" . highlight-symbol-next-in-defun)
    ("C-c s p" . highlight-symbol-prev-in-defun)
    ("C-c s o" . highlight-symbol-occur))
@@ -49,23 +51,30 @@
    highlight-symbol-on-navigation-p t)  ; highlight immediately after navigation
   :diminish highlight-symbol-mode)
 
-(use-package rainbow-mode               ; fontify colors in buffers
+(use-package rainbow-mode ; fontify colors in buffers
   :ensure t
   :bind
   (("C-c t r" . rainbow-mode))
+  :delight rainbow-mode
   :config
   (add-hook 'css-mode-hook #'rainbow-mode))
 
-(use-package yasnippet                  ; snippets
+(use-package whitespace-cleanup-mode
   :ensure t
+  :bind (("C-c x w" . whitespace-cleanup))
+  :init (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
+          (add-hook hook #'whitespace-cleanup-mode))
+  :delight whitespace-cleanup-mode)
+
+(use-package yasnippet
+  :ensure t
+  :defer t
+  :delight yas-minor-mode " ⓨ"
   :config
-  ;; YASnippet no longer includes the snippets themselves, so bring
-  ;; these in separately
-  (use-package yasnippet-snippets :ensure t)
+  (use-package yasnippet-snippets :disabled t :ensure t :defer t)
   (add-hook 'prog-mode-hook #'yas-minor-mode)
 
-  (yas-reload-all)
-  :diminish (yas-minor-mode " Ⓨ"))
+  (yas-reload-all))
 
 (provide 'init-prog)
 ;;; init-prog.el ends here

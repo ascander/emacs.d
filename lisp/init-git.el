@@ -25,6 +25,7 @@
 ;;; Code:
 
 (use-package diff-hl			; highlight diffs in the fringe
+  :disabled t
   :ensure t
   :defer t
   :init

@@ -1,5 +1,5 @@
 ;;; init.el --- Ascander Dost's Emacs configuration -*- lexical-binding: t; -*-
-;; 
+;;
 ;; Copyright (C) 2018  Ascander Dost
 
 ;; Author: Ascander Dost
@@ -27,19 +27,19 @@
 
 ;;; Code:
 
-;; (defconst *spell-check-support-enabled* nil)   ; enable with `t'
+(defconst *spell-check-support-enabled* nil)   ; enable with `t'
 (defconst *is-a-mac* (eq system-type 'darwin)) ; are we on a mac?
 
-;; -----------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
 ;; Init debugging
-;; -----------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
 
 (setq debug-on-error t)
 (setq message-log-max 10000)
 
-;; -----------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
 ;; Adjust garbage collection thresholds during startup, and thereafter
-;; -----------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
 
 (let ((normal-gc-cons-threshold (* 20 1024 1024))
       (init-gc-cons-threshold (* 128 1024 1024)))
@@ -47,9 +47,9 @@
   (add-hook 'after-init-hook
             (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
 
-;; -----------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
 ;; Configure package management
-;; -----------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
 
 (require 'package)
 (setq-default
@@ -57,30 +57,53 @@
  package-enable-at-startup nil)         ; activate packages after initialization
 (setq package-archives
       ;; Package archives, the usual suspects
-      '(("GNU ELPA"     . "http://elpa.gnu.org/packages/")
-        ("MELPA Stable" . "https://stable.melpa.org/packages/")
-        ("MELPA"        . "https://melpa.org/packages/"))
-      ;; Prefer MELPA Stable over GNU over MELPA.
+      '(("gnu"          . "http://elpa.gnu.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")
+        ("melpa"        . "https://melpa.org/packages/")
+        ("org"          . "https://orgmode.org/elpa/"))
       package-archive-priorities
-      '(("MELPA Stable" . 10)
-        ("GNU ELPA"     . 5)
-        ("MELPA"        . 0)))
+      '(("melpa-stable" . 10)
+        ("gnu"          . 5)
+        ("melpa"        . 0))
+      package-pinned-packages
+      ;; Pin some packages to melpa, because its version is more recent than melpa-stable
+      '(("all-the-icons-ivy" . "melpa")
+        ("ivy"               . "melpa")
+        ("counsel"           . "melpa")
+        ("swiper"            . "melpa")))
 (package-initialize)
 
-;; Install `use-package' if necessary
-(unless (package-installed-p 'use-package)
+;; Bootstrap `use-package'
+(unless (and (package-installed-p 'use-package)
+             (package-installed-p 'delight))
   (package-refresh-contents)
-  (package-install 'use-package))
+  (package-install 'use-package t)
+  (package-install 'delight t))
 
-(eval-when-compile (require 'use-package))
-(require 'bind-key)
+(eval-when-compile (require 'use-package)) ; Auto-requires `bind-key' also
 
-;; ---------------------------------------------------------------------------
+;; Benchmark init time
+(use-package benchmark-init
+  :ensure t
+  :config
+  ;; Disable collection of benchmark data after initialization
+  (add-hook 'after-init-hook #'benchmark-init/deactivate))
+
+;; --------------------------------------------------------------------------------
 ;; Customization, Environment, and OS settings
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
 
 (use-package validate                   ; Validate options
   :ensure t)
+
+(use-package paradox                    ; Modern Emacs package menu
+  :ensure t
+  :config
+  (validate-setq
+   paradox-column-width-package 32
+   paradox-column-width-version 18
+   paradox-execute-asynchronously t)
+  (remove-hook 'paradox-after-execution-functions #'paradox--report-buffer-print))
 
 ;; Location of the `custom.el' file.
 (defconst *custom-file* (locate-user-emacs-file "custom.el")
@@ -95,55 +118,21 @@
                  custom-unlispify-tag-names nil
                  custom-unlispify-menu-entries nil))
 
-(use-package exec-path-from-shell
-  :ensure t
-  :if (and *is-a-mac* (display-graphic-p))
-  :config
-  (progn
-    (when (string-match-p "/zsh$" (getenv "SHELL"))
-      ;; Use a non-interactive login shell. This loads environment
-      ;; variables from `.zprofile'.
-      (validate-setq exec-path-from-shell-arguments '("-l")))
-
-    (validate-setq exec-path-from-shell-variables
-                   '("JAVA_OPTS"        ; Java options
-                     "SBT_OPTS"         ; SBT options
-                     "EMAIL"            ; My email address
-                     "PATH"             ; Executables
-                     "MANPATH"          ; Man pages
-                     "INFOPATH"         ; Info directories
-                     "LANG"             ; Language
-                     "LC_CTYPE"         ; Character set
-                     ))
-
-    ;; Initialize Emacs' environment from the shell
-    (exec-path-from-shell-initialize)
-
-    ;; Tell Emacs who I am
-    (validate-setq user-email-address (getenv "EMAIL"))
-
-    ;; Re-initialize the `info-directory-list' from $INFOPATH. Since
-    ;; `package.el' already initializes info, we need to explicitly
-    ;; add the $INFOPATH directories to `info-directory-list'. Reverse
-    ;; the list of info paths to prepend them in proper order.
-    (with-eval-after-load 'info
-      (dolist (dir (nreverse (parse-colon-path (getenv "INFOPATH"))))
-        (when dir
-          (add-to-list 'Info-directory-list dir))))))
-
 ;; Time execution of initialization
 (add-hook 'after-init-hook (lambda () (message "Time to load init file: %s"
                                                (emacs-init-time))))
 
-;;----------------------------------------------------------------------------
-;; Load configs for specific features and modes
-;;----------------------------------------------------------------------------
+;; --------------------------------------------------------------------------------
+;; Initialize specific features
+;; --------------------------------------------------------------------------------
 
 ;; Add files in my `.emacs.d/lisp' directory
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
+(use-package init-defaults)
 (use-package init-osx)
 (use-package init-ui)
+(use-package init-modeline)
 (use-package init-themes)
 (use-package init-fonts)
 (use-package init-files)
@@ -154,131 +143,11 @@
 (use-package init-editing)
 (use-package init-windows)
 (use-package init-ivy)
-(use-package init-modeline)
-
+(use-package init-hydra)
 (use-package init-git)
 (use-package init-prog)
 (use-package init-company)
 (use-package init-scala)
-
-;; (require-package 'wgrep)
-;; (require-package 'diminish)
-;; (require-package 'scratch)
-;; (require-package 'command-log-mode)
-
-;; (require 'init-frame-hooks)
-;; (require 'init-xterm)
-;; (require 'init-gui-frames)
-;; (require 'init-isearch)
-;; (require 'init-grep)
-;; (require 'init-uniquify)
-;; (require 'init-ibuffer)
-;; (require 'init-flycheck)
-
-;; (require 'init-recentf)
-;; (require 'init-smex)
-;; (require 'init-ivy)
-;; (require 'init-hippie-expand)
-;; (require 'init-company)
-;; (require 'init-windows)
-;; (require 'init-sessions)
-;; (require 'init-mmm)
-
-;; (require 'init-editing-utils)
-;; (require 'init-whitespace)
-
-;; (require 'init-vc)
-;; (require 'init-darcs)
-;; (require 'init-git)
-;; (require 'init-github)
-
-;; (require 'init-projectile)
-
-; (require 'init-compile)
-; ;;(require 'init-crontab)
-; (require 'init-textile)
-; (require 'init-markdown)
-; (require 'init-csv)
-; (require 'init-erlang)
-; (require 'init-javascript)
-; (require 'init-php)
-;; (require 'init-org)
-;; (require 'init-scala)
-; (require 'init-nxml)
-; (require 'init-html)
-; (require 'init-css)
-; (require 'init-haml)
-; (require 'init-http)
-; (require 'init-python)
-; (require 'init-haskell)
-; (require 'init-elm)
-; (require 'init-purescript)
-; (require 'init-ruby)
-; (require 'init-rails)
-; (require 'init-sql)
-; (require 'init-rust)
-; (require 'init-toml)
-; (require 'init-yaml)
-; (require 'init-docker)
-; (require 'init-terraform)
-; ;;(require 'init-nix)
-; (maybe-require-package 'nginx-mode)
-
-; (require 'init-paredit)
-; (require 'init-lisp)
-; (require 'init-slime)
-; (require 'init-clojure)
-; (require 'init-clojure-cider)
-; (require 'init-common-lisp)
-
-; (when *spell-check-support-enabled*
-;   (require 'init-spelling))
-
-; (require 'init-misc)
-
-; (require 'init-folding)
-; (require 'init-dash)
-
-; ;;(require 'init-twitter)
-; ;; (require 'init-mu)
-; (require 'init-ledger)
-; ;; Extra packages which don't require any configuration
-
-; (require-package 'gnuplot)
-; (require-package 'lua-mode)
-; (require-package 'htmlize)
-; (require-package 'dsvn)
-; (when *is-a-mac*
-;   (require-package 'osx-location))
-; (maybe-require-package 'regex-tool)
-; (maybe-require-package 'dotenv-mode)
-
-; (when (maybe-require-package 'uptimes)
-;   (setq-default uptimes-keep-count 200)
-;   (add-hook 'after-init-hook (lambda () (require 'uptimes))))
-
-;;----------------------------------------------------------------------------
-;; Allow access from emacsclient
-;;----------------------------------------------------------------------------
-;; (require 'server)
-;; (unless (server-running-p)
-;;   (server-start))
-
-;;----------------------------------------------------------------------------
-;; Variables configured via the interactive 'customize' interface
-;;----------------------------------------------------------------------------
-;; (when (file-exists-p custom-file)
-;;   (load custom-file))
-
-;;----------------------------------------------------------------------------
-;; Locales (setting them earlier in this file doesn't work in X)
-;;----------------------------------------------------------------------------
-;; (require 'init-locales)
-
-;;----------------------------------------------------------------------------
-;; Allow users to provide an optional "init-local" containing personal settings
-;;----------------------------------------------------------------------------
-;; (require 'init-local nil t)
 
 (provide 'init)
 ;;; init.el ends here

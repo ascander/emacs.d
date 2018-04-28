@@ -26,7 +26,7 @@
 
 (use-package which-key                  ; show help popups for prefix keys
   :ensure t
-  :diminish (which-key-mode . " wk")
+  :delight which-key-mode " ⓦ"
   :init (which-key-mode)
   :config
   (validate-setq

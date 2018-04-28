@@ -32,6 +32,42 @@
                  mac-right-option-modifier 'none   ; for inputting utf-8 chars
 		 mac-function-modifier 'hyper))    ; in case you ever need this
 
+(use-package exec-path-from-shell
+  :ensure t
+  :if (and *is-a-mac* (display-graphic-p))
+  :config
+  (progn
+    (when (string-match-p "/zsh$" (getenv "SHELL"))
+      ;; Use a non-interactive login shell. This loads environment
+      ;; variables from `.zprofile'.
+      (validate-setq exec-path-from-shell-arguments '("-l")))
+
+    (validate-setq exec-path-from-shell-variables
+                   '("JAVA_OPTS"        ; Java options
+                     "SBT_OPTS"         ; SBT options
+                     "EMAIL"            ; My email address
+                     "PATH"             ; Executables
+                     "MANPATH"          ; Man pages
+                     "INFOPATH"         ; Info directories
+                     "LANG"             ; Language
+                     "LC_CTYPE"         ; Character set
+                     ))
+
+    ;; Initialize Emacs' environment from the shell
+    (exec-path-from-shell-initialize)
+
+    ;; Tell Emacs who I am
+    (setq user-email-address (getenv "EMAIL"))
+
+    ;; Re-initialize the `info-directory-list' from $INFOPATH. Since
+    ;; `package.el' already initializes info, we need to explicitly
+    ;; add the $INFOPATH directories to `info-directory-list'. Reverse
+    ;; the list of info paths to prepend them in proper order.
+    (with-eval-after-load 'info
+      (dolist (dir (nreverse (parse-colon-path (getenv "INFOPATH"))))
+        (when dir
+          (add-to-list 'Info-directory-list dir))))))
+
 ;; TODO - keep or remove this
 ;; (when *is-a-mac*
 ;;   ;; Make mouse wheel / trackpad scrolling less jerky
@@ -49,7 +85,7 @@
 ;;   (global-set-key (kbd "M-ˍ") 'ns-do-hide-others)) ; what describe-key reports for cmd-option-h
 
 
-(use-package ns-win                     ; OS X window support 
+(use-package ns-win                     ; OS X window support
   :defer t
   :if *is-a-mac*
   :config

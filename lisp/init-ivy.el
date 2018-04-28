@@ -26,19 +26,28 @@
 
 (use-package ivy                        ; minibuffer completion framework
   :ensure t
-  :init (ivy-mode 1)
-  :bind
-  (:map ivy-mode-map
-        ("C-'" . ivy-avy))
+  :defer t
   :config
+  (ivy-mode 1)
   (validate-setq ivy-use-virtual-buffers t
                  ivy-count-format ""
                  ivy-initial-inputs-alist nil)
-  :diminish ivy-mode)
+  :delight ivy-mode)
+
+(use-package swiper                     ; An Ivy-powered alternative to isearch
+  :ensure t
+  :bind (([remap isearch-forward] . swiper))
+  :config
+  ;; swipe for symbol at point
+  (defun ascander/swiper-at-point (sym)
+    "Use `swiper' to search for the symbol at point."
+    (interactive (list (thing-at-point 'symbol)))
+    (swiper sym))
+
+  (bind-key "M-s-/" #'ascander/swiper-at-point ivy-mode-map))
 
 (use-package counsel                    ; Ivy-powered commands
   :ensure t
-  :init (counsel-mode 1)
   :bind (([remap execute-extended-command] . counsel-M-x)
          ([remap find-file]                . counsel-find-file)
          ([remap describe-function]        . counsel-describe-function)
@@ -51,18 +60,14 @@
          ("C-c r g"                        . counsel-rg)
          ("C-c j t"                        . counsel-imenu)
          ("C-c g L"                        . counsel-git-log))
-  :diminish counsel-mode)
+  :delight counsel-mode
+  :config
+  (counsel-mode 1))
 
-(use-package swiper                     ; isearch with overview
-  :ensure t
-  :defer t
-  :bind (([remap isearch-forward] . swiper)))
 
 (provide 'init-ivy)
 ;;; init-ivy.el ends here
 
-;; (when (maybe-require-package 'ivy-historian)
-;;   (add-hook 'after-init-hook (lambda () (ivy-historian-mode t))))
 
 ;; (when (maybe-require-package 'swiper)
 ;;   (after-load 'ivy
@@ -72,7 +77,6 @@
 ;;       (swiper sym))
 
 ;;     (define-key ivy-mode-map (kbd "M-s /") 'sanityinc/swiper-at-point)))
-
 
 ;; (when (maybe-require-package 'ivy-xref)
 ;;   (setq xref-show-xrefs-function 'ivy-xref-show-xrefs))

@@ -25,46 +25,60 @@
 ;;; Code:
 
 (use-package solarized-theme			; I always come back to you
-  ;; :disabled t
-  :ensure solarized-theme
+  :ensure t
   :config
   (validate-setq
-   x-underline-at-descent-line t        ; draw the mode line underline lower
-   solarized-use-variable-pitch nil	; no variable sized fonts
-   solarized-use-less-bold t		; less bold
-   solarized-use-more-italic t		; more italics
-   solarized-distinct-doc-face t	; make docstrings stand out more
-   solarized-emphasize-indicators nil	; less colors for gutters
-   solarized-high-contrast-mode-line t  ; make active/inactive mode line stand out more
+   ;; Fixes the box around the mode line
+   x-underline-at-descent-line t
+   solarized-use-variable-pitch nil
+   solarized-use-less-bold t
+   solarized-use-more-italic nil
+   solarized-distinct-doc-face t
+   solarized-emphasize-indicators nil
+   solarized-high-contrast-mode-line t
    ;; Avoid all font size changes
    solarized-height-minus-1 1.0
    solarized-height-plus-1 1.0
    solarized-height-plus-2 1.0
    solarized-height-plus-3 1.0
-   solarized-height-plus-4 1.0)
-  
-  (load-theme 'solarized-dark 'no-confirm))
+   solarized-height-plus-4 1.0))
 
-(use-package base16-theme		; base16 color themes
-  :disabled t
+(use-package base16-theme               ; Base16 color themes
   :ensure t
   :config
-  (validate-setq base16-highlight-mode-line 'contrast)
-  (load-theme 'base16-oceanicnext t))
+  (validate-setq base16-highlight-mode-line 'contrast))
 
-;;------------------------------------------------------------------------------
-;; Toggle between light and dark
-;;------------------------------------------------------------------------------
+(use-package doom-themes                ; DOOM themes
+  :ensure t
+  :init (load-theme 'doom-city-lights)
+  :config
+  (progn
+    (doom-themes-neotree-config)
+    (doom-themes-org-config)))
 
-(defun light ()
-  "Activate a light color theme."
+(defun ad|reset-themes ()
+  "Disable all currently enabled themes."
   (interactive)
-  (load-theme 'solarized-light))
+  (mapc #'disable-theme custom-enabled-themes))
 
-(defun dark ()
-  "Activate a dark color theme."
-  (interactive)
-  (load-theme 'solarized-dark))
+(defhydra ad|themes-hydra (:hint nil :color amaranth)
+  "
+Color Theme:
+_s_ Solarized Dark   _c_ DOOM City Lights
+_S_ Solarized Light  _o_ DOOM One
+^ ^                  _g_ DOOM Spacegrey
+^ ^                  _n_ DOOM Nord
+"
+  ("s" (load-theme 'solarized-dark t))
+  ("S" (load-theme 'solarized-light t))
+  ("c" (load-theme 'doom-city-lights t))
+  ("o" (load-theme 'doom-one t))
+  ("g" (load-theme 'doom-spacegrey t))
+  ("n" (load-theme 'doom-nord t))
+  ("r" (ad|reset-themes) "reset")
+  ("RET" nil "quit" :color blue))
+
+(bind-keys ("C-c w t" . ad|themes-hydra/body))
 
 (provide 'init-themes)
 ;;; init-themes.el ends here

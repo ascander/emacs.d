@@ -25,56 +25,64 @@
 ;;; Code:
 
 (use-package org			; the almighty Org mode
-  :ensure t
+  :ensure org-plus-contrib
   :mode (("\\.org$" . org-mode))
   :bind (("C-c l"   . org-store-link)
-	 ("C-c a"   . org-agenda)
-	 ("C-c b"   . ascander/org-insert-checkbox)
+         ("C-c a"   . org-agenda)
          ("C-c c"   . org-capture))
   :config
   ;; Miscellaneous preferences
   (validate-setq
    org-src-fontify-natively t
    org-log-done 'time
-   org-fast-tag-selection-include-todo t
    org-use-fast-todo-selection t
+   org-startup-folded nil
    org-startup-truncated nil
-   org-tags-column 80)
+   org-tags-column 80
+   org-enable-priority-commands nil
+   org-reverse-note-order t)
 
   ;; TODO task states
   (setq
    org-todo-keywords
-   '((sequence "TODO(t)" "IN-PROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELED(c)")))
+   '((sequence "TODO(t)" "IN-PROGRESS(i)" "WAITING(w@/!)" "|" "DONE(d)" "CANCELED(c@/!)")
+     (sequence "IDEA(e)")))
+
+  ;; Common TODO tags
+  (setq org-tag-alist '((:startgroup . nil)
+                        ("@work" . ?w) ("@home" . ?h)
+                        (:endgroup . nil)
+                        ("project" . ?p)))
 
   ;; Agenda files
   (validate-setq org-agenda-files '("~/org/inbox.org"
                                     "~/org/gtd.org"
+                                    "~/org/emacs.org"
                                     "~/org/tickler.org"))
 
   ;; Capture settings
   (setq org-capture-templates '(("t" "Todo [inbox]" entry
                                  (file+headline "~/org/inbox.org" "Tasks")
                                  "** TODO %i%?")
+                                ("i" "Idea [inbox]" entry
+                                 (file+headline "~/org/inbox.org" "Ideas")
+                                 "** IDEA %i%?")
                                 ("T" "Tickler" entry
                                  (file+headline "~/org/tickler.org" "Tickler")
-                                 "** %i%? \n %U")))  
+                                 "** %i%? \n %U")))
 
   ;; Refile targets include non-inbox files (including `someday.org')
-  (setq org-refile-targets '(("~/org/gtd.org" :maxlevel . 3)
+  (setq org-refile-targets '(("~/org/gtd.org" :maxlevel . 2)
+                             ("~/org/emacs.org" :maxlevel . 2)
                              ("~/org/someday.org" :level . 1)
                              ("~/org/tickler.org" :maxlevel . 2)))
 
-  ;; Checkboxes
-  (defun ascander/org-insert-checkbox ()
-    "Insert a checkbox."
-    (interactive)
-    (insert "[ ] "))
+  ;; Archiving
+  (validate-setq org-archive-location "~/org/archive.org::* From %s")
 
-  ;; Disable priorities
-  (validate-setq org-enable-priority-commands nil)
-
-  ;; Put new stuff at the top
-  (validate-setq org-reverse-note-order t))
+  ;; Navigate by headings, using Ivy
+  (validate-setq org-goto-interface 'outline-path-completion
+                 org-outline-path-complete-in-steps nil))
 
 (use-package org-bullets		; fancy utf-8 bullets for org mode
   :defer t
@@ -83,6 +91,11 @@
 (use-package org-cliplink            ; insert links from the clipboard
   :ensure t
   :bind ("C-c o i" . org-cliplink))
+
+(use-package toc-org                    ; Maintain a ToC in org files
+  :ensure t
+  :defer t
+  :init (add-hook 'org-mode-hook (lambda () (toc-org-enable))))
 
 (provide 'init-org)
 ;;; init-org.el ends here

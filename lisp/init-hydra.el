@@ -1,4 +1,4 @@
-;;; init-modeline.el --- Mode line configuration     -*- lexical-binding: t; -*-
+;;; init-hydra.el --- Part of my Emacs setup         -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Ascander Dost
 
@@ -20,26 +20,12 @@
 
 ;;; Commentary:
 
-;; Settings for my Emacs mode line.
+;; Hydra settings go here.
 
 ;;; Code:
 
-(use-package spaceline
-  :ensure t
-  :config
-  (require 'spaceline-config)
+(use-package hydra                      ; Keybindings that stick
+  :ensure t)
 
-  (validate-setq
-   powerline-image-apple-rgb t
-   powerline-default-separator 'slant
-   powerline-height 20
-   spaceline-minor-modes-separator nil
-   spaceline-highlight-face-func 'spaceline-highlight-face-modified
-   spaceline-separator-dir-left '(left . left)
-   spaceline-separator-dir-right '(right . right)
-   spaceline-buffer-encoding-abbrev-p nil
-   spaceline-buffer-size-p nil)
-  (spaceline-emacs-theme))
-
-(provide 'init-modeline)
-;;; init-modeline.el ends here
+(provide 'init-hydra)
+;;; init-hydra.el ends here

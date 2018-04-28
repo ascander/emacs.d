@@ -44,12 +44,13 @@
 (when (display-graphic-p)
   (validate-setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 
-(use-package ignoramus			; ignore uninteresting files everywhere
+(use-package ignoramus			; Ignore uninteresting files everywhere
   :ensure t
   :config
   ;; Ignore some additional directories/files
   (dolist (name '("company-statistics-cache.el"
-		  ".ensime_cache" "ensime"))
+                  ".ensime_cache"
+                  "ensime"))
     (add-to-list 'ignoramus-file-basename-exact-names name))
   (ignoramus-setup))
 
@@ -65,6 +66,20 @@
 		 recentf-exclude (list "/\\.git/.*\\'" ; git contents
 				       "/elpa/.*\\'"   ; package files
 				       #'ignoramus-boring-p)))
+
+(use-package neotree                    ; Tree view of projects
+  :ensure t
+  :bind (("C-c f t" . neotree-toggle))
+  :config
+  (setq neo-theme (if (display-graphic-p) 'icons 'arrow)
+        neo-window-width 32
+        neo-create-file-auto-open t
+        neo-banner-message nil
+        neo-show-updir-line nil
+        neo-mode-line-type 'neotree
+        neo-smart-open t
+        neo-show-hidden-files t
+        neo-auto-indent-point t))
 
 (provide 'init-files)
 ;;; init-files.el ends here

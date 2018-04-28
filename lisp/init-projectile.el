@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-(use-package projectile			; project management for Emacs
+(use-package projectile			; Project management for Emacs
   :ensure t
   :defer 1
   :config
@@ -33,20 +33,16 @@
   (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
   (validate-setq
    projectile-completion-system 'ivy
-   projectile-find-dir-includes-top-level t 
+   projectile-find-dir-includes-top-level t
    projectile-switch-project-action #'projectile-dired)
-  :diminish projectile-mode)
+  :delight projectile-mode)
 
-;; (use-package counsel-projectile		; counsel interface to projectile
-;;   :ensure t
-;;   :after projectile
-;;   :config
-;;   (counsel-projectile-on))
-
-(use-package projectile-ripgrep		; ripgrep for projectile
+(use-package counsel-projectile		; Counsel interface to Projectile
   :ensure t
   :after projectile
-  :bind ("C-c p G" . projectile-ripgrep))
+  :bind (("C-c p G" . counsel-projectile-rg))
+  :config
+  (counsel-projectile-mode))
 
 (provide 'init-projectile)
 ;;; init-projectile.el ends here
