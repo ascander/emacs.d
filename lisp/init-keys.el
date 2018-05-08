@@ -36,15 +36,17 @@
    which-key-sort-order 'which-key-prefix-then-key-order
    which-key-replacement-alist
    '(
-     ;; Using unicode symbols ruins alignment; which is worse?
-     ;; (("DEL" . nil) . ("⌫" . nil))
-     ;; (("RET" . nil) . ("⏎" . nil))
-     ;; (("TAB" . nil) . ("↹" . nil))
-     ;; Shorten common right-side patterns
-     ((nil . "Prefix Command") . (nil . "prefix"))
-     ((nil . "\\`\\?\\?\\'")   . (nil . "λ"))
-     ((nil . "projectile-")    . (nil . "proj-"))
-     ((nil . "magit-")         . (nil . "git-")))))
+     ;; Replacements for how all or part of FUNCTION is replaced when
+     ;; `which-key' displays:
+     ;;
+     ;;     KEY → FUNCTION
+     ;;
+     ;; Eg: after "C-c g" display "s → magit-status" as "s → git-status"
+     ((nil . "Prefix Command")            . (nil . "prefix"))
+     ((nil . "\\`\\?\\?\\'")              . (nil . "λ"))
+     ((nil . "projectile-")               . (nil . "proj-"))
+     ((nil . "magit-")                    . (nil . "git-"))
+     ((nil . "\\`hydra-\\(.+\\)/body\\'") . (nil . "=|\\1")))))
 
 (provide 'init-keys)
 ;;; init-keys.el ends here

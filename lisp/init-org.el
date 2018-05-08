@@ -54,6 +54,10 @@
                         (:endgroup . nil)
                         ("project" . ?p)))
 
+  ;; Don't allow changes of TODO state unless it makes sense
+  (validate-setq org-enforce-todo-dependencies t
+                 org-enforce-todo-checkbox-dependencies t)
+
   ;; Agenda files
   (validate-setq org-agenda-files '("~/org/inbox.org"
                                     "~/org/gtd.org"

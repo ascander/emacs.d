@@ -26,16 +26,17 @@
 
 ;; Default fonts
 
-(defvar default-font-size-pt 12 "Default font size, in points.")
+(defvar default-font-size-pt 12
+  "Default font size, in points.")
 
 (set-face-attribute 'default nil
-                    :family "Iosevka" :height 120)
+                    :family "Iosevka Type" :height 120)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans" :height 130 :weight 'regular)
 
 ;; Global font resizing: https://github.com/kaushalmodi/.emacs.d
-(defun ascii/global-font-size-adj (scale &optional absolute)
+(defun ad|font-size-adj (scale &optional absolute)
   "Adjust font size globally: in all buffers, mode line, echo area, etc.
 
 The built-in `text-scale-adjust' function does an excellent job
@@ -58,32 +59,22 @@ scale is applied relative to the current font size."
   ;; Internal font size is 10x font size in points.
   (set-face-attribute 'default nil :height (* font-size-pt 10)))
 
-(defun ascii/global-font-size-incr  () (interactive) (ascii/global-font-size-adj +1))
-(defun ascii/global-font-size-decr  () (interactive) (ascii/global-font-size-adj -1))
-(defun ascii/global-font-size-reset () (interactive) (ascii/global-font-size-adj 0))
+(defun ad|font-size-incr  () (interactive) (ad|font-size-adj +1))
+(defun ad|font-size-decr  () (interactive) (ad|font-size-adj -1))
+(defun ad|font-size-reset () (interactive) (ad|font-size-adj 0))
 
 ;; Initialize `font-size-pt'
 (unless (boundp 'font-size-pt)
-  (ascii/global-font-size-reset))
+  (ad|font-size-reset))
 
-(defhydra hydra-font-resize (nil
-                             "C-c"
-                             :bind (lambda (key cmd) (bind-key key cmd))
-                             :color red
-                             :hint nil)
-"
-Font Size:     _C--_/_-_ Decrease     _C-=_/_=_ Increase     _C-0_/_0_ Reset     _q_ Cancel
-"
-;; Hydra entry bindings
-("C--" ascii/global-font-size-decr)
-("C-=" ascii/global-font-size-incr)
-("C-0" ascii/global-font-size-reset :color blue)
-;; Hydra-internal bindings... work only when the hydra is active!
-("-"   ascii/global-font-size-decr :bind nil)
-("="   ascii/global-font-size-incr :bind nil)
-("+"   ascii/global-font-size-incr :bind nil)
-("0"   ascii/global-font-size-reset :bind nil)
-("q"   nil :color blue))
+(defhydra hydra-font-resize (:hint nil :color red)
+  "Font Size"
+  ("-" ad|font-size-decr "Decrease")
+  ("=" ad|font-size-incr "Increase")
+  ("0" ad|font-size-reset "Reset")
+  ("RET" nil "quit" :color blue))
+
+(bind-keys ("C-M-=" . hydra-font-resize/body))
 
 (provide 'init-fonts)
 ;;; init-fonts.el ends here

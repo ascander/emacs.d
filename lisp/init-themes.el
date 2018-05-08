@@ -26,6 +26,7 @@
 
 (use-package solarized-theme			; I always come back to you
   :ensure t
+  :init
   :config
   (validate-setq
    ;; Fixes the box around the mode line
@@ -41,7 +42,9 @@
    solarized-height-plus-1 1.0
    solarized-height-plus-2 1.0
    solarized-height-plus-3 1.0
-   solarized-height-plus-4 1.0))
+   solarized-height-plus-4 1.0)
+
+  (load-theme 'solarized-dark 'no-confirm))
 
 (use-package base16-theme               ; Base16 color themes
   :ensure t
@@ -50,7 +53,6 @@
 
 (use-package doom-themes                ; DOOM themes
   :ensure t
-  :init (load-theme 'doom-city-lights)
   :config
   (progn
     (doom-themes-neotree-config)
@@ -61,7 +63,7 @@
   (interactive)
   (mapc #'disable-theme custom-enabled-themes))
 
-(defhydra ad|themes-hydra (:hint nil :color amaranth)
+(defhydra hydra-color-theme (:hint nil :color amaranth)
   "
 Color Theme:
 _s_ Solarized Dark   _c_ DOOM City Lights
@@ -78,7 +80,7 @@ _S_ Solarized Light  _o_ DOOM One
   ("r" (ad|reset-themes) "reset")
   ("RET" nil "quit" :color blue))
 
-(bind-keys ("C-c w t" . ad|themes-hydra/body))
+(bind-keys ("C-c w t" . hydra-color-theme/body))
 
 (provide 'init-themes)
 ;;; init-themes.el ends here
