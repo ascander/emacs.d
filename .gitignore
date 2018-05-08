@@ -50,3 +50,7 @@ site-lisp/package/
 /rake.cache
 /plantuml.jar
 /magithub
+/bookmarks
+/smex-items
+company-statistics-cache.el
+projectile.cache
