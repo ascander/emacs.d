@@ -1,4 +1,4 @@
-;;; init-projectile.el --- Project interaction settings          -*- lexical-binding: t; -*-
+;;; init-modeline.el --- Mode line configuration     -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Ascander Dost
 
@@ -20,29 +20,26 @@
 
 ;;; Commentary:
 
-;; This file contains settings for Projectile.
+;; Settings for my Emacs mode line.
 
 ;;; Code:
 
-(use-package projectile			; Project management for Emacs
+(use-package spaceline
   :ensure t
-  :defer 1
   :config
-  (projectile-global-mode)
-  ;; Remove dead projects when Emacs is idle
-  (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
+  (require 'spaceline-config)
+
   (validate-setq
-   projectile-completion-system 'ivy
-   projectile-find-dir-includes-top-level t
-   projectile-switch-project-action #'projectile-dired)
-  :delight projectile-mode)
+   powerline-image-apple-rgb t
+   powerline-default-separator 'slant
+   powerline-height 20
+   spaceline-minor-modes-separator nil
+   spaceline-highlight-face-func 'spaceline-highlight-face-modified
+   spaceline-separator-dir-left '(left . left)
+   spaceline-separator-dir-right '(right . right)
+   spaceline-buffer-encoding-abbrev-p nil
+   spaceline-buffer-size-p nil)
+  (spaceline-emacs-theme))
 
-(use-package counsel-projectile		; Counsel interface to Projectile
-  :ensure t
-  :after projectile
-  :bind (("C-c p G" . counsel-projectile-rg))
-  :config
-  (counsel-projectile-mode))
-
-(provide 'init-projectile)
-;;; init-projectile.el ends here
+(provide 'init-modeline)
+;;; init-modeline.el ends here

@@ -1,9 +1,9 @@
-;;; init-fonts.el --- Part of my Emacs configuration  -*- lexical-binding: t; -*-
+;;; init-fonts.el --- Default font settings          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Ascander Dost
 
 ;; Author: Ascander Dost <dostinthemachine@gmail.com>
-;; Keywords: convenience, faces
+;; Keywords: convenience
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,35 +20,61 @@
 
 ;;; Commentary:
 
-;; Font settings are in this file.
+;; This file contains font settings.
 
 ;;; Code:
 
 ;; Default fonts
+
+(defvar default-font-size-pt 12
+  "Default font size, in points.")
+
 (set-face-attribute 'default nil
-                    :family "Iosevka Type"
-                    :height 120)
+                    :family "Iosevka Type" :height 120)
 
 (set-face-attribute 'variable-pitch nil
-                    :family "Fira Sans"
-                    :height 130
-                    :weight 'regular)
+                    :family "Fira Sans" :height 130 :weight 'regular)
 
-;;; Changing font sizes
-(require-package 'default-text-scale)
-(add-hook 'after-init-hook 'default-text-scale-mode)
+;; Global font resizing: https://github.com/kaushalmodi/.emacs.d
+(defun ad|font-size-adj (scale &optional absolute)
+  "Adjust font size globally: in all buffers, mode line, echo area, etc.
 
+The built-in `text-scale-adjust' function does an excellent job
+of font resizing, but it does not change font sizes outside the
+current buffer; for example, in the mode line.
 
-(defun sanityinc/maybe-adjust-visual-fill-column ()
-  "Readjust visual fill column when the global font size is modified.
-This is helpful for writeroom-mode, in particular."
-  ;; TODO: submit as patch
-  (if visual-fill-column-mode
-      (add-hook 'after-setting-font-hook 'visual-fill-column--adjust-window nil t)
-    (remove-hook 'after-setting-font-hook 'visual-fill-column--adjust-window t)))
+M-<SCALE> COMMAND increases font size by SCALE points if SCALE is positive
+                  decreases font size by SCALE points if SCALE is negative
+                  resets    font size if SCALE is 0.
 
-(add-hook 'visual-fill-column-mode-hook
-          'sanityinc/maybe-adjust-visual-fill-column)
+If ABSOLUTE is non-nil, text scale is applied relative to the
+default font size `default-font-size-pt'. Otherwise, the text
+scale is applied relative to the current font size."
+  (interactive "p")
+  (if (= scale 0)
+      (setq font-size-pt default-font-size-pt)
+    (if (bound-and-true-p absolute)
+        (setq font-size-pt (+ default-font-size-pt scale))
+      (setq font-size-pt (+ font-size-pt scale))))
+  ;; Internal font size is 10x font size in points.
+  (set-face-attribute 'default nil :height (* font-size-pt 10)))
+
+(defun ad|font-size-incr  () (interactive) (ad|font-size-adj +1))
+(defun ad|font-size-decr  () (interactive) (ad|font-size-adj -1))
+(defun ad|font-size-reset () (interactive) (ad|font-size-adj 0))
+
+;; Initialize `font-size-pt'
+(unless (boundp 'font-size-pt)
+  (ad|font-size-reset))
+
+(defhydra hydra-font-resize (:hint nil :color red)
+  "Font Size"
+  ("-" ad|font-size-decr "Decrease")
+  ("=" ad|font-size-incr "Increase")
+  ("0" ad|font-size-reset "Reset")
+  ("RET" nil "quit" :color blue))
+
+(bind-keys ("C-M-=" . hydra-font-resize/body))
 
 (provide 'init-fonts)
 ;;; init-fonts.el ends here
