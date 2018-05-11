@@ -89,6 +89,7 @@
                  org-outline-path-complete-in-steps nil))
 
 (use-package org-bullets		; fancy utf-8 bullets for org mode
+  :ensure t
   :defer t
   :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 

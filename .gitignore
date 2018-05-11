@@ -51,6 +51,5 @@ site-lisp/package/
 /plantuml.jar
 /magithub
 /bookmarks
-/smex-items
 company-statistics-cache.el
 projectile.cache
