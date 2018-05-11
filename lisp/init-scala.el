@@ -33,38 +33,24 @@
 		 scala-indent:operator-strategy)
 
   ;; Newline behaves correctly in multiline comments
-  (defun ascander/scala-mode-newline-comments ()
+  (defun ad|scala-mode-newline-comments ()
     "Insert a leading asterisk in multiline comments."
     (interactive)
     (newline-and-indent)
     (scala-indent:insert-asterisk-on-multiline-comment))
 
   (define-key scala-mode-map (kbd "RET")
-    #'ascander/scala-mode-newline-comments)
-
-  ;; Navigate by `def' declarations
-  (defun ascander/next-def ()
-    "Move to the next def."
-    (interactive)
-    (search-forward "def "))
-
-  (defun ascander/prev-def ()
-    "Move to the previous def."
-    (interactive)
-    (search-backward "def "))
-
-  (define-key scala-mode-map (kbd "M-<up>") #'ascander/prev-def)
-  (define-key scala-mode-map (kbd "M-<down>") #'ascander/next-def))
+    #'ad|scala-mode-newline-comments))
 
 (use-package sbt-mode			; interactive support for Satan's Build Tool
   :ensure t
   :defer t
   :bind (:map scala-mode-map
-	      ("C-c m b c" . sbt-command)
-	      ("C-c m b r" . sbt-run-previous-command))
+	          ("C-c m b c" . sbt-command)
+	          ("C-c m b r" . sbt-run-previous-command))
   :config
   
-  (defun ascander/scala-pop-to-sbt (new-frame)
+  (defun ad|scala-pop-to-sbt (new-frame)
     "Start an SBT REPL for this project, optionally in a NEW-FRAME.
 
 Select the SBT REPL for the current project in a new window. If
@@ -80,12 +66,12 @@ Select the SBT REPL for the current project in a new window. If
       (pop-to-buffer (sbt:buffer-name))))
 
   (with-eval-after-load 'scala-mode
-    (bind-key "C-c m s" #'ascander/scala-pop-to-sbt scala-mode-map))
+    (bind-key "C-c m s" #'ad|scala-pop-to-sbt scala-mode-map))
 
-  ;; Disable smartparens mode in SBT buffers, because it frequently
-  ;; hangs while trying ot find matching delimiters.
+  ;; Disable smartparens mode in SBT buffers, because it frequently hangs while
+  ;; trying to find matching delimiters.
   (add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
-					(smartparens-mode -1)))))
+					               (smartparens-mode -1)))))
 
 (use-package ensime			; enhanced Scala interaction mode for Emacs
   :ensure t
@@ -94,8 +80,8 @@ Select the SBT REPL for the current project in a new window. If
   :bind (:map ensime-mode-map
               ("C-c m E" . ensime-reload)
               ("C-c m x" . ensime-disconnect)
-	      ("<f5>" . ensime-sbt-do-compile)
-	      :map scala-mode-map ("C-c m e" . ensime))
+	          ("<f5>" . ensime-sbt-do-compile)
+	          :map scala-mode-map ("C-c m e" . ensime))
   :config
   ;; Shut up, Ensime
   (validate-setq ensime-startup-notification nil)
@@ -105,7 +91,7 @@ Select the SBT REPL for the current project in a new window. If
 
   ;; Workaround for Yasnippet in `ensime-mode'. See comments in
   ;; https://github.com/ensime/ensime-emacs/issues/474 for discussion.
-  (defun ascander/yas-advise-indent-function (function-symbol)
+  (defun ad|yas-advise-indent-function (function-symbol)
     (eval `(defadvice ,function-symbol (around yas-try-expand-first activate)
              ,(format
                "Try to expand a snippet before point, then call `%s' as usual"
@@ -114,7 +100,7 @@ Select the SBT REPL for the current project in a new window. If
                (unless (and (interactive-p)
                             (yas-expand))
                  ad-do-it)))))
-  (ascander/yas-advise-indent-function 'ensime-company-complete-or-indent))
+  (ad|yas-advise-indent-function 'ensime-company-complete-or-indent))
 
 (provide 'init-scala)
 ;;; init-scala.el ends here

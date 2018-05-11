@@ -58,12 +58,11 @@
   ;; Show refined hunks during diffs
   (set-default 'magit-diff-refine-hunk t)
 
-  ;; Set Magit's repo dirs for `magit-status' from Projectile's known
-  ;; projects. Initialize the `magit-repository-directories'
-  ;; immediately after Projectile was loaded, and update it every time
-  ;; we switched projects, because the new project might have been
-  ;; unknown before
-  (defun ascander/magit-set-repo-dirs-from-projectile ()
+  ;; Set Magit's repo dirs for `magit-status' from Projectile's known projects.
+  ;; Initialize the `magit-repository-directories' immediately after Projectile
+  ;; was loaded, and update it every time we switched projects, because the new
+  ;; project might have been unknown before
+  (defun ad|magit-set-repo-dirs-from-projectile ()
     "Set `magit-repo-dirs' from known Projectile projects."
     (let ((project-dirs (bound-and-true-p projectile-known-projects)))
       ;; Remove trailing slashes from project directories, because
@@ -73,10 +72,10 @@
                      (mapcar #'directory-file-name project-dirs))))
 
   (with-eval-after-load 'projectile
-    (ascander/magit-set-repo-dirs-from-projectile))
+    (ad|magit-set-repo-dirs-from-projectile))
 
   (add-hook 'projectile-switch-project-hook
-            #'ascander/magit-set-repo-dirs-from-projectile)
+            #'ad|magit-set-repo-dirs-from-projectile)
 
   ;; Refresh `magit-status' after saving a buffer
   (add-hook 'after-save-hook #'magit-after-save-refresh-status))

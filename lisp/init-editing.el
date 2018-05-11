@@ -128,13 +128,13 @@
   (add-hook 'after-init-hook 'global-prettify-symbols-mode))
 
 ;; Newline behavior
-;; (defun ascander/newline-at-end-of-line ()
+;; (defun ad|newline-at-end-of-line ()
 ;;   "Move to the end of the line, enter a newline, and reindent."
 ;;   (interactive)
 ;;   (move-end-of-line nil)
 ;;   (newline-and-indent))
 
-;; (global-set-key (kbd "M-<return>") 'ascander/newline-at-end-of-line)
+;; (global-set-key (kbd "M-<return>") 'ad|newline-at-end-of-line)
 
 (use-package autorevert			; auto-revert buffers of changed files
   :ensure t

@@ -34,17 +34,21 @@
                  ivy-initial-inputs-alist nil)
   :delight ivy-mode)
 
+(use-package ivy-xref                   ; Ivy interface to xref
+  :ensure t
+  :init (validate-setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+
 (use-package swiper                     ; An Ivy-powered alternative to isearch
   :ensure t
   :bind (([remap isearch-forward] . swiper))
   :config
   ;; swipe for symbol at point
-  (defun ascander/swiper-at-point (sym)
+  (defun ad|swiper-at-point (sym)
     "Use `swiper' to search for the symbol at point."
     (interactive (list (thing-at-point 'symbol)))
     (swiper sym))
 
-  (bind-key "M-s-/" #'ascander/swiper-at-point ivy-mode-map))
+  (bind-key "M-s-/" #'ad|swiper-at-point ivy-mode-map))
 
 (use-package counsel                    ; Ivy-powered commands
   :ensure t
@@ -64,19 +68,5 @@
   :config
   (counsel-mode 1))
 
-
 (provide 'init-ivy)
 ;;; init-ivy.el ends here
-
-
-;; (when (maybe-require-package 'swiper)
-;;   (after-load 'ivy
-;;     (defun sanityinc/swiper-at-point (sym)
-;;       "Use `swiper' to search for the symbol at point."
-;;       (interactive (list (thing-at-point 'symbol)))
-;;       (swiper sym))
-
-;;     (define-key ivy-mode-map (kbd "M-s /") 'sanityinc/swiper-at-point)))
-
-;; (when (maybe-require-package 'ivy-xref)
-;;   (setq xref-show-xrefs-function 'ivy-xref-show-xrefs))
