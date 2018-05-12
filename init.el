@@ -62,10 +62,11 @@
         ("melpa"        . 0))
       package-pinned-packages
       ;; Pin some packages to melpa, because its version is more recent than melpa-stable
-      '(("all-the-icons-ivy" . "melpa")
-        ("ivy"               . "melpa")
-        ("counsel"           . "melpa")
-        ("swiper"            . "melpa")))
+      '(("powerline"   . "melpa")
+        ("doom-themes" . "melpa")
+        ("ivy"         . "melpa")
+        ("counsel"     . "melpa")
+        ("swiper"      . "melpa")))
 (package-initialize)
 
 ;; Bootstrap `use-package'

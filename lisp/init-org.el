@@ -45,7 +45,7 @@
   ;; TODO task states
   (setq
    org-todo-keywords
-   '((sequence "TODO(t)" "IN-PROGRESS(i)" "WAITING(w@/!)" "|" "DONE(d)" "CANCELED(c@/!)")
+   '((sequence "TODO(t)" "IN-PROGRESS(i)" "NEXT(n)" "WAITING(w@/!)" "|" "DONE(d)" "CANCELED(c@/!)")
      (sequence "IDEA(e)")))
 
   ;; Common TODO tags
