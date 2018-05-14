@@ -59,14 +59,7 @@
       package-archive-priorities
       '(("melpa-stable" . 10)
         ("gnu"          . 5)
-        ("melpa"        . 0))
-      package-pinned-packages
-      ;; Pin some packages to melpa, because its version is more recent than melpa-stable
-      '(("powerline"   . "melpa")
-        ("doom-themes" . "melpa")
-        ("ivy"         . "melpa")
-        ("counsel"     . "melpa")
-        ("swiper"      . "melpa")))
+        ("melpa"        . 0)))
 (package-initialize)
 
 ;; Bootstrap `use-package'
@@ -89,7 +82,11 @@
 ;; Customization, Environment, and OS settings
 ;; --------------------------------------------------------------------------------
 
+<<<<<<< Updated upstream
 (use-package server                     ; Run Emacs in daemon mode
+=======
+(use-package server                     ; Emacs server
+>>>>>>> Stashed changes
   :ensure t
   :init (server-mode)
   :config (unless (server-running-p)
@@ -100,6 +97,7 @@
 
 (use-package paradox                    ; Modern Emacs package menu
   :ensure t
+  :defer t
   :config
   (validate-setq
    paradox-column-width-package 32

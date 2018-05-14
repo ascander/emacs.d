@@ -26,7 +26,7 @@
 
 (use-package ivy                        ; minibuffer completion framework
   :ensure t
-  :defer t
+  :pin melpa
   :config
   (ivy-mode 1)
   (validate-setq ivy-use-virtual-buffers t
@@ -36,10 +36,11 @@
 
 (use-package ivy-xref                   ; Ivy interface to xref
   :ensure t
-  :init (validate-setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  :init (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 
 (use-package swiper                     ; An Ivy-powered alternative to isearch
   :ensure t
+  :pin melpa
   :bind (([remap isearch-forward] . swiper))
   :config
   ;; swipe for symbol at point
@@ -52,6 +53,7 @@
 
 (use-package counsel                    ; Ivy-powered commands
   :ensure t
+  :pin melpa
   :bind (([remap execute-extended-command] . counsel-M-x)
          ([remap find-file]                . counsel-find-file)
          ([remap describe-function]        . counsel-describe-function)

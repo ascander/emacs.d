@@ -53,6 +53,7 @@
 
 (use-package doom-themes                ; DOOM themes
   :ensure t
+  :pin melpa
   :config
   (progn
     (doom-themes-neotree-config)

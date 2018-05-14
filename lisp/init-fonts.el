@@ -35,6 +35,10 @@
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans" :height 130 :weight 'regular)
 
+;; Enable font ligatures if using Emacs mac port
+(when (boundp 'mac-carbon-version-string)
+  (mac-auto-operator-composition-mode))
+
 ;; Global font resizing: https://github.com/kaushalmodi/.emacs.d
 (defun ad|font-size-adj (scale &optional absolute)
   "Adjust font size globally: in all buffers, mode line, echo area, etc.

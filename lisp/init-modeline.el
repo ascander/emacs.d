@@ -30,7 +30,6 @@
   (require 'spaceline-config)
 
   (validate-setq
-   powerline-image-apple-rgb t
    powerline-default-separator 'slant
    powerline-height 20
    spaceline-minor-modes-separator nil
@@ -39,6 +38,11 @@
    spaceline-separator-dir-right '(right . right)
    spaceline-buffer-encoding-abbrev-p nil
    spaceline-buffer-size-p nil)
+
+  ;; Correct for Apple SRGB unless using Emacs mac port
+  (unless (boundp 'mac-carbon-version-string)
+    (setq powerline-image-apple-rgb t))
+
   (spaceline-emacs-theme))
 
 (provide 'init-modeline)

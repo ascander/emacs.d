@@ -24,9 +24,9 @@
 
 ;;; Code:
 
-;; Disable scroll bar, tool bar, and menu bar when not on OS X. Note that disabling the menu bar is
-;; not possible on OS X. Running Emacs in `fullscreen-mode' hides the menu bar, but it cannot be
-;; permanently hidden.
+;; Disable scroll bar, tool bar, and menu bar when not on OS X. Note that
+;; disabling the menu bar is not possible on OS X. Running Emacs in
+;; `fullscreen-mode' hides the menu bar, but it cannot be permanently hidden.
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (when (and (not *is-a-mac*) (fboundp 'menu-bar-mode) (menu-bar-mode -1)))
@@ -62,7 +62,6 @@
 (fset 'yes-or-no-p 'y-or-n-p)                      ; Replace yes/no prompts with y/n
 (fset 'display-startup-echo-area-message #'ignore) ; No startup message in the echo area
 (delete-selection-mode 1)                          ; Replace region when inserting text
-(mouse-avoidance-mode 'banish)                     ; Avoid collision of mouse with point
 (put 'downcase-region 'disabled nil)               ; Enable downcase-region
 (put 'upcase-region 'disabled nil)                 ; Enable upcase-region
 (global-hl-line-mode)                              ; Highlight the current line

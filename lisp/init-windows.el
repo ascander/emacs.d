@@ -29,9 +29,7 @@
   :init (progn
           ;; Kill `suspend-frame'
           (global-set-key (kbd "C-z") nil)
-          (global-set-key (kbd "C-x C-z") nil))
-  :config
-  (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
+          (global-set-key (kbd "C-x C-z") nil)))
 
 (use-package ibuffer                    ; A better buffer list
   :bind (([remap list-buffers] . ibuffer))
@@ -41,9 +39,9 @@
   "
  ^Navigation^ | ^Mark^        | ^Actions^        | ^View^
 -^----------^-+-^----^--------+-^-------^--------+-^----^-------
-  _k_:    ↑   | _m_: mark     | _D_: delete      | _g_: refresh
+  _k_:    ↑  | _m_: mark     | _D_: delete      | _g_: refresh
  _RET_: visit | _u_: unmark   | _S_: save        | _s_: sort
-  _j_:    ↓   | _*_: specific | _a_: all actions | _/_: filter
+  _j_:    ↓  | _*_: specific | _a_: all actions | _/_: filter
 -^----------^-+-^----^--------+-^-------^--------+-^----^-------
 "
   ("j" ibuffer-forward-line)
