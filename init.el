@@ -82,11 +82,7 @@
 ;; Customization, Environment, and OS settings
 ;; --------------------------------------------------------------------------------
 
-<<<<<<< Updated upstream
-(use-package server                     ; Run Emacs in daemon mode
-=======
 (use-package server                     ; Emacs server
->>>>>>> Stashed changes
   :ensure t
   :init (server-mode)
   :config (unless (server-running-p)
