@@ -66,6 +66,10 @@
           (add-hook hook #'whitespace-cleanup-mode))
   :delight whitespace-cleanup-mode)
 
+(use-package eldoc
+  :ensure t
+  :delight eldoc-mode)
+
 (use-package yasnippet
   :ensure t
   :defer t
