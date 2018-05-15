@@ -101,19 +101,6 @@
    paradox-execute-asynchronously t)
   (remove-hook 'paradox-after-execution-functions #'paradox--report-buffer-print))
 
-;; Location of the `custom.el' file.
-(defconst *custom-file* (locate-user-emacs-file "custom.el")
-  "File used to store settings from Customization UI.")
-
-(use-package cus-edit                   ; Customize interface
-  :init (load *custom-file* 'no-error 'no-message)
-  :config
-  (validate-setq custom-file *custom-file*
-                 custom-buffer-done-kill nil
-                 custom-buffer-verbose-help nil
-                 custom-unlispify-tag-names nil
-                 custom-unlispify-menu-entries nil))
-
 ;; Time execution of initialization
 (add-hook 'after-init-hook (lambda () (message "Time to load init file: %s"
                                                (emacs-init-time))))

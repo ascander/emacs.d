@@ -83,6 +83,19 @@
   (add-to-list 'recentf-exclude no-littering-etc-directory)
   (add-to-list 'recentf-exclude no-littering-var-directory))
 
+(use-package cus-edit                   ; Customize interface
+  :config
+  ;; Put `custom.el' in its place
+  (validate-setq custom-file
+                 (expand-file-name "custom.el" no-littering-etc-directory))
+  ;; Miscellaneous other settings
+  (validate-setq custom-buffer-done-kill nil
+                 custom-buffer-verbose-help nil
+                 custom-unlispify-tag-names nil
+                 custom-unlispify-menu-entries nil)
+
+  (load custom-file 'noerror 'nowarning))
+
 (use-package neotree                    ; Tree view of projects
   :ensure t
   :bind (("C-c f t" . neotree-toggle))
