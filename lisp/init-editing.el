@@ -41,7 +41,7 @@
   
   ;; Helpful wrapping commands
   (sp-pair "(" ")"   :wrap "C-(")
-  (sp-pair "[" "]"   :wrap "M-[")         ;  "C-[" sends ESC
+  (sp-pair "[" "]"   :wrap "M-s-[")     ;  "C-[" sends ESC
   (sp-pair "{" "}"   :wrap "C-{")
   (sp-pair "\"" "\"" :wrap "C-\""))
 

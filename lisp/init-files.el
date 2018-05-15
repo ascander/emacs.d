@@ -1,7 +1,6 @@
 ;;; init-files.el --- File handling settings         -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018  Ascander Dost
-
 ;; Author: Ascander Dost <dostinthemachine@gmail.com>
 ;; Keywords: convenience
 
@@ -24,11 +23,6 @@
 
 ;;; Code:
 
-;; Keep backup and auto-save files out of the way
-(validate-setq
- backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
- auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
-
 ;; Delete files to the Trash
 (validate-setq delete-by-moving-to-trash t)
 
@@ -44,6 +38,24 @@
 (when (display-graphic-p)
   (validate-setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 
+(use-package no-littering
+  :ensure t
+  :config
+  ;; Versioning settings for old files
+  (validate-setq
+   create-lockfiles nil              ; don't use lockfiles
+   delete-old-versions t             ; delete excessively old versions
+   kept-new-versions 4               ; keep this many newest versions
+   kept-old-versions 2               ; keep this many old versions
+   version-control t)                ; use version control
+
+  ;; Keep backup and auto-save files out of the way
+  (validate-setq
+   backup-directory-alist
+   `((".*" . ,(no-littering-expand-var-file-name "backup/")))
+   auto-save-file-name-transforms
+   `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+
 (use-package ignoramus			; Ignore uninteresting files everywhere
   :ensure t
   :config
@@ -58,14 +70,18 @@
   :init (recentf-mode)
   :config
   (validate-setq recentf-max-saved-items 200
-		 recentf-max-menu-items 15
-		 ;; Cleanup recent files only when Emacs is idle, but
-		 ;; not when the mode is enabled, because that slows
-		 ;; down Emacs unnecessarily.
-		 recentf-auto-cleanup 300
-		 recentf-exclude (list "/\\.git/.*\\'" ; git contents
-				       "/elpa/.*\\'"   ; package files
-				       #'ignoramus-boring-p)))
+         recentf-max-menu-items 15
+         ;; Cleanup recent files only when Emacs is idle, but
+         ;; not when the mode is enabled, because that slows
+         ;; down Emacs unnecessarily.
+         recentf-auto-cleanup 300
+         recentf-exclude (list "/\\.git/.*\\'" ; git contents
+                       "/elpa/.*\\'"   ; package files
+                       #'ignoramus-boring-p))
+
+  ;; Add `no-littering' directories to recentf
+  (add-to-list 'recentf-exclude no-littering-etc-directory)
+  (add-to-list 'recentf-exclude no-littering-var-directory))
 
 (use-package neotree                    ; Tree view of projects
   :ensure t
