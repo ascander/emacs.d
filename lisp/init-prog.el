@@ -71,14 +71,15 @@
   :delight eldoc-mode)
 
 (use-package yasnippet
-  :ensure t
-  :defer t
-  :delight yas-minor-mode " ⓨ"
-  :config
-  (use-package yasnippet-snippets :disabled t :ensure t :defer t)
-  (add-hook 'prog-mode-hook #'yas-minor-mode)
+  :commands (yas-reload-all yas-minor-mode)
+  :delight yas-minor-mode " ⓨ "
+  :init
+  (add-hook 'prog-mode-hook
+            (lambda () (yas-reload-all)(yas-minor-mode))))
 
-  (yas-reload-all))
+(use-package yasnippet-snippets
+  :ensure t
+  :after yasnippet)
 
 (provide 'init-prog)
 ;;; init-prog.el ends here
