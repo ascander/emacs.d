@@ -24,15 +24,15 @@
 
 ;;; Code:
 
-;; Keybindings
+;; Set modifier Keys
 (when *is-a-mac*
-  (validate-setq mac-option-modifier 'super        ; option is harder to reach
-		 mac-command-modifier 'meta        ; so ⌘ is the correct meta
-		 mac-right-command-modifier 'none  ; let os x use this
-                 mac-right-option-modifier 'none   ; for inputting utf-8 chars
-		 mac-function-modifier 'hyper))    ; in case you ever need this
+  (validate-setq
+   mac-command-modifier 'meta           ; ⌘ is easiest to reach
+   mac-option-modifier 'super           ; option is harder to reach
+   mac-control-modifier 'control        ; this is tied to caps lock
+   mac-function-modifier nil))          ; let OS X use this
 
-(use-package exec-path-from-shell
+(use-package exec-path-from-shell       ; Fix $PATH on GUI Emacs
   :ensure t
   :if (and *is-a-mac* (display-graphic-p))
   :config
