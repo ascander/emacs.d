@@ -68,5 +68,11 @@
 (line-number-mode)                                 ; Display line number in the mode line
 (column-number-mode)                               ; Display column number in the mode line
 
+;; Make the Emacs shell ('M-x shell') interactive, and disable echoing each
+;; terminal command as it's entered on the command line.
+(setq shell-command-switch "-ic")
+(add-hook 'comint-mode-hook
+          '(lambda () (setq comint-process-echoes t))) ;
+
 (provide 'init-defaults)
 ;;; init-defaults.el ends here

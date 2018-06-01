@@ -34,14 +34,18 @@
   :config
   ;; Miscellaneous preferences
   (validate-setq
-   org-src-fontify-natively t
-   org-log-done 'time
-   org-use-fast-todo-selection t
-   org-startup-folded nil
-   org-startup-truncated nil
-   org-tags-column 80
-   org-enable-priority-commands nil
-   org-reverse-note-order t)
+   org-src-fontify-natively t              ; fontify text in code blocks
+   org-log-done 'time                      ; timestamp done states
+   org-use-fast-todo-selection t           ; fast-select TODO states
+   org-startup-folded nil                  ; don't start up folded
+   org-startup-truncated nil               ; don't start up truncated
+   org-tags-column 80                      ; indent tags to here
+   org-enable-priority-commands nil        ; disable priority commands
+   org-reverse-note-order t                ; store new notes at the beginning
+   )
+
+  ;; Open org agenda in current window
+  (setq org-agenda-window-setup 'current-window)
 
   ;; TODO task states
   (setq

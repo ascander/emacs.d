@@ -37,12 +37,8 @@
   :if (and *is-a-mac* (display-graphic-p))
   :config
   (progn
-    (when (string-match-p "/zsh$" (getenv "SHELL"))
-      ;; Use a non-interactive login shell. This loads environment
-      ;; variables from `.zprofile'.
-      (validate-setq exec-path-from-shell-arguments '("-l")))
-
-    (validate-setq exec-path-from-shell-variables
+    (validate-setq exec-path-from-shell-check-startup-files nil
+                   exec-path-from-shell-variables
                    '("JAVA_OPTS"        ; Java options
                      "SBT_OPTS"         ; SBT options
                      "EMAIL"            ; My email address
@@ -57,7 +53,8 @@
     (exec-path-from-shell-initialize)
 
     ;; Tell Emacs who I am
-    (setq user-email-address (getenv "EMAIL"))
+    (setq user-email-address (getenv "EMAIL")
+          user-full-name (getenv "FULLNAME"))
 
     ;; Re-initialize the `info-directory-list' from $INFOPATH. Since
     ;; `package.el' already initializes info, we need to explicitly
