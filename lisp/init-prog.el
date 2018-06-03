@@ -75,7 +75,7 @@
   :delight yas-minor-mode " ⓨ "
   :init
   (add-hook 'prog-mode-hook
-            (lambda () (yas-reload-all)(yas-minor-mode))))
+            (lambda () (yas-minor-mode)(yas-reload-all))))
 
 (use-package yasnippet-snippets
   :ensure t
