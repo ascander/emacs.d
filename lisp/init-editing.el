@@ -26,7 +26,7 @@
 
 (use-package smartparens                ; Dealing with pairs in Emacs
   :ensure t
-  :delight smartparens-mode " ⓟ "
+  :delight smartparens-mode " ⓟ"
   :init
   (smartparens-global-mode t)
   (show-smartparens-global-mode t)

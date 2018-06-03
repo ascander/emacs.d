@@ -72,7 +72,7 @@
 
 (use-package yasnippet
   :commands (yas-reload-all yas-minor-mode)
-  :delight yas-minor-mode " ⓨ "
+  :delight yas-minor-mode " ⓨ"
   :init
   (add-hook 'prog-mode-hook
             (lambda () (yas-minor-mode)(yas-reload-all))))
