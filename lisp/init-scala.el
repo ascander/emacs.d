@@ -49,7 +49,7 @@
 	          ("C-c m b c" . sbt-command)
 	          ("C-c m b r" . sbt-run-previous-command))
   :config
-  
+
   (defun ad|scala-pop-to-sbt (new-frame)
     "Start an SBT REPL for this project, optionally in a NEW-FRAME.
 
@@ -85,9 +85,31 @@ Select the SBT REPL for the current project in a new window. If
   :config
   ;; Shut up, Ensime
   (validate-setq ensime-startup-notification nil)
-  
+
   ;; Enable Ensime for all Scala buffers
   (add-hook 'scala-mode-hook #'ensime-mode)
+
+  ;; Redefine semantic highlighting faces; this is because things like implicit
+  ;; conversion use both underlining and an indication in the gutter; only one
+  ;; is needed. Also, italics are for the weak-minded, so don't use them here,
+  ;; or anywhere else if you can help it.
+  ;;
+  ;; See: https://github.com/ensime/ensime-server/issues/1036
+  (setq
+   ensime-sem-high-faces
+   '((var                . scala-font-lock:var-face)
+     (val                . (:inherit font-lock-constant-face))
+     (varField           . scala-font-lock:var-face)
+     (valField           . (:inherit font-lock-constant-face))
+     (functionCall       . font-lock-function-name-face)
+     (operator           . font-lock-keyword-face)
+     (class              . font-lock-type-face)
+     (trait              .  (:inherit font-lock-type-face))
+     (object             . font-lock-constant-face)
+     (package            . font-lock-preprocessor-face)
+     (implicitConversion . nil)
+     (implicitParams     . nil)
+     (deprecated         . (:strike-through "dark gray"))))
 
   ;; Workaround for Yasnippet in `ensime-mode'. See comments in
   ;; https://github.com/ensime/ensime-emacs/issues/474 for discussion.
@@ -104,5 +126,3 @@ Select the SBT REPL for the current project in a new window. If
 
 (provide 'init-scala)
 ;;; init-scala.el ends here
-
-
