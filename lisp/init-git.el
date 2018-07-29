@@ -44,7 +44,7 @@
   :bind (("C-c g c" . magit-clone)
          ("C-c g s" . magit-status)
          ("C-c g b" . magit-blame)
-         ("C-c g l" . magit-log-buffer-line)
+         ;; ("C-c g l" . magit-log-buffer-line)
          ("C-c g p" . magit-pull))
   :config
   (validate-setq

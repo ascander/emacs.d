@@ -131,6 +131,7 @@
 (use-package init-prog)
 (use-package init-company)
 (use-package init-scala)
+(use-package init-markdown)
 
 (provide 'init)
 ;;; init.el ends here

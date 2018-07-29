@@ -48,5 +48,8 @@
      ((nil . "magit-")                    . (nil . "git-"))
      ((nil . "\\`hydra-\\(.+\\)/body\\'") . (nil . "=|\\1")))))
 
+(use-package free-keys                  ; Show unused keys
+  :defer t)
+
 (provide 'init-keys)
 ;;; init-keys.el ends here

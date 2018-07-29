@@ -24,8 +24,12 @@
 
 ;;; Code:
 
+(global-set-key (kbd "s-p") 'previous-buffer)
+(global-set-key (kbd "s-n") 'next-buffer)
+(global-set-key (kbd "s-k") 'kill-this-buffer)
+
 (use-package frame                      ; Frames
-  :bind (("M-s-f" . toggle-frame-fullscreen))
+  :bind (("C-S-f" . toggle-frame-fullscreen))
   :init (progn
           ;; Kill `suspend-frame'
           (global-set-key (kbd "C-z") nil)

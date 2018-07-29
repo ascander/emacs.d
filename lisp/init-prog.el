@@ -70,7 +70,11 @@
   :ensure t
   :delight eldoc-mode)
 
+(use-package deadgrep                   ; Fast, beautiful text search
+  :bind ("s-g" . deadgrep))
+
 (use-package yasnippet
+  :ensure t
   :commands (yas-reload-all yas-minor-mode)
   :delight yas-minor-mode " ⓨ"
   :init

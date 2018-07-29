@@ -42,6 +42,23 @@
   :after projectile
   :bind (("C-c p G" . counsel-projectile-rg))
   :config
+
+  ;; Open project root in 'dired' instead of the default action when running
+  ;; `counsel-projectile-switch-project'. Taken from:
+  ;; https://github.com/ericdanan/counsel-projectile/issues/58#issuecomment-387752675
+  (defun ad|counsel-projectile-switch-project-action-dired (project)
+    "Open 'dired' at the root of a project."
+    (let ((projectile-switch-project-action
+           (lambda ()
+             (projectile-dired))))
+      (counsel-projectile-switch-project-by-name project)))
+
+  (counsel-projectile-modify-action
+   'counsel-projectile-switch-project-action
+   '((add ("." ad|counsel-projectile-switch-project-action-dired
+           "open 'dired' at the root of the project")
+          1)))
+
   (counsel-projectile-mode))
 
 (provide 'init-projectile)

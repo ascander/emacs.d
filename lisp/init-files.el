@@ -23,6 +23,20 @@
 
 ;;; Code:
 
+;; Save all open file-visiting buffers, without prompting. Bind this to the
+;; default 'C-x s' since you should probably save all buffers if you're saving
+;; one of them. Additionally, adds a hook to save all on loss of focus. Taken
+;; from: https://www.bytedude.com/useful-emacs-shortcuts/
+(defun ad|save-open-buffers ()
+  "Save all open file-visiting buffers without prompting. This
+basically runs 'C-x s' on all open buffers."
+  (interactive)
+  (save-some-buffers t))
+
+(global-set-key (kbd "C-x s") 'ad|save-open-buffers)
+
+(add-hook 'focus-out-hook 'ad|save-open-buffers)
+
 ;; Delete files to the Trash
 (validate-setq delete-by-moving-to-trash t)
 
@@ -96,8 +110,9 @@
 
   (load custom-file 'noerror 'nowarning))
 
+;; Consider switching to 'dired' for this kind of thing.
 (use-package neotree                    ; Tree view of projects
-  :ensure t
+  :disabled t
   :bind (("C-c f t" . neotree-toggle))
   :config
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow)

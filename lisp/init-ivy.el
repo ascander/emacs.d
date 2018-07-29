@@ -25,21 +25,47 @@
 ;;; Code:
 
 (use-package ivy                        ; minibuffer completion framework
-  :ensure t
+  :defer 0.1
   :pin melpa
+  :delight ivy-mode
+  :bind (("C-c C-r" . ivy-resume)
+         ("s-j"     . ivy-switch-buffer)
+         ("C-x B"   . ivy-switch-buffer-other-window))
   :config
-  (ivy-mode 1)
   (validate-setq ivy-use-virtual-buffers t
                  ivy-count-format ""
                  ivy-initial-inputs-alist nil)
-  :delight ivy-mode)
+  (ivy-mode))
 
-(use-package ivy-xref                   ; Ivy interface to xref
+(use-package counsel                    ; Ivy-powered commands
   :ensure t
-  :init (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  :after ivy
+  :pin melpa
+  :bind (([remap execute-extended-command] . counsel-M-x)
+         ([remap find-file]                . counsel-find-file)
+         ([remap describe-function]        . counsel-describe-function)
+         ([remap describe-variable]        . counsel-describe-variable)
+         ([remap info-lookup-symbol]       . counsel-info-lookup-symbol)
+         ([remap completion-at-point]      . counsel-company)
+         ([remap org-goto]                 . counsel-org-goto)
+         ("C-c f L"                        . counsel-load-library)
+         ("C-c f r"                        . counsel-recentf)
+         ("C-c i 8"                        . counsel-unicode-char)
+         ("C-c r g"                        . counsel-rg)
+         ("C-c j t"                        . counsel-imenu)
+         ("C-c g L"                        . counsel-git-log))
+  :delight counsel-mode
+  :config
+  ;; Settings for a counsel powered `org-goto' command, taken from:
+  ;; https://github.com/abo-abo/swiper/pull/1005
+  (setq counsel-org-goto-display-style 'path)
+  (setq counsel-org-goto-separator " ➨ ")
+  (setq counsel-org-goto-face-style 'org)
+  (counsel-mode))
 
 (use-package swiper                     ; An Ivy-powered alternative to isearch
   :ensure t
+  :after ivy
   :pin melpa
   :bind (([remap isearch-forward] . swiper))
   :config
@@ -51,24 +77,22 @@
 
   (bind-key "M-s-/" #'ad|swiper-at-point ivy-mode-map))
 
-(use-package counsel                    ; Ivy-powered commands
+(use-package ivy-xref                   ; Ivy interface to xref
   :ensure t
-  :pin melpa
-  :bind (([remap execute-extended-command] . counsel-M-x)
-         ([remap find-file]                . counsel-find-file)
-         ([remap describe-function]        . counsel-describe-function)
-         ([remap describe-variable]        . counsel-describe-variable)
-         ([remap info-lookup-symbol]       . counsel-info-lookup-symbol)
-         ([remap completion-at-point]      . counsel-company)
-         ("C-c f L"                        . counsel-load-library)
-         ("C-c f r"                        . counsel-recentf)
-         ("C-c i 8"                        . counsel-unicode-char)
-         ("C-c r g"                        . counsel-rg)
-         ("C-c j t"                        . counsel-imenu)
-         ("C-c g L"                        . counsel-git-log))
-  :delight counsel-mode
+  :init (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+
+(use-package ivy-rich                   ; More friendly interface for buffer switching
+  :ensure t
+  :after ivy
   :config
-  (counsel-mode 1))
+  ;; Align virtual buffers, and abbreviate paths
+  (setq ivy-virtual-abbreviate 'full
+        ivy-rich-path-style 'abbrev
+        ivy-rich-switch-buffer-align-virtual-buffer t)
+
+  (ivy-set-display-transformer 'ivy-switch-buffer
+                               'ivy-rich-switch-buffer-transformer)
+  (ivy-rich-mode))
 
 (provide 'init-ivy)
 ;;; init-ivy.el ends here
