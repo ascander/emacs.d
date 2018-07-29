@@ -25,25 +25,6 @@
 ;;; Code:
 (when *is-a-mac*
   ;; Modifier keys
-  ;;
-  ;; These settings are used in conjunction with remapping the modifier keys in
-  ;; 'System Preferences' for OS X as follows:
-  ;;
-  ;;   Caps Lock     => Command
-  ;;   Control       => Command
-  ;;   Option        => Option
-  ;;   Command       => Control
-  ;;   Function (fn) => Function (fn)
-  ;;
-  ;; The combined effect is optimized for Emacs usage, at the expense of some
-  ;; unlearning of OS X default keybindings. We get:
-  ;;
-  ;;   Command   => Control
-  ;;   Option    => Meta
-  ;;   Control   => Super
-  ;;   Caps Lock => Super
-  ;;
-  ;; Note that 'Hyper' is not used. It's important to have limits.
   (setq mac-command-modifier 'control
         mac-option-modifier 'meta
         mac-control-modifier 'super
