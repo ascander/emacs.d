@@ -30,7 +30,7 @@
   "Default font size, in points.")
 
 (set-face-attribute 'default nil
-                    :font "Iosevka Type:weight=Thin" :height 120)
+                    :family "Iosevka Type" :height 120)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans" :height 130 :weight 'regular)

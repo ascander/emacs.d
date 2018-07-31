@@ -24,6 +24,10 @@
 
 ;;; Code:
 
+(use-package powerline
+  :ensure t
+  :pin melpa)
+
 (use-package spaceline
   :ensure t
   :config

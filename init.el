@@ -105,6 +105,13 @@
 (add-hook 'after-init-hook (lambda () (message "Time to load init file: %s"
                                                (emacs-init-time))))
 
+(use-package restart-emacs              ; Restart Emacs from inside Emacs
+  :defer t)
+
+(use-package esup                       ; Profile Emacs startup from inside Emacs
+  :disabled t
+  :defer t)
+
 ;; -----------------------------------------------------------------------------
 ;; Initialize specific features
 ;; -----------------------------------------------------------------------------
