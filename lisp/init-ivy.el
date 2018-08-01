@@ -25,7 +25,7 @@
 ;;; Code:
 
 (use-package ivy                        ; minibuffer completion framework
-  :defer 0.1
+  :ensure t
   :pin melpa
   :delight ivy-mode
   :bind (("C-c C-r" . ivy-resume)
