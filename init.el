@@ -20,13 +20,6 @@
 
 ;;; Commentary:
 
-;; This configuration assumes Emacs 26 or higher.
-;;
-;; Making changes/testing:
-;;
-;; - Use M-x esup to profile startup time
-;; - Use M-x restart-emacs to restart after making changes
-
 ;;; Code:
 
 ;; TODO: move this to a more reasonable place
@@ -76,8 +69,7 @@
 
 (use-package exec-path-from-shell       ; Fix $PATH on GUI Emacs (on Macs)
   :ensure t
-  :when (and (memq window-system '(mac ns))
-             (display-graphic-p))
+  :when (memq window-system '(mac ns))
   :config
   ;; Don't check for environment variables in the wrong shell startup
   ;; file, and load some specific environment variables
@@ -92,81 +84,5 @@
           ))
   (exec-path-from-shell-initialize))
 
-;; ;; -----------------------------------------------------------------------------
-;; ;; Customization, Environment, and OS settings
-;; ;; -----------------------------------------------------------------------------
-
-;; (use-package server                     ; Emacs server
-;;   :ensure t
-;;   :init (server-mode)
-;;   :config (unless (server-running-p)
-;;             (server-start)))
-
-;; (use-package validate                   ; Validate options
-;;   :ensure t)
-
-;; (use-package paradox                    ; Modern Emacs package menu
-;;   :ensure t
-;;   :defer t
-;;   :config
-;;   (validate-setq
-;;    paradox-column-width-package 32
-;;    paradox-column-width-version 18
-;;    paradox-execute-asynchronously t)
-;;   (remove-hook 'paradox-after-execution-functions #'paradox--report-buffer-print))
-
-;; (use-package restart-emacs              ; Restart Emacs from inside Emacs
-;;   :defer t)
-
-;; (use-package esup                       ; Profile Emacs startup from inside Emacs
-;;   :disabled t
-;;   :defer t)
-
-;; ;; -----------------------------------------------------------------------------
-;; ;; Initialize specific features
-;; ;; -----------------------------------------------------------------------------
-
-;; ;; Add files in my `.emacs.d/lisp' directory
-;; (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-
-;; (use-package init-defaults)
-;; (use-package init-osx)
-;; (use-package init-ui)
-;; (use-package init-modeline)
-;; (use-package init-themes)
-;; (use-package init-fonts)
-;; (use-package init-files)
-;; (use-package init-dired)
-;; (use-package init-projectile)
-;; (use-package init-org)
-;; (use-package init-keys)
-;; (use-package init-editing)
-;; (use-package init-windows)
-;; (use-package init-ivy)
-;; (use-package init-hydra)
-;; (use-package init-git)
-;; (use-package init-prog)
-;; (use-package init-company)
-;; (use-package init-scala)
-;; (use-package init-markdown)
-
 (provide 'init)
 ;;; init.el ends here
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages (quote (exec-path-from-shell use-package))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-;; Local Variables:
-;; indent-tabs-mode: nil
-;; coding: utf-8
-;; no-byte-compile: t
-;; End:
