@@ -25,10 +25,14 @@
 ;;; Code:
 (when *is-a-mac*
   ;; Modifier keys
-  (setq mac-command-modifier 'control
-        mac-option-modifier 'meta
-        mac-control-modifier 'super
-        mac-function-modifier 'none)
+  (setq mac-command-modifier 'meta       ; Command (⌘) is Meta
+        mac-right-command-modifier 'left ; On both sides
+        mac-option-modifier 'super       ; Alt/Option (⌥) is Super
+        mac-right-option-modifier 'none  ; But not on the right (for accented characters)
+        mac-control-modifier 'control    ; The OS requires this to be the same as Caps Lock
+        mac-right-control-modifier 'left ; Keep it on both sides
+        mac-function-modifier 'none      ; Leave Function (Fn) for OS X commands
+        )
   ;; Disable passing commands to the system if using Emacs mac port. This
   ;; prevents 'Cmd-h' from hiding the app, instead of sending 'C-h'.
   (if (boundp 'mac-carbon-version-string)
