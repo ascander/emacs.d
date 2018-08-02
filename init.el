@@ -171,15 +171,15 @@
   :config
   (load-theme 'solarized-dark 'no-confirm))
 
-(use-package dimmer
+(use-package dimmer                     ; Highlight the current buffer
   :ensure t
   :init
   (add-hook 'after-init-hook #'dimmer-mode))
 
-(use-package stripe-buffer
+(use-package stripe-buffer              ; Striped backgorund in `dired'
   :ensure t
   :init
-  (add-hook 'dired-mode-hook #'stripe-buffer-mode))
+  (add-hook 'dired-mode-hook #'turn-on-stripe-buffer-mode))
 
 (provide 'init)
 ;;; init.el ends here
