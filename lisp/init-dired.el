@@ -90,6 +90,8 @@ T - tag prefix
 
   (bind-key "." #'hydra-dired/body dired-mode-map)
 
+  (add-hook 'dired-mode-hook (lambda () (hl-line-mode -1)))
+  
   ;; If on a GNU system, or we have GNU 'ls' available, add some more
   ;; switches: '--group-directories-first' lists directories before
   ;; files, and '-v' sorts numbers in file names correctly.
@@ -117,7 +119,7 @@ T - tag prefix
 
 (use-package stripe-buffer		; add stripes to a buffer
   :ensure t
-  :init (add-hook 'dired-mode-hook #'stripe-buffer-mode))
+  :init (add-hook 'dired-mode-hook #'stripe-listify-buffer))
 
 (provide 'init-dired)
 ;;; init-dired.el ends here
