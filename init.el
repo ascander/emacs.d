@@ -65,24 +65,121 @@
 (eval-when-compile
   (require 'use-package))
 
-;;; Environment settings
+;;; OS X settings
 
-(use-package exec-path-from-shell       ; Fix $PATH on GUI Emacs (on Macs)
+;; Modifier keys
+(when (eq system-type 'darwin)
+      (setq mac-command-modifier 'meta
+            mac-option-modifier 'super
+            mac-function-modifier 'none))
+
+(use-package osx-trash
   :ensure t
-  :when (memq window-system '(mac ns))
+  :if (eq system-type 'darwin)
   :config
-  ;; Don't check for environment variables in the wrong shell startup
-  ;; file, and load some specific environment variables
-  (setq exec-path-from-shell-check-startup-files nil
-        exec-path-from-shell-variables
-        '("JAVA_OPTS"                   ; Java options
-          "SBT_OPTS"                    ; SBT options
-          "PATH"                        ; Commands
-          "MANPATH"                     ; Manpages
-          "LANG"                        ; Language
-          "LC_CTYPE"                    ; Character set
-          ))
-  (exec-path-from-shell-initialize))
+  (osx-trash-setup))
+
+;;; Customization and packages
+
+(use-package cus-edit                   ; The Customization UI
+  :defer t
+  :config
+  (setq custom-file (locate-user-emacs-file "custom.el"))
+  (load custom-file 'no-error 'no-message))
+
+;;; Basic UI settings
+
+;; Disable tool-bar, scroll-bar, and menu-bar. The menu bar cannot be
+;; removed on OS X, so only remove it if you're not on a Mac.
+(when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+(when (and (not (eq system-type 'darwin))
+           (fboundp 'menu-bar-mode))
+  (menu-bar-mode -1))
+
+;; Set some sensible defaults
+(setq-default
+ blink-cursor-mode -1                ; No blinking
+ ring-bell-function #'ignore         ; No ringing
+ inhibit-startup-screen t            ; No startup screen
+ initial-scratch-message ""          ; No message in the scratch buffer
+ cursor-in-non-selected-windows nil  ; Hide the cursor in inactive windows
+ delete-by-moving-to-trash t         ; Delete files to trash
+ fill-column 80                      ; Set width for modern displays
+ help-window-select t                ; Focus new help windows when opened
+ indent-tabs-mode nil                ; Stop using tabs to indent
+ tab-width 4                         ; But set their width properly
+ left-margin-width 0                 ; No left margin
+ right-margin-width 0                ; No right margin
+ recenter-positions '(12 top bottom) ; Set re-centering positions
+ scroll-conservatively 1000          ; Never recenter point while scrolling
+ select-enable-clipboard t           ; Merge system's and Emacs' clipboard
+ sentence-end-double-space nil       ; Single space after a sentence end
+ show-trailing-whitespace nil        ; Don't display trailing whitespaces by default
+ split-height-threshold nil          ; Disable vertical window splitting
+ split-width-threshold nil           ; Disable horizontal window splitting
+ uniquify-buffer-name-style 'forward ; Uniquify buffer names correctly
+ window-combination-resize t)        ; Resize windows proportionally
+
+;; Miscellaneous settings
+(fset 'yes-or-no-p 'y-or-n-p)                      ; Replace yes/no prompts with y/n
+(fset 'display-startup-echo-area-message #'ignore) ; No startup message in the echo area
+(delete-selection-mode 1)                          ; Replace region when inserting text
+(put 'downcase-region 'disabled nil)               ; Enable downcase-region
+(put 'upcase-region 'disabled nil)                 ; Enable upcase-region
+(global-hl-line-mode)                              ; Highlight the current line
+(line-number-mode)                                 ; Display line number in the mode line
+(column-number-mode)                               ; Display column number in the mode line
+
+;; Make the Emacs shell ('M-x shell') interactive, and disable echoing each
+;; terminal command as it's entered on the command line.
+(setq shell-command-switch "-ic")
+(add-hook 'comint-mode-hook
+          '(lambda () (setq comint-process-echoes t)))
+
+;;; Fonts
+
+(set-face-attribute 'default nil
+                    :family "Iosevka Type"
+                    :height 120
+                    :weight 'regular)
+
+(set-face-attribute 'variable-pitch nil
+                    :family "Fira Sans"
+                    :height 140
+                    :weight 'regular)
+
+;;; Color theme and looks
+
+(use-package solarized-theme            ; I always come back to you
+  :ensure t
+  :init
+  ;; Basic settings - disprefer bold and italics, use high contrast
+  (setq x-underline-at-descent-line t   ; Fixes the box around the mode line
+        solarized-use-variable-pitch nil
+        solarized-use-less-bold t
+        solarized-use-more-italic nil
+        solarized-distinct-doc-face t
+        solarized-emphasize-indicators nil
+        solarized-high-contrast-mode-line t)
+  ;; Avoid all font size changes
+  (setq solarized-height-minus-1 1.0
+        solarized-height-plus-1 1.0
+        solarized-height-plus-2 1.0
+        solarized-height-plus-3 1.0
+        solarized-height-plus-4 1.0)
+  :config
+  (load-theme 'solarized-dark 'no-confirm))
+
+(use-package dimmer
+  :ensure t
+  :init
+  (add-hook 'after-init-hook #'dimmer-mode))
+
+(use-package stripe-buffer
+  :ensure t
+  :init
+  (add-hook 'dired-mode-hook #'stripe-buffer-mode))
 
 (provide 'init)
 ;;; init.el ends here
