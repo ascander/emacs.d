@@ -1,54 +1,53 @@
-# Elisp byte code
+# Created by https://www.gitignore.io/api/emacs
+
+### Emacs ###
+# -*- mode: gitignore; -*-
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
 *.elc
+auto-save-list
+tramp
+.\#*
 
-# Customization settings. We ignore these because they are automatically
-# generated, and sometimes contain “local” information (e.g. safe themes,
-# automatically installed packages). And all of my real settings are in init.el
-# anyway
-/etc/custom.el
+# Org-mode
+.org-id-locations
+*_archive
 
-# Installed packages
+# flymake-mode
+*_flymake.*
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+# elpa packages
 /elpa/
 
-# Recovery and backup directories
-/auto-save-list/
-/.backup/
+# reftex files
+*.rel
 
-# Cache files and settings for packages
-.#*
-.org-id-locations
-.historian
-recentf~
-network-security.data
-/tutorial/
-/.emacs.desktop*
-/.mc-lists.el
-/smex-items
-/bookmarks
-/history
-/ido.last
-/places
-/projectile-bookmarks.eld
-/projectile.cache
-/recentf
-/semanticdb/
-/session.*
-/tramp
-/tramp-auto-save
-/url/
-/var/
-/abbrev_defs
-/cider-repl-history
-/eww-bookmarks
-/.sx
-/eshell/
-/company-statistics-cache.el
-/fixes/
-/helm-adaptive-history
-/el-get/
-/site-lisp/
-/request/
-/.cask/
-/autosave/
-/backup/
-/ensime/
+# AUCTeX auto folder
+/auto/
+
+# cask packages
+.cask/
+dist/
+
+# Flycheck
+flycheck_*.el
+
+# server auth directory
+/server/
+
+# projectiles files
+.projectile
+
+# directory configuration
+.dir-locals.el
+
+# customization file
+custom.el
+
+# End of https://www.gitignore.io/api/emacs
