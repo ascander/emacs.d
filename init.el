@@ -181,5 +181,27 @@
   :init
   (add-hook 'dired-mode-hook #'turn-on-stripe-buffer-mode))
 
+;;; Package manager and init development
+
+(use-package paradox                    ; Modernizing Emacs' package menu
+  :defer t
+  :init
+  (defconst *paradox-github-token-file*
+    (concat user-emacs-directory "site-lisp/" "paradox-token.el")
+    "Location of the `paradox-github-token' setting for Paradox.")
+  :config
+  ;; Basic settings
+  (setq paradox-execute-asynchronously t
+        paradox-column-width-package 32)
+  
+  (load *paradox-github-token-file* :noerror :nomessage)
+  (paradox-enable))
+
+;;; File handling
+
+;; Keep auto-save and backup files out of the way
+(setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
+      auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+
 (provide 'init)
 ;;; init.el ends here
