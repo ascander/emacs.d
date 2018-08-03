@@ -25,12 +25,14 @@
 ;;; Code:
 (when *is-a-mac*
   ;; Modifier keys
+  ;;
+  ;; Note: Caps Lock (⇪) is Control in this setup. This is currently mapped via
+  ;; OS X (in System Preferences). A better setup would be to map Caps Lock to
+  ;; Control via Karabiner, and to map Left/Right Control (^) to Hyper.
+  ;;
   (setq mac-command-modifier 'meta       ; Command (⌘) is Meta
-        mac-right-command-modifier 'left ; On both sides
         mac-option-modifier 'super       ; Alt/Option (⌥) is Super
-        mac-right-option-modifier 'none  ; But not on the right (for accented characters)
-        mac-control-modifier 'control    ; The OS requires this to be the same as Caps Lock
-        mac-right-control-modifier 'left ; Keep it on both sides
+        mac-control-modifier 'control    ; TODO: make this Hyper w/ Karabiner
         mac-function-modifier 'none      ; Leave Function (Fn) for OS X commands
         )
   ;; Disable passing commands to the system if using Emacs mac port. This
