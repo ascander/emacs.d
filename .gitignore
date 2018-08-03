@@ -50,4 +50,7 @@ flycheck_*.el
 # customization file
 custom.el
 
+# paradox github token file
+paradox-token.el
+
 # End of https://www.gitignore.io/api/emacs

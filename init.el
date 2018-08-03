@@ -187,7 +187,7 @@
   :defer t
   :init
   (defconst *paradox-github-token-file*
-    (concat user-emacs-directory "site-lisp/" "paradox-token.el")
+    (locate-user-emacs-file "paradox-token.el")
     "Location of the `paradox-github-token' setting for Paradox.")
   :config
   ;; Basic settings
