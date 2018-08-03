@@ -22,6 +22,9 @@
 
 ;;; Code:
 
+;; Constants
+(defconst *is-a-mac* (eq system-type 'darwin) "Are we on a mac?")
+
 ;; TODO: move this to a more reasonable place
 ;; Enter debugger on error, and keep more messages.
 (setq debug-on-error t)
@@ -68,14 +71,14 @@
 ;;; OS X settings
 
 ;; Modifier keys
-(when (eq system-type 'darwin)
-      (setq mac-command-modifier 'meta
-            mac-option-modifier 'super
-            mac-function-modifier 'none))
+(when *is-a-mac*
+      (setq mac-command-modifier 'meta    ; Command is Meta
+            mac-option-modifier 'super    ; Alt/Option is Super
+            mac-function-modifier 'none)) ; Reserve Function for OS X
 
 (use-package osx-trash
   :ensure t
-  :if (eq system-type 'darwin)
+  :if *is-a-mac*
   :config
   (osx-trash-setup))
 
@@ -93,9 +96,7 @@
 ;; removed on OS X, so only remove it if you're not on a Mac.
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-(when (and (not (eq system-type 'darwin))
-           (fboundp 'menu-bar-mode))
-  (menu-bar-mode -1))
+(when (and (not *is-a-mac*) (fboundp 'menu-bar-mode)) (menu-bar-mode -1))
 
 ;; Set some sensible defaults
 (setq-default
@@ -202,6 +203,27 @@
 ;; Keep auto-save and backup files out of the way
 (setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
       auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+
+(use-package dired                      ; Edit directories
+  :defer t
+  :init
+  (when-let (gls (and *is-a-mac* (executable-find "gls")))
+    (setq insert-directory-program gls))
+  :config
+  ;; Basic dired settings
+  (setq dired-auto-revert-buffer t
+        dired-listing-switches "-alh"
+        dired-recursive-copies 'always
+        dired-dwim-target t)
+
+  ;; Turn off `hl-line-mode' in dired buffers
+  (add-hook 'dired-mode-hook (lambda () (hl-line-mode -1)))
+
+  ;; Use more 'ls' switches if we have them available
+  (when (or (memq system-type '(gnu gnu/linux))
+            (string= (file-name-nondirectory insert-directory-program) "gls"))
+    (setq dired-listing-switches
+          (concat dired-listing-switches " --group-directories-first -v"))))
 
 (provide 'init)
 ;;; init.el ends here
