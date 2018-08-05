@@ -70,11 +70,14 @@
 
 ;;; OS X settings
 
-;; Modifier keys
 (when *is-a-mac*
-      (setq mac-command-modifier 'meta    ; Command is Meta
-            mac-option-modifier 'super    ; Alt/Option is Super
-            mac-function-modifier 'none)) ; Reserve Function for OS X
+  ;; Modifier keys
+  (setq mac-command-modifier 'meta      ; Command is Meta
+        mac-option-modifier 'super      ; Alt/Option is Super
+        mac-function-modifier 'none)    ; Reserve Function for OS X
+
+  ;; Reuse existing frame for opening new files
+  (setq ns-pop-up-frames nil))
 
 (use-package osx-trash
   :ensure t
@@ -85,7 +88,6 @@
 ;;; Customization and packages
 
 (use-package cus-edit                   ; The Customization UI
-  :defer t
   :config
   (setq custom-file (locate-user-emacs-file "custom.el"))
   (load custom-file 'no-error 'no-message))
@@ -120,8 +122,10 @@
  split-height-threshold nil          ; Disable vertical window splitting
  split-width-threshold nil           ; Disable horizontal window splitting
  uniquify-buffer-name-style 'forward ; Uniquify buffer names correctly
- window-combination-resize t)        ; Resize windows proportionally
-
+ window-combination-resize t         ; Resize windows proportionally
+ history-length 1000                 ; Store more history
+ use-dialog-box nil)                 ; Don't use dialogues for mouse imput
+ 
 ;; Miscellaneous settings
 (fset 'yes-or-no-p 'y-or-n-p)                      ; Replace yes/no prompts with y/n
 (fset 'display-startup-echo-area-message #'ignore) ; No startup message in the echo area
@@ -180,7 +184,7 @@
 (use-package stripe-buffer              ; Striped backgorund in `dired'
   :ensure t
   :init
-  (add-hook 'dired-mode-hook #'turn-on-stripe-buffer-mode))
+  (add-hook 'dired-mode-hook #'stripe-listify-buffer))
 
 ;;; Package manager and init development
 
@@ -193,6 +197,7 @@
   :config
   ;; Basic settings
   (setq paradox-execute-asynchronously t
+        paradox-spinner-type 'progress-bar
         paradox-column-width-package 32)
   
   (load *paradox-github-token-file* :noerror :nomessage)
@@ -203,6 +208,21 @@
 ;; Keep auto-save and backup files out of the way
 (setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
       auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+
+;; Use UTF-8 wherever possible
+(setq locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(when (display-graphic-p)
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+
+(use-package ffap                       ; Find files at point
+  :defer t
+  ;; Please stop pinging random hosts! See
+  ;; https://github.com/technomancy/emacs-starter-kit/issues/39
+  :config (setq ffap-machine-p-known 'reject))
 
 (use-package dired                      ; Edit directories
   :defer t
@@ -216,14 +236,91 @@
         dired-recursive-copies 'always
         dired-dwim-target t)
 
-  ;; Turn off `hl-line-mode' in dired buffers
-  (add-hook 'dired-mode-hook (lambda () (hl-line-mode -1)))
-
   ;; Use more 'ls' switches if we have them available
   (when (or (memq system-type '(gnu gnu/linux))
             (string= (file-name-nondirectory insert-directory-program) "gls"))
     (setq dired-listing-switches
           (concat dired-listing-switches " --group-directories-first -v"))))
+
+(use-package dired-x                    ; Additional tools for 'dired'
+  :after dired
+  :init
+  :config
+  (require 'delight)
+  (add-hook 'dired-mode-hook #'dired-omit-mode)
+  
+  ;; Don't tell me when you're omitting files, and additionally hide some other
+  ;; uninteresting files in Dired.
+  (setq dired-omit-verbose nil
+        dired-omit-files
+        (concat dired-omit-files "\\|^.DS_STORE$\\|^.projectile$")))
+
+(use-package ignoramus                  ; Ignore uninteresting files everywhere
+  :ensure t
+  :config
+  ;; Ignore some additional files and directories
+  (dolist (name '("company-statistics-cache.el"
+                  ".ensime"
+                  ".ensime_cache"))
+    (add-to-list 'ignoramus-file-basename-exact-names name))
+
+  (ignoramus-setup))
+
+(use-package recentf                    ; Save recently visited files
+  :init
+  (setq recentf-max-saved-items 100     ; Save more recent items
+        recentf-max-menu-items 15       ; In the menu, too
+        recentf-auto-cleanup 300        ; Cleanup after 300 idle seconds
+
+        ;; Exclude some boring files
+        recentf-exclude (list "/\\.git/.*\\'" ; Git contents
+                              "/elpa/.*\\'"   ; Package files
+                              #'ignoramus-boring-p))
+  :config (recentf-mode t))
+
+(use-package autorevert
+  :delight auto-revert-mode
+  :init
+  ;; Basic settings
+  (setq auto-revert-verbose nil                ; Autorevert quietly
+        global-auto-revert-non-file-buffers t) ; Dired, too
+
+  ;; File notifications are not used on OS X
+  (when *is-a-mac*
+    (setq auto-revert-use-notify nil))
+  :config (global-auto-revert-mode t))
+
+;;; Buffer, frame and window settings
+
+(use-package ibuffer                       ; A better buffer list
+  :bind (([remap list-buffers] . ibuffer)) ; C-x C-b
+  :config
+  (setq ibuffer-formats
+        '((mark modified read-only vc-status-mini " "
+                (name 18 18 :left :elide)
+                " "
+                (size 9 -1 :right)
+                " "
+                (mode 16 16 :left :elide)
+                " "
+                (vc-status 16 16 :left)
+                " "
+                filename-and-process)
+          (mark modified read-only " "
+                (name 18 18 :left :elide)
+                " "
+                (size 9 -1 :right)
+                " "
+                (mode 16 16 :left :elide)
+                " " filename-and-process)
+          (mark " " (name 16 -1) " " filename))))
+
+(use-package ibuffer-vc                 ; Group buffers by VC project
+  :commands ibuffer-vc-set-filter-groups-by-vc-root
+  :hook (ibuffer . (lambda ()
+                     (ibuffer-vc-set-filter-groups-by-vc-root)
+                     (unless (eq ibuffer-sorting-mode 'alphabetic)
+                       (ibuffer-do-sort-by-alphabetic)))))
 
 (provide 'init)
 ;;; init.el ends here

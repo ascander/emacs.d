@@ -53,4 +53,7 @@ custom.el
 # paradox github token file
 paradox-token.el
 
+# recentf file
+recentf
+
 # End of https://www.gitignore.io/api/emacs
