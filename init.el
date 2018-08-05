@@ -322,5 +322,27 @@
                      (unless (eq ibuffer-sorting-mode 'alphabetic)
                        (ibuffer-do-sort-by-alphabetic)))))
 
+(use-package ace-window                 ; Fast window switching
+  :bind (("M-o" . ace-window))
+  :config
+  ;; Set face for `aw-leading-char-face'
+  (set-face-attribute 'aw-leading-char-face nil
+                      :foreground "deep sky blue"
+                      :height 2.0)
+  ;; Settings
+  (setq aw-keys '(?a ?s ?d ?f ?j ?k ?l)
+        aw-dispatch-always t
+        aw-dispatch-alist
+        '((?x aw-delete-window     "Ace - Delete Window")
+          (?c aw-swap-window       "Ace - Swap Window")
+          (?n aw-flip-window       "Ace - Flip Window")
+          (?v aw-split-window-vert "Ace - Split Vert Window")
+          (?h aw-split-window-horz "Ace - Split Horiz Window")
+          (?m delete-other-windows "Ace - Maximize Window")
+          (?g delete-other-windows)
+          (?b balance-windows)
+          (?u winner-undo)
+          (?r winner-redo))))
+
 (provide 'init)
 ;;; init.el ends here
