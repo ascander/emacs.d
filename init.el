@@ -64,6 +64,7 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package t))
+(setq-default use-package-always-ensure t)
 
 (eval-when-compile
   (require 'use-package))
@@ -80,7 +81,6 @@
   (setq ns-pop-up-frames nil))
 
 (use-package osx-trash
-  :ensure t
   :if *is-a-mac*
   :config
   (osx-trash-setup))
@@ -88,6 +88,7 @@
 ;;; Customization and packages
 
 (use-package cus-edit                   ; The Customization UI
+  :ensure nil
   :config
   (setq custom-file (locate-user-emacs-file "custom.el"))
   (load custom-file 'no-error 'no-message))
@@ -118,11 +119,13 @@
  scroll-conservatively 1000          ; Never recenter point while scrolling
  select-enable-clipboard t           ; Merge system's and Emacs' clipboard
  sentence-end-double-space nil       ; Single space after a sentence end
+ require-final-newline t             ; Require a newline at file end
  show-trailing-whitespace nil        ; Don't display trailing whitespaces by default
  split-height-threshold nil          ; Disable vertical window splitting
  split-width-threshold nil           ; Disable horizontal window splitting
  uniquify-buffer-name-style 'forward ; Uniquify buffer names correctly
  window-combination-resize t         ; Resize windows proportionally
+ frame-resize-pixelwise t            ; Resize frames by pixel (don't snap to char)
  history-length 1000                 ; Store more history
  use-dialog-box nil)                 ; Don't use dialogues for mouse imput
  
@@ -157,7 +160,6 @@
 ;;; Color theme and looks
 
 (use-package solarized-theme            ; I always come back to you
-  :ensure t
   :init
   ;; Basic settings - disprefer bold and italics, use high contrast
   (setq x-underline-at-descent-line t   ; Fixes the box around the mode line
@@ -177,12 +179,10 @@
   (load-theme 'solarized-dark 'no-confirm))
 
 (use-package dimmer                     ; Highlight the current buffer
-  :ensure t
   :init
   (add-hook 'after-init-hook #'dimmer-mode))
 
 (use-package stripe-buffer              ; Striped backgorund in `dired'
-  :ensure t
   :init
   (add-hook 'dired-mode-hook #'stripe-listify-buffer))
 
@@ -225,6 +225,7 @@
   :config (setq ffap-machine-p-known 'reject))
 
 (use-package dired                      ; Edit directories
+  :ensure nil
   :defer t
   :init
   (when-let (gls (and *is-a-mac* (executable-find "gls")))
@@ -243,12 +244,11 @@
           (concat dired-listing-switches " --group-directories-first -v"))))
 
 (use-package dired-x                    ; Additional tools for 'dired'
+  :ensure nil
   :after dired
   :init
-  :config
-  (require 'delight)
   (add-hook 'dired-mode-hook #'dired-omit-mode)
-  
+  :config
   ;; Don't tell me when you're omitting files, and additionally hide some other
   ;; uninteresting files in Dired.
   (setq dired-omit-verbose nil
@@ -256,7 +256,6 @@
         (concat dired-omit-files "\\|^.DS_STORE$\\|^.projectile$")))
 
 (use-package ignoramus                  ; Ignore uninteresting files everywhere
-  :ensure t
   :config
   ;; Ignore some additional files and directories
   (dolist (name '("company-statistics-cache.el"
@@ -343,6 +342,102 @@
           (?b balance-windows)
           (?u winner-undo)
           (?r winner-redo))))
+
+(use-package focus-autosave-mode        ; Save buffers when Emacs loses focus
+  :ensure t
+  :delight focus-autosave-mode
+  :config
+  (focus-autosave-mode))
+
+(use-package winner                     ; Undo/redo window configuration changes
+  :config (winner-mode t))
+
+(use-package windmove                   ; Navigate windows using arrow keys
+  :config
+  ;; Wrap around the edge of the frame, and user Super instead of Shift, because
+  ;; the Shift key causes conflicts in `org-mode'.
+  (setq windmove-wrap-around t)
+  (windmove-default-keybindings 'super))
+
+;;; Project management
+
+(use-package projectile                 ; Project management for Emacs
+  :defer 2
+  :delight projectile-mode
+  :config
+  ;; Basic settings
+  (setq projectile-completion-system 'ivy
+        projectile-find-dir-includes-top-level t
+        projectile-switch-project-action #'projectile-dired)
+  
+  ;; Remove dead projects when Emacs is idle
+  (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
+
+  (projectile-global-mode))
+
+;;; Version control
+
+(use-package what-the-commit            ; Random commit message
+  :bind (("C-c i w" . what-the-commit-insert)
+         ("C-c g w" . what-the-commit)))
+
+(use-package magit                      ; The one and only Git front end 
+  :ensure t
+  :bind (("C-c g c" . magit-clone)
+         ("C-c g s" . magit-status)
+         ("C-c g b" . magit-blame)
+         ("C-c g p" . magit-pull))
+  :config
+  ;; Basic settings
+  (setq magit-save-repository-buffers 'dontask
+        magit-refs-show-commit-count 'all
+        magit-branch-prefer-remote-upstream '("master")
+        magit-branch-adjust-remote-upstream-alist '(("origin/master" "master"))
+        magit-revision-show-gravatars nil
+        magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+
+  ;; Show refined hunks during diffs
+  (set-default 'magit-diff-refine-hunk t)
+
+  ;; Set Magit's repo dirs for `magit-status' from Projectile's known projects.
+  ;; Initialize the `magit-repository-directories' immediately after Projectile
+  ;; was loaded, and update it every time we switched projects, because the new
+  ;; project might have been unknown before
+  (defun ad|magit-set-repo-dirs-from-projectile ()
+    "Set `magit-repo-dirs' from known Projectile projects."
+    (let ((project-dirs (bound-and-true-p projectile-known-projects)))
+      ;; Remove trailing slashes from project directories, because Magit adds
+      ;; trailing slashes again, which breaks the presentation in the Magit
+      ;; prompt.
+      (setq magit-repository-directories
+                     (mapcar #'directory-file-name project-dirs))))
+  (with-eval-after-load 'projectile
+    (ad|magit-set-repo-dirs-from-projectile))
+
+  (add-hook 'projectile-switch-project-hook
+            #'ad|magit-set-repo-dirs-from-projectile)
+
+  ;; Refresh `magit-status' after saving a buffer
+  (add-hook 'after-save-hook #'magit-after-save-refresh-status))
+
+(use-package git-commit                 ; git commit message mode
+  :defer t
+  :config
+  ;; Don't check style conventions... come on.
+  (remove-hook 'git-commit-finish-query-functions
+               #'git-commit-check-style-conventions))
+
+(use-package gitconfig-mode             ; Gitconfig editing
+  :defer t)
+
+(use-package gitignore-mode             ; '.gitignore' file editing
+  :defer t)
+
+(use-package gitattributes-mode         ; '.gitattributes' file editing
+  :defer t)
+
+(use-package git-timemachine            ; Go back in Git time
+  :bind (("C-c g t" . git-timemachine)))
 
 (provide 'init)
 ;;; init.el ends here
