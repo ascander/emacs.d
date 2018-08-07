@@ -423,7 +423,7 @@
 (use-package git-commit                 ; git commit message mode
   :defer t
   :config
-  ;; Don't check style conventions... come on.
+  ;; Don't check style conventions.
   (remove-hook 'git-commit-finish-query-functions
                #'git-commit-check-style-conventions))
 
