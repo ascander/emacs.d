@@ -63,11 +63,13 @@
 ;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
-  (package-install 'use-package t))
+  (package-install 'use-package t)
+  (package-install 'delight t))
 (setq-default use-package-always-ensure t)
 
 (eval-when-compile
   (require 'use-package))
+(require 'delight)
 
 ;;; OS X settings
 
@@ -275,7 +277,7 @@
         recentf-exclude (list "/\\.git/.*\\'" ; Git contents
                               "/elpa/.*\\'"   ; Package files
                               #'ignoramus-boring-p))
-  :config (recentf-mode t))
+  :config (recentf-mode 1))
 
 (use-package autorevert
   :delight auto-revert-mode
@@ -287,7 +289,7 @@
   ;; File notifications are not used on OS X
   (when *is-a-mac*
     (setq auto-revert-use-notify nil))
-  :config (global-auto-revert-mode t))
+  :config (global-auto-revert-mode 1))
 
 ;;; Buffer, frame and window settings
 
@@ -344,13 +346,11 @@
           (?r winner-redo))))
 
 (use-package focus-autosave-mode        ; Save buffers when Emacs loses focus
-  :ensure t
   :delight focus-autosave-mode
-  :config
-  (focus-autosave-mode))
+  :config (focus-autosave-mode t))
 
 (use-package winner                     ; Undo/redo window configuration changes
-  :config (winner-mode t))
+  :config (winner-mode 1))
 
 (use-package windmove                   ; Navigate windows using arrow keys
   :config
@@ -373,7 +373,7 @@
   ;; Remove dead projects when Emacs is idle
   (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
 
-  (projectile-global-mode))
+  (projectile-global-mode t))
 
 ;;; Version control
 
@@ -382,7 +382,6 @@
          ("C-c g w" . what-the-commit)))
 
 (use-package magit                      ; The one and only Git front end 
-  :ensure t
   :bind (("C-c g c" . magit-clone)
          ("C-c g s" . magit-status)
          ("C-c g b" . magit-blame)
@@ -438,6 +437,79 @@
 
 (use-package git-timemachine            ; Go back in Git time
   :bind (("C-c g t" . git-timemachine)))
+
+;;; Completion
+
+(use-package hydra                      ; Make Emacs bindings that stick around
+  :defer t)
+
+(use-package ivy                        ; Generic completion mechanism for Emacs
+  :delight ivy-mode
+  :demand t
+  :bind (("s-j" . ivy-switch-buffer)
+         ("s-J" . ivy-switch-buffer-other-window)
+         ("s-r" . ivy-resume))
+  :config
+  ;; Basic settings
+  (setq ivy-use-virtual-buffers t
+        ivy-initial-inputs-alist nil
+        ivy-count-format "")
+
+  (ivy-mode 1))
+
+(use-package ivy-hydra                  ; A useful hydra for the Ivy minibuffer
+  :after (ivy hydra)
+  :defer t
+  :config
+  (bind-key "C-o" #'hydra-ivy/body ivy-minibuffer-map))
+
+(use-package ivy-rich
+  :after ivy
+  :defer t
+  :config
+  ;; Align virtual buffers, and abbreviate paths
+  (setq ivy-virtual-abbreviate 'full
+        ivy-rich-path-style 'abbrev
+        ivy-rich-switch-buffer-align-virtual-buffer t)
+
+  (ivy-set-display-transformer 'ivy-switch-buffer
+                               'ivy-rich-switch-buffer-transformer)
+  (ivy-rich-mode 1))
+
+(use-package counsel                    ; Ivy-enhanced versions of commands
+  :after ivy
+  :demand t
+  :delight counsel-mode
+  :bind (([remap execute-extended-command] . counsel-M-x)
+         ([remap find-file]                . counsel-find-file)
+         ([remap describe-face]            . counsel-describe-face)
+         ([remap describe-function]        . counsel-describe-function)
+         ([remap describe-variable]        . counsel-describe-variable)
+         ([remap info-lookup-symbol]       . counsel-info-lookup-symbol)
+         ([remap completion-at-point]      . counsel-company)
+         ([remap org-goto]                 . counsel-org-goto)
+         ("C-c f L"                        . counsel-load-library)
+         ("C-c f r"                        . counsel-recentf)
+         ("C-c i 8"                        . counsel-unicode-char)
+         ("C-c r g"                        . counsel-rg)
+         ("C-c j t"                        . counsel-imenu)
+         ("C-c g L"                        . counsel-git-log))
+  :config
+  ;; Use Smex ranking of results automatically
+  (use-package smex
+    :config (smex-initialize))
+  ;; TODO: counsel powered `org-goto' command
+  (counsel-mode 1))
+
+(use-package counsel-projectile         ; Counsel integration with Projectile
+  :after (counsel projectile)
+  :config
+  ;; TODO: remap `projectile-ag' to `counsel-projectile-rg'
+  (counsel-projectile-mode 1))
+
+(use-package swiper                     ; An Ivy-enhanced alternative to isearch
+  :after ivy
+  :bind (([remap isearch-forward] . swiper)))
 
 (provide 'init)
 ;;; init.el ends here

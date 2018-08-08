@@ -41,6 +41,9 @@ flycheck_*.el
 # server auth directory
 /server/
 
+# Smex items
+smex-items
+
 # projectiles files
 .projectile
 projectile-bookmarks.eld
