@@ -70,6 +70,8 @@
   (package-install 'delight t))
 
 (eval-when-compile (require 'use-package)) ; Auto-requires `bind-key' also
+(require 'delight)
+(setq-default use-package-always-ensure t)
 
 ;; Benchmark init time
 (use-package benchmark-init
@@ -119,26 +121,26 @@
 ;; Add files in my `.emacs.d/lisp' directory
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-(use-package init-defaults)
-(use-package init-osx)
-(use-package init-ui)
-(use-package init-modeline)
-(use-package init-themes)
-(use-package init-fonts)
-(use-package init-files)
-(use-package init-dired)
-(use-package init-projectile)
-(use-package init-org)
-(use-package init-keys)
-(use-package init-editing)
-(use-package init-windows)
-(use-package init-ivy)
-(use-package init-hydra)
-(use-package init-git)
-(use-package init-prog)
-(use-package init-company)
-(use-package init-scala)
-(use-package init-markdown)
+(use-package init-defaults :ensure nil)
+(use-package init-osx :ensure nil)
+(use-package init-ui :ensure nil)
+(use-package init-modeline :ensure nil)
+(use-package init-themes :ensure nil)
+(use-package init-fonts :ensure nil)
+(use-package init-files :ensure nil)
+(use-package init-dired :ensure nil)
+(use-package init-projectile :ensure nil)
+(use-package init-org :ensure nil)
+(use-package init-keys :ensure nil)
+(use-package init-editing :ensure nil)
+(use-package init-windows :ensure nil)
+(use-package init-ivy :ensure nil)
+(use-package init-hydra :ensure nil)
+(use-package init-git :ensure nil)
+(use-package init-prog :ensure nil)
+(use-package init-company :ensure nil)
+(use-package init-scala :ensure nil)
+(use-package init-markdown :ensure nil)
 
 (provide 'init)
 ;;; init.el ends here

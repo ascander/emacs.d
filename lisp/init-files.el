@@ -98,6 +98,7 @@ basically runs 'C-x s' on all open buffers."
   (add-to-list 'recentf-exclude no-littering-var-directory))
 
 (use-package cus-edit                   ; Customize interface
+  :ensure nil
   :config
   ;; Put `custom.el' in its place
   (validate-setq custom-file

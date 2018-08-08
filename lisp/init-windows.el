@@ -29,7 +29,7 @@
 (global-set-key (kbd "s-k") 'kill-this-buffer)
 
 (use-package frame                      ; Frames
-  :bind (("M-s-f" . toggle-frame-fullscreen))
+  :ensure nil
   :init (progn
           ;; Kill `suspend-frame'
           (global-set-key (kbd "C-z") nil)

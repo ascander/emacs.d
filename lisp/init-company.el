@@ -25,8 +25,8 @@
 ;;; Code:
 
 (use-package company                    ; Graphical (auto-)completion
-  :ensure t
-  :defer 1
+  :defer 2
+  :delight company-mode
   :config
   (global-company-mode)
 

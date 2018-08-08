@@ -24,8 +24,7 @@
 
 ;;; Code:
 
-(use-package ivy                        ; minibuffer completion framework
-  :ensure t
+(use-package ivy                        ; Minibuffer completion framework
   :pin melpa
   :delight ivy-mode
   :bind (("C-c C-r" . ivy-resume)
@@ -35,12 +34,12 @@
   (validate-setq ivy-use-virtual-buffers t
                  ivy-count-format ""
                  ivy-initial-inputs-alist nil)
-  (ivy-mode))
+  (ivy-mode 1))
 
 (use-package counsel                    ; Ivy-powered commands
-  :ensure t
-  :after ivy
   :pin melpa
+  :after ivy
+  :delight counsel-mode
   :bind (([remap execute-extended-command] . counsel-M-x)
          ([remap find-file]                . counsel-find-file)
          ([remap describe-function]        . counsel-describe-function)
@@ -54,19 +53,21 @@
          ("C-c r g"                        . counsel-rg)
          ("C-c j t"                        . counsel-imenu)
          ("C-c g L"                        . counsel-git-log))
-  :delight counsel-mode
   :config
+  (use-package smex
+    :config (smex-initialize))
+
   ;; Settings for a counsel powered `org-goto' command, taken from:
   ;; https://github.com/abo-abo/swiper/pull/1005
-  (setq counsel-org-goto-display-style 'path)
-  (setq counsel-org-goto-separator " ➨ ")
-  (setq counsel-org-goto-face-style 'org)
-  (counsel-mode))
+  (setq counsel-org-goto-display-style 'path
+        counsel-org-goto-separator " ➨ "
+        counsel-org-goto-face-style 'org)
+
+  (counsel-mode 1))
 
 (use-package swiper                     ; An Ivy-powered alternative to isearch
-  :ensure t
-  :after ivy
   :pin melpa
+  :after ivy
   :bind (([remap isearch-forward] . swiper))
   :config
   ;; swipe for symbol at point
@@ -78,11 +79,9 @@
   (bind-key "M-s-/" #'ad|swiper-at-point ivy-mode-map))
 
 (use-package ivy-xref                   ; Ivy interface to xref
-  :ensure t
   :init (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 
 (use-package ivy-rich                   ; More friendly interface for buffer switching
-  :ensure t
   :after ivy
   :config
   ;; Align virtual buffers, and abbreviate paths
@@ -92,7 +91,7 @@
 
   (ivy-set-display-transformer 'ivy-switch-buffer
                                'ivy-rich-switch-buffer-transformer)
-  (ivy-rich-mode))
+  (ivy-rich-mode 1))
 
 (provide 'init-ivy)
 ;;; init-ivy.el ends here

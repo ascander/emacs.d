@@ -29,6 +29,7 @@
   (validate-setq insert-directory-program gls))
 
 (use-package dired			; edit directories
+  :ensure nil
   :defer t
   :init
   (defhydra hydra-dired (:hint nil :color pink)
@@ -101,6 +102,7 @@ T - tag prefix
      dired-listing-switches (concat dired-listing-switches " --group-directories-first -v"))))
 
 (use-package dired-x			; additional tools for dired
+  :ensure nil
   :defer t
   :after dired
   :init (add-hook 'dired-mode-hook #'dired-omit-mode)
@@ -110,12 +112,13 @@ T - tag prefix
     ;; OS X 'tar' is close enough to GNU 'tar'.
     (validate-setq dired-guess-shell-gnutar "tar"))
 
-  ;; Diminish `dired-omit-mode'. This can't be done in the usual way
-  ;; with ':diminish' because it is explicitly set in
-  ;; `dired-omit-startup'.
-  (add-function :after (symbol-function 'dired-omit-startup)
-		(lambda () (diminish 'dired-omit-mode))
-		'((name . dired-omit-mode-diminish))))
+  ;; ;; Diminish `dired-omit-mode'. This can't be done in the usual way
+  ;; ;; with ':diminish' because it is explicitly set in
+  ;; ;; `dired-omit-startup'.
+  ;; (add-function :after (symbol-function 'dired-omit-startup)
+  ;;   	(lambda () (diminish 'dired-omit-mode))
+  ;;   	'((name . dired-omit-mode-diminish)))
+  )
 
 (use-package stripe-buffer		; add stripes to a buffer
   :ensure t

@@ -25,8 +25,7 @@
 ;;; Code:
 
 (use-package projectile			; Project management for Emacs
-  :ensure t
-  :defer 1
+  :defer 2
   :config
   (projectile-global-mode)
   ;; Remove dead projects when Emacs is idle
@@ -38,7 +37,7 @@
   :delight projectile-mode)
 
 (use-package counsel-projectile		; Counsel interface to Projectile
-  :ensure t
+  :pin melpa
   :after projectile
   :bind (("C-c p G" . counsel-projectile-rg))
   :config
@@ -59,7 +58,7 @@
            "open 'dired' at the root of the project")
           1)))
 
-  (counsel-projectile-mode))
+  (counsel-projectile-mode 1))
 
 (provide 'init-projectile)
 ;;; init-projectile.el ends here
