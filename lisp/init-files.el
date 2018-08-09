@@ -53,6 +53,7 @@ basically runs 'C-x s' on all open buffers."
   (validate-setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 
 (use-package no-littering
+  :disabled t
   :ensure t
   :config
   ;; Versioning settings for old files
@@ -94,15 +95,15 @@ basically runs 'C-x s' on all open buffers."
                        #'ignoramus-boring-p))
 
   ;; Add `no-littering' directories to recentf
-  (add-to-list 'recentf-exclude no-littering-etc-directory)
-  (add-to-list 'recentf-exclude no-littering-var-directory))
+  ;; (add-to-list 'recentf-exclude no-littering-etc-directory)
+  ;; (add-to-list 'recentf-exclude no-littering-var-directory)
+  )
 
 (use-package cus-edit                   ; Customize interface
   :ensure nil
   :config
   ;; Put `custom.el' in its place
-  (validate-setq custom-file
-                 (expand-file-name "custom.el" no-littering-etc-directory))
+  (validate-setq custom-file (locate-user-emacs-file "custom.el"))
   ;; Miscellaneous other settings
   (validate-setq custom-buffer-done-kill nil
                  custom-buffer-verbose-help nil

@@ -122,7 +122,8 @@ T - tag prefix
 
 (use-package stripe-buffer		; add stripes to a buffer
   :ensure t
-  :init (add-hook 'dired-mode-hook #'stripe-listify-buffer))
+  :init (add-hook 'dired-mode-hook #'stripe-listify-buffer)
+  :config (set-face-attribute 'stripe-hl-line nil :inherit 'region))
 
 (provide 'init-dired)
 ;;; init-dired.el ends here

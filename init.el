@@ -145,7 +145,7 @@
 (provide 'init)
 ;;; init.el ends here
 
-;; Local Variables:
+ ;; Local Variables:
 ;; indent-tabs-mode: nil
 ;; coding: utf-8
 ;; no-byte-compile: t
