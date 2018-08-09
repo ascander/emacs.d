@@ -149,6 +149,7 @@
 
 ;;; Fonts
 
+;; Set default fonts
 (set-face-attribute 'default nil
                     :family "Iosevka Type"
                     :height 120
@@ -158,6 +159,8 @@
                     :family "Fira Sans"
                     :height 140
                     :weight 'regular)
+
+
 
 ;;; Color theme and looks
 
@@ -185,7 +188,10 @@
   (add-hook 'after-init-hook #'dimmer-mode))
 
 (use-package stripe-buffer              ; Striped backgorund in `dired'
+  :defer t
   :init
+  ;; NOTE: the face for `stripe-hl-line' is customized via the customization
+  ;; interface. It would be good to figure out how to set this here.
   (add-hook 'dired-mode-hook #'stripe-listify-buffer))
 
 ;;; Package manager and init development
@@ -364,6 +370,7 @@
 (use-package projectile                 ; Project management for Emacs
   :defer 2
   :delight projectile-mode
+  :bind-keymap ("C-c p" . projectile-command-map)
   :config
   ;; Basic settings
   (setq projectile-completion-system 'ivy
@@ -465,7 +472,6 @@
 
 (use-package ivy-rich
   :after ivy
-  :defer t
   :config
   ;; Align virtual buffers, and abbreviate paths
   (setq ivy-virtual-abbreviate 'full
@@ -502,6 +508,10 @@
   (counsel-mode 1))
 
 (use-package counsel-projectile         ; Counsel integration with Projectile
+  
+  ;; Disable until https://github.com/ericdanan/counsel-projectile/issues/91 is
+  ;; resolved. Projectile seems to be a shit show for the time being.
+  :disabled t
   :after (counsel projectile)
   :config
   ;; TODO: remap `projectile-ag' to `counsel-projectile-rg'
