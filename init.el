@@ -82,6 +82,40 @@
   ;; Reuse existing frame for opening new files
   (setq ns-pop-up-frames nil))
 
+(use-package exec-path-from-shell       ; Fix $PATH on GUI Emacs
+  :disabled t
+  :when *is-a-mac*
+  :ensure t
+  :config
+  (progn
+    (validate-setq exec-path-from-shell-check-startup-files nil
+                   exec-path-from-shell-variables
+                   '("JAVA_OPTS"        ; Java options
+                     "SBT_OPTS"         ; SBT options
+                     "EMAIL"            ; My email address
+                     "PATH"             ; Executables
+                     "MANPATH"          ; Man pages
+                     "INFOPATH"         ; Info directories
+                     "LANG"             ; Language
+                     "LC_CTYPE"         ; Character set
+                     ))
+
+    ;; Initialize Emacs' environment from the shell
+    (exec-path-from-shell-initialize)
+
+    ;; Tell Emacs who I am
+    (setq user-email-address (getenv "EMAIL")
+          user-full-name (getenv "FULLNAME"))
+
+    ;; Re-initialize the `info-directory-list' from $INFOPATH. Since
+    ;; `package.el' already initializes info, we need to explicitly
+    ;; add the $INFOPATH directories to `info-directory-list'. Reverse
+    ;; the list of info paths to prepend them in proper order.
+    (with-eval-after-load 'info
+      (dolist (dir (nreverse (parse-colon-path (getenv "INFOPATH"))))
+        (when dir
+          (add-to-list 'Info-directory-list dir))))))
+
 (use-package osx-trash
   :if *is-a-mac*
   :config
@@ -404,6 +438,9 @@ T - tag prefix
   (when *is-a-mac*
     (setq auto-revert-use-notify nil))
   :config (global-auto-revert-mode 1))
+
+;; View read-only files
+(setq view-read-only t)
 
 ;;; Buffer, frame and window settings
 
