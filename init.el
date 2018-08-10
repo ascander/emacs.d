@@ -149,7 +149,10 @@
 
 ;;; Fonts
 
-;; Set default fonts
+;; Default font settings
+(defvar default-font-size-pt 12
+  "Default font size, in points.")
+
 (set-face-attribute 'default nil
                     :family "Iosevka Type"
                     :height 120
@@ -160,7 +163,58 @@
                     :height 140
                     :weight 'regular)
 
+;; Global font resizing, taken from https://github.com/kaushalmodi/.emacs.d
+(defun ad|global-font-size-adj (scale &optional absolute)
+  "Adjust the font sizes globally: in all the buffers, mode line, echo area, etc.
 
+The built-in `text-scale-adjust' function does an excellent job
+of font resizing, but it does not change the font sizes of text
+outside the current buffer; for example, in the mode line.
+
+M-<SCALE> COMMAND increases font size by SCALE points if SCALE is +ve,
+                  decreases font size by SCALE points if SCALE is -ve
+                  resets    font size if SCALE is 0.
+
+If ABSOLUTE is non-nil, text scale is applied relative to the
+default font size `default-font-size-pt'. Else, the text scale is
+applied relative to the current font size."
+  (interactive "p")
+  (if (= scale 0)
+      (setq font-size-pt default-font-size-pt)
+    (if (bound-and-true-p absolute)
+        (setq font-size-pt (+ default-font-size-pt scale))
+      (setq font-size-pt (+ font-size-pt scale))))
+  ;; The internal font size value is 10x the font size in points unit. So a 10pt
+  ;; font size is equal to 100 in internal font size value.
+  (set-face-attribute 'default nil :height (* font-size-pt 10)))
+
+(defun ad|global-font-size-incr () (interactive) (ad|global-font-size-adj +1))
+(defun ad|global-font-size-decr () (interactive) (ad|global-font-size-adj -1))
+(defun ad|global-font-size-reset () (interactive) (ad|global-font-size-adj 0))
+
+;; Initialize font-size-pt var to the default value
+(unless (boundp 'font-size-pt)
+  (ad|global-font-size-reset))
+
+;; Font resizing hydra, for convenience
+(defhydra hydra-font-resize (nil
+                             "C-c"
+                             :bind (lambda (key cmd) (bind-key key cmd))
+                             :color red
+                             :hint nil)
+  "
+Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
+"
+  ;; Hydra entry bindings
+  ("C--" ad|global-font-size-decr)
+  ("C-=" ad|global-font-size-incr)
+  ("C-0" ad|global-font-size-reset :color blue)
+  ;; Hydra-internal bindings, below work only when the hydra is active!
+  ("-"   ad|global-font-size-decr :bind nil)
+  ("="   ad|global-font-size-incr :bind nil)
+  ("+"   ad|global-font-size-incr :bind nil)
+  ("0"   ad|global-font-size-reset :bind nil)
+  ("q"   nil :color blue))
 
 ;;; Color theme and looks
 
@@ -370,7 +424,7 @@
 (use-package projectile                 ; Project management for Emacs
   :defer 2
   :delight projectile-mode
-  :bind-keymap ("C-c p" . projectile-command-map)
+  :bind-keymap ("s-p" . projectile-command-map)
   :config
   ;; Basic settings
   (setq projectile-completion-system 'ivy
@@ -508,10 +562,7 @@
   (counsel-mode 1))
 
 (use-package counsel-projectile         ; Counsel integration with Projectile
-  
-  ;; Disable until https://github.com/ericdanan/counsel-projectile/issues/91 is
-  ;; resolved. Projectile seems to be a shit show for the time being.
-  :disabled t
+  :load-path "site-lisp/counsel-projectile"
   :after (counsel projectile)
   :config
   ;; TODO: remap `projectile-ag' to `counsel-projectile-rg'
