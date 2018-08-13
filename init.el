@@ -773,15 +773,15 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
           ;; Replacements for how all or part of FUNCTION is replaced when
           ;; `which-key' displays:
           ;;
-          ;;     KEY -> Function
+          ;;     KEY → Function
           ;;
-          ;; Eg: after "C-c g" display "s -> magit-status" as "s -> git-status"
+          ;; Eg: after "C-c g" display "s → magit-status" as "s → git-status"
           ((nil . "Prefix Command")            . (nil . "prefix"))
           ((nil . "\\`\\?\\?\\'")              . (nil . "λ"))
           ((nil . "projectile-")               . (nil . "pj-"))
           ((nil . "magit-")                    . (nil . "git-"))
           ((nil . "\\`hydra-\\(.+\\)/body\\'") . (nil . "=|\\1"))
-          ((nil . "\\`hydra-\\(.+\\)\\'") . (nil . "=|\\1"))))
+          ((nil . "\\`hydra-\\(.+\\)\\'")      . (nil . "=|\\1"))))
   :config
   (which-key-mode 1))
 
