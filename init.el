@@ -760,6 +760,34 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :after ivy
   :bind (([remap isearch-forward] . swiper)))
 
+;;; Keys and keybindings
+
+(use-package which-key                  ; Display keybindings based on current command
+  :defer 5
+  :delight
+  :init
+  (setq which-key-idle-delay 0.4
+        which-key-sort-order 'which-key-prefix-then-key-order
+        which-key-replacement-alist
+        '(
+          ;; Replacements for how all or part of FUNCTION is replaced when
+          ;; `which-key' displays:
+          ;;
+          ;;     KEY -> Function
+          ;;
+          ;; Eg: after "C-c g" display "s -> magit-status" as "s -> git-status"
+          ((nil . "Prefix Command")            . (nil . "prefix"))
+          ((nil . "\\`\\?\\?\\'")              . (nil . "λ"))
+          ((nil . "projectile-")               . (nil . "pj-"))
+          ((nil . "magit-")                    . (nil . "git-"))
+          ((nil . "\\`hydra-\\(.+\\)/body\\'") . (nil . "=|\\1"))
+          ((nil . "\\`hydra-\\(.+\\)\\'") . (nil . "=|\\1"))))
+  :config
+  (which-key-mode 1))
+
+(use-package free-keys                  ; Show free keybindings in the current buffer
+  :defer 5)
+
 ;;; Basic editing
 
 ;; Display line numbers when they matter; namely, when navigating to a specific
@@ -787,7 +815,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (put 'narrow-to-defun 'disabled nil)
 
 (use-package smartparens                ; Deal with pairs in Emacs
-  :delight smartparens-mode " ()"
+  :delight
   :config
   (require 'smartparens-config)
 
