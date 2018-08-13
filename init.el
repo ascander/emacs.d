@@ -800,5 +800,11 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (smartparens-global-mode 1)
   (show-smartparens-global-mode 1))
 
+;;; Programming modes
+
+;; Make symbols pretty in programming contexts
+(when (fboundp 'global-prettify-symbols-mode)
+  (add-hook 'prog-mode-hook #'global-prettify-symbols-mode))
+
 (provide 'init)
 ;;; init.el ends here
