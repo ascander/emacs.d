@@ -760,5 +760,45 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :after ivy
   :bind (([remap isearch-forward] . swiper)))
 
+;;; Basic editing
+
+;; Display line numbers when they matter; namely, when navigating to a specific
+;; line via `goto-line'.
+(defun ad|goto-line-with-numbers ()
+  "Show line numbers while navigating to a specific line."
+  (interactive)
+  (unwind-protect
+      (progn
+        (display-line-numbers-mode 1)
+        (goto-line (read-number "Goto line: ")))
+    (display-line-numbers-mode -1)))
+(global-set-key [remap goto-line] #'ad|goto-line-with-numbers)
+
+(use-package writeroom-mode             ; Distraction free editing mode
+  :bind (:map writeroom-mode-map
+              ("C-M-<" . #'writeroom-decrease-width)
+              ("C-M->" . #'writeroom-increase-width)
+              ("C-M-=" . #'writeroom-adjust-width)
+              ("s-m"   . #'writeroom-toggle-mode-line)))
+
+;; Allow narrowing (disabled by default)
+(put 'narrow-to-region 'disabled nil)
+(put 'narrow-to-page 'disabled nil)
+(put 'narrow-to-defun 'disabled nil)
+
+(use-package smartparens                ; Deal with pairs in Emacs
+  :delight smartparens-mode " ()"
+  :config
+  (require 'smartparens-config)
+
+  ;; Free bindings for navigation
+  (bind-key "C-<left>" nil smartparens-mode-map)
+  (bind-key "C-<right>" nil smartparens-mode-map)
+  (bind-key "M-<backspace>" nil smartparens-mode-map)
+  
+  ;;  Activate smartparens globally
+  (smartparens-global-mode 1)
+  (show-smartparens-global-mode 1))
+
 (provide 'init)
 ;;; init.el ends here
