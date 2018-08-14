@@ -50,9 +50,8 @@
 ;;; Package management
 
 (require 'package)
-(setq-default
- load-prefer-newer t            ; prefer the newest version of a file
- package-enable-at-startup nil) ; explicitly initialize packages
+(setq load-prefer-newer t            ; prefer the newest version of a file
+      package-enable-at-startup nil) ; explicitly initialize packages
 
 (setq package-archives
       '(("melpa" . "https://melpa.org/packages/")
@@ -61,15 +60,16 @@
 (package-initialize)
 
 ;; Bootstrap `use-package'
+;; TODO: this should also check/install `delight'
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
-  (package-install 'use-package t)
-  (package-install 'delight t))
+  (package-install 'use-package t))
 (setq-default use-package-always-ensure t)
 
 (eval-when-compile
   (require 'use-package))
 (require 'delight)
+(require 'bind-key)
 
 ;;; OS X settings
 
@@ -629,6 +629,12 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
            ("s-n" . next-buffer)
            ("s-k" . kill-this-buffer))
 
+;;; Org
+
+(use-package init-org                   ; The almighty Org mode
+  :load-path "lisp"
+  :ensure nil)
+
 ;;; Project management
 
 (use-package projectile                 ; Project management for Emacs
@@ -885,9 +891,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package expand-region              ; Expand the selected region by semantic units
   :bind ("C-=" . er/expand-region))
 
-(use-package multiple-cursors
-  )
-
 (use-package dumb-jump                  ; Jump to definition dumbly
   :hook ((prog-mode . dumb-jump-mode))
   :bind (("M-g o" . dumb-jump-go-other-window)
@@ -898,6 +901,12 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :init
   (setq dumb-jump-selector 'ivy
         dumb-jump-prefer-searcher 'rg))
+
+(use-package highlight-symbol           ; Automatic and manual symbol highlighting for Emacs
+  :bind (("C-c h s" . highlight-symbol)
+         ("C-c h n" . highlight-symbol-next)
+         ("C-c h p" . highlight-symbol-prev)
+         ("C-c h r" . highlight-symbol-query-replace)))
 
 (provide 'init)
 ;;; init.el ends here
