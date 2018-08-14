@@ -573,6 +573,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package ace-window                 ; Fast window switching
   :bind (("M-o" . ace-window))
+  :init
   :config
   ;; Set face for `aw-leading-char-face'
   (set-face-attribute 'aw-leading-char-face nil
@@ -591,7 +592,23 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
           (?g delete-other-windows)
           (?b balance-windows)
           (?u winner-undo)
-          (?r winner-redo))))
+          (?r winner-redo)))
+
+  ;; Add hydras for sizing/frames
+  (when (package-installed-p 'hydra)
+    (defhydra hydra-window-size (:color red)
+      "Window size"
+      ("h" shrink-window-horizontally "shrink horizontal")
+      ("j" shrink-window "shrink vertical")
+      ("k" enlarge-window "enlarge vertical")
+      ("l" enlarge-window-horizontally "enlarge horizontal"))
+    (defhydra hydra-window-frame (:color red)
+      "Frame"
+      ("f" make-frame "new frame")
+      ("x" delete-frame "delete frame"))
+
+    (add-to-list 'aw-dispatch-alist '(?w hydra-window-size/body) t)
+    (add-to-list 'aw-dispatch-alist '(?\; hydra-window-frame/body) t)))
 
 (use-package focus-autosave-mode        ; Save buffers when Emacs loses focus
   :delight focus-autosave-mode
@@ -606,6 +623,11 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   ;; the Shift key causes conflicts in `org-mode'.
   (setq windmove-wrap-around t)
   (windmove-default-keybindings 'super))
+
+;; Quicker buffer cycling commands
+(bind-keys ("s-p" . previous-buffer)
+           ("s-n" . next-buffer)
+           ("s-k" . kill-this-buffer))
 
 ;;; Project management
 
@@ -828,11 +850,54 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (smartparens-global-mode 1)
   (show-smartparens-global-mode 1))
 
-;;; Programming modes
+;;; Programming Settings
 
 ;; Make symbols pretty in programming contexts
 (when (fboundp 'global-prettify-symbols-mode)
   (add-hook 'prog-mode-hook #'global-prettify-symbols-mode))
+
+(use-package rainbow-delimiters         ; Highlight delimiters by depth
+  :defer t
+  :hook ((prog-mode . rainbow-delimiters-mode)
+         (text-mode . rainbow-delimiters-mode)))
+
+(use-package rainbow-mode               ; Fontify colors in buffers
+  :bind (("C-c t r" . rainbow-mode))
+  :delight
+  :hook prog-mode
+  :init
+  ;; Don't highlight color names (just color codes, thanks)
+  (setq rainbow-x-colors nil))
+
+(use-package whitespace-cleanup-mode    ; Intelligently clean up whitespace before buffers are saved
+  :bind (("C-c x w" . whitespace-cleanup))
+  :hook (prog-mode text-mode conf-mode)
+  :delight)
+
+(use-package eldoc                      ; Print argument information in the echo area
+  :delight eldoc-mode
+  :defer t
+  :hook (eval-expression-minibuffer-setup . eldoc-mode))
+
+(use-package deadgrep                   ; Fast, beautiful text search
+  :bind ("s-g" . deadgrep))
+
+(use-package expand-region              ; Expand the selected region by semantic units
+  :bind ("C-=" . er/expand-region))
+
+(use-package multiple-cursors
+  )
+
+(use-package dumb-jump                  ; Jump to definition dumbly
+  :hook ((prog-mode . dumb-jump-mode))
+  :bind (("M-g o" . dumb-jump-go-other-window)
+         ("M-g j" . dumb-jump-go)
+         ("M-g b" . dumb-jump-back)
+         ("M-g i" . dumb-jump-go-prompt)
+         ("M-g l" . dumb-jump-quick-look))
+  :init
+  (setq dumb-jump-selector 'ivy
+        dumb-jump-prefer-searcher 'rg))
 
 (provide 'init)
 ;;; init.el ends here
