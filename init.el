@@ -3,7 +3,7 @@
 ;; Copyright (C) 2018  Ascander Dost
 
 ;; Author: Ascander Dost <dostinthemachine@gmail.com>
-;; Keywords: 
+;; Keywords:
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -164,7 +164,7 @@
  frame-resize-pixelwise t            ; Resize frames by pixel (don't snap to char)
  history-length 1000                 ; Store more history
  use-dialog-box nil)                 ; Don't use dialogues for mouse imput
- 
+
 ;; Miscellaneous settings
 (fset 'yes-or-no-p 'y-or-n-p)                      ; Replace yes/no prompts with y/n
 (fset 'display-startup-echo-area-message #'ignore) ; No startup message in the echo area
@@ -295,7 +295,7 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
   (setq paradox-execute-asynchronously t
         paradox-spinner-type 'progress-bar
         paradox-column-width-package 32)
-  
+
   (load *paradox-github-token-file* :noerror :nomessage)
   (paradox-enable))
 
@@ -328,7 +328,7 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
   :init
   (when-let (gls (and *is-a-mac* (executable-find "gls")))
     (setq insert-directory-program gls))
-  
+
   ;; Hydra from https://github.com/abo-abo/hydra/wiki/Dired
   (defhydra hydra-dired (:hint nil :color pink)
     "
@@ -379,7 +379,7 @@ T - tag prefix
     ("z" diredp-compress-this-file)
     ("Z" dired-do-compress)
     ("q" nil)
-    ("." nil :color blue))  
+    ("." nil :color blue))
   :config
   ;; Basic dired settings
   (setq dired-auto-revert-buffer t
@@ -542,7 +542,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     (">" ibuffer-filter-by-size-gt "size")
     ("<" ibuffer-filter-by-size-lt "size")
     ("/" ibuffer-filter-disable "disable")
-    ("b" hydra-ibuffer-main/body "back" :color blue))  
+    ("b" hydra-ibuffer-main/body "back" :color blue))
   :config
   (setq ibuffer-formats
         '((mark modified read-only vc-status-mini " "
@@ -646,7 +646,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (setq projectile-completion-system 'ivy
         projectile-find-dir-includes-top-level t
         projectile-switch-project-action #'projectile-dired)
-  
+
   ;; Remove dead projects when Emacs is idle
   (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
 
@@ -658,7 +658,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :bind (("C-c i w" . what-the-commit-insert)
          ("C-c g w" . what-the-commit)))
 
-(use-package magit                      ; The one and only Git front end 
+(use-package magit                      ; The one and only Git front end
   :bind (("C-c g c" . magit-clone)
          ("C-c g s" . magit-status)
          ("C-c g b" . magit-blame)
@@ -851,7 +851,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (bind-key "C-<left>" nil smartparens-mode-map)
   (bind-key "C-<right>" nil smartparens-mode-map)
   (bind-key "M-<backspace>" nil smartparens-mode-map)
-  
+
   ;;  Activate smartparens globally
   (smartparens-global-mode 1)
   (show-smartparens-global-mode 1))
