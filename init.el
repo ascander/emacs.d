@@ -908,5 +908,37 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
          ("C-c h p" . highlight-symbol-prev)
          ("C-c h r" . highlight-symbol-query-replace)))
 
+(use-package yasnippet                  ; Snippets
+  :commands (yas-reload-all yas-minor-mode)
+  :delight yas-minor-mode " |ⓨ"
+  :hook ((prog-mode . yas-minor-mode))
+  :config (yas-reload-all))
+
+(use-package yasnippet-snippets         ; Official snippets collection
+  :after yasnippet)
+
+;;; Markdown support
+
+(use-package markdown-mode              ; Major mode for editing Markdown/GFM files
+  :commands (markdown-mode gfm-mode)
+  :mode (("\\README\\.md\\'" . gfm-mode)
+         ("\\.md\\'"          . markdown-mode)
+         ("\\.markdown\\'"    . markdown-mode))
+  :init
+  ;; Turn off auto-fill for GFM markdown
+  (add-hook 'gfm-mode-hook #'turn-off-auto-fill)
+  (add-hook 'gfm-mode-hook #'visual-line-mode)
+  (setq markdown-command "multimarkdown")
+  :config
+  ;; Turn off 'M-q' in GFM markdown - it's too easy to do by mistake
+  (bind-key "M-q" #'ignore gfm-mode-map))
+
+(use-package markdown-preview-mode      ; Preview markdown
+  :after markdown-mode
+  :config
+  (setq markdown-preview-stylesheets
+        (list (concat "https://github.com/dmarcotte/github-markdown-preview/"
+                      "blob/master/data/css/github.css"))))
+
 (provide 'init)
 ;;; init.el ends here
