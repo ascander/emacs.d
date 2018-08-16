@@ -940,5 +940,64 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         (list (concat "https://github.com/dmarcotte/github-markdown-preview/"
                       "blob/master/data/css/github.css"))))
 
+;;; Scala support
+
+(use-package scala-mode                 ; Major mode for editing Scala files
+  :defer t
+  :config
+  ;; Indentation preferences
+  (setq scala-indent:default-run-on-strategy
+        scala-indent:operator-strategy)
+
+  ;; For correct newline behavior in multiline comments
+  (defun ad|scala-mode-newline-comments ()
+    "Insert a leading asterisk in multiline comments, when hitting RET."
+    (interactive)
+    (newline-and-indent)
+    (scala-indent:insert-asterisk-on-multiline-comment))
+  (bind-key "RET" #'ad-scala-mode-newline-comments scala-mode-map))
+
+(use-package sbt-mode                   ; Interactive support for Satan's Build Tool
+  :after scala-mode
+  :commands (sbt:buffer-name sbt:run-sbt sbt-start sbt-command)
+  :bind (:map scala-mode-map
+              ("C-c m b s" . sbt-start)
+              ("C-c m b c" . sbt-command)
+              ("C-c m b r" . sbt-run-previous-command))
+  :init
+  (defun ad|scala-pop-to-sbt (new-frame)
+    "Start an SBT REPL for this project, optionally in a NEW-FRAME.
+
+Select the SBT REPL for the current project in a new window, if
+one exists. If the REPL is not yet running, start it. With prefix
+argument, select the REPL in a new frame instead."
+    (interactive "P")
+    ;; Start SBT if it's not already running
+    (when (not (comint-check-proc (sbt:buffer-name)))
+      (sbt:run-sbt))
+
+    (let ((display-buffer-overriding-action
+           (if new-frame '(display-buffer-pop-up-frame) nil)))
+      (pop-to-buffer (sbt:buffer-name))))
+
+  (with-eval-after-load 'scala-mode
+    (bind-key "<f5>" #'ad|scala-pop-to-sbt scala-mode-map))
+
+  ;; Disable smartparens mode in SBT buffers, because it hangs while trying to
+  ;; find matching delimiters: LINK HERE
+  (add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
+                                   (smartparens-mode -1))))
+  :config
+  ;; Don't pop up SBT buffers automatically
+  (setq sbt:display-command-buffer nil)
+
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31 allows using
+  ;; SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map))
+
+
 (provide 'init)
 ;;; init.el ends here

@@ -24,54 +24,54 @@
 
 ;;; Code:
 
-(use-package scala-mode			; major mode for editing Scala
-  :ensure t
-  :defer t
-  :config
-  ;; Indentation preferences
-  (validate-setq scala-indent:default-run-on-strategy
-		 scala-indent:operator-strategy)
+;; (use-package scala-mode			; major mode for editing Scala
+;;   :ensure t
+;;   :defer t
+;;   :config
+;;   ;; Indentation preferences
+;;   (validate-setq scala-indent:default-run-on-strategy
+;; 		 scala-indent:operator-strategy)
 
-  ;; Newline behaves correctly in multiline comments
-  (defun ad|scala-mode-newline-comments ()
-    "Insert a leading asterisk in multiline comments."
-    (interactive)
-    (newline-and-indent)
-    (scala-indent:insert-asterisk-on-multiline-comment))
+;;   ;; Newline behaves correctly in multiline comments
+;;   (defun ad|scala-mode-newline-comments ()
+;;     "Insert a leading asterisk in multiline comments."
+;;     (interactive)
+;;     (newline-and-indent)
+;;     (scala-indent:insert-asterisk-on-multiline-comment))
 
-  (define-key scala-mode-map (kbd "RET")
-    #'ad|scala-mode-newline-comments))
+;;   (define-key scala-mode-map (kbd "RET")
+;;     #'ad|scala-mode-newline-comments))
 
-(use-package sbt-mode			; interactive support for Satan's Build Tool
-  :ensure t
-  :defer t
-  :bind (:map scala-mode-map
-	          ("C-c m b c" . sbt-command)
-	          ("C-c m b r" . sbt-run-previous-command))
-  :config
+;; (use-package sbt-mode			; interactive support for Satan's Build Tool
+;;   :ensure t
+;;   :defer t
+;;   :bind (:map scala-mode-map
+;; 	          ("C-c m b c" . sbt-command)
+;; 	          ("C-c m b r" . sbt-run-previous-command))
+;;   :config
 
-  (defun ad|scala-pop-to-sbt (new-frame)
-    "Start an SBT REPL for this project, optionally in a NEW-FRAME.
+;;   (defun ad|scala-pop-to-sbt (new-frame)
+;;     "Start an SBT REPL for this project, optionally in a NEW-FRAME.
 
-Select the SBT REPL for the current project in a new window. If
-  the REPL is not yet running, start it. With prefix argument,
-  select the REPL in a new frame instead."
-    (interactive "P")
-    ;; Start SBT when not running, taken from `sbt:command'
-    (when (not (comint-check-proc (sbt:buffer-name)))
-      (sbt:run-sbt))
+;; Select the SBT REPL for the current project in a new window. If
+;;   the REPL is not yet running, start it. With prefix argument,
+;;   select the REPL in a new frame instead."
+;;     (interactive "P")
+;;     ;; Start SBT when not running, taken from `sbt:command'
+;;     (when (not (comint-check-proc (sbt:buffer-name)))
+;;       (sbt:run-sbt))
 
-    (let ((display-buffer-overriding-action
-	   (if new-frame '(display-buffer-pop-up-frame) nil)))
-      (pop-to-buffer (sbt:buffer-name))))
+;;     (let ((display-buffer-overriding-action
+;; 	   (if new-frame '(display-buffer-pop-up-frame) nil)))
+;;       (pop-to-buffer (sbt:buffer-name))))
 
-  (with-eval-after-load 'scala-mode
-    (bind-key "C-c m s" #'ad|scala-pop-to-sbt scala-mode-map))
+;;   (with-eval-after-load 'scala-mode
+;;     (bind-key "C-c m s" #'ad|scala-pop-to-sbt scala-mode-map))
 
-  ;; Disable smartparens mode in SBT buffers, because it frequently hangs while
-  ;; trying to find matching delimiters.
-  (add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
-					               (smartparens-mode -1)))))
+;;   ;; Disable smartparens mode in SBT buffers, because it frequently hangs while
+;;   ;; trying to find matching delimiters.
+;;   (add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
+;; 					               (smartparens-mode -1)))))
 
 (use-package ensime			; enhanced Scala interaction mode for Emacs
   :ensure t
