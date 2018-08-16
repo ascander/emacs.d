@@ -910,7 +910,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package yasnippet                  ; Snippets
   :commands (yas-reload-all yas-minor-mode)
-  :delight yas-minor-mode " |ⓨ"
+  :delight yas-minor-mode "ⓨ"
   :hook ((prog-mode . yas-minor-mode))
   :config (yas-reload-all))
 
@@ -939,6 +939,17 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (setq markdown-preview-stylesheets
         (list (concat "https://github.com/dmarcotte/github-markdown-preview/"
                       "blob/master/data/css/github.css"))))
+
+;; Lisp/Emacs Lisp support
+
+(use-package elisp-mode                 ; Major mode for editing Emacs Lisp files
+  :ensure nil
+  :delight emacs-lisp-mode "ξ"
+  :bind (:map emacs-lisp-mode-map
+              ("C-c m e r" . eval-region)
+              ("C-c m e b" . eval-buffer)
+              ("C-c m e e" . eval-last-sexp)
+              ("C-c m e f" . eval-defun)))
 
 ;;; Scala support
 
