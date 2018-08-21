@@ -33,7 +33,7 @@
 ;; Increase GC threshold for faster startup, and set to a more
 ;; reasonable value after startup.
 (let ((normal-gc-cons-threshold (* 20 1024 1024))
-      (init-gc-cons-threshold (* 128 1024 1024)))
+      (init-gc-cons-threshold (* 256 1024 1024)))
   (setq gc-cons-threshold init-gc-cons-threshold)
   (add-hook 'after-init-hook
             (lambda () (setq gc-cons-threshold normal-gc-cons-threshold))))
@@ -188,7 +188,7 @@
   "Default font size, in points.")
 
 (set-face-attribute 'default nil
-                    :family "Iosevka Type"
+                    :family "Iosevka"
                     :height 120
                     :weight 'regular)
 
@@ -249,6 +249,10 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
   ("+"   ad|global-font-size-incr :bind nil)
   ("0"   ad|global-font-size-reset :bind nil)
   ("q"   nil :color blue))
+
+(use-package init-ligatures             ; Sick liggz
+  :load-path "lisp"
+  :ensure nil)
 
 ;;; Color theme and looks
 
@@ -625,7 +629,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (windmove-default-keybindings 'super))
 
 ;; Quicker buffer cycling commands
-(bind-keys ("s-p" . previous-buffer)
+(bind-keys ("s-p" . previous-buffer)    ; TODO: conflicts with projectile command prefix
            ("s-n" . next-buffer)
            ("s-k" . kill-this-buffer))
 
@@ -634,6 +638,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package init-org                   ; The almighty Org mode
   :load-path "lisp"
   :ensure nil)
+
+(use-package ox-reveal                  ; Reveal.js back end for Org export
+  :load-path "site-lisp/org-reveal")
 
 ;;; Project management
 
@@ -774,7 +781,11 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   ;; Use Smex ranking of results automatically
   (use-package smex
     :config (smex-initialize))
-  ;; TODO: counsel powered `org-goto' command
+
+  ;; Counsel-powered `org-goto' command
+  (setq counsel-org-goto-display-style 'path
+        counsel-org-goto-face-style 'org)
+
   (counsel-mode 1))
 
 (use-package counsel-projectile         ; Counsel integration with Projectile
@@ -917,6 +928,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package yasnippet-snippets         ; Official snippets collection
   :after yasnippet)
 
+(use-package htmlize                    ; Convert buffer text/decorations into HTML
+  :defer t)
+
 ;;; Markdown support
 
 (use-package markdown-mode              ; Major mode for editing Markdown/GFM files
@@ -966,7 +980,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     (interactive)
     (newline-and-indent)
     (scala-indent:insert-asterisk-on-multiline-comment))
-  (bind-key "RET" #'ad-scala-mode-newline-comments scala-mode-map))
+
+  (define-key scala-mode-map (kbd "RET")
+    #'ad|scala-mode-newline-comments))
 
 (use-package sbt-mode                   ; Interactive support for Satan's Build Tool
   :after scala-mode

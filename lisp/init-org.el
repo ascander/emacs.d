@@ -278,7 +278,7 @@ Skip project and sub-project tasks, habits, and project related tasks."
 
   ;; Navigate by headings, using Ivy
   (setq org-goto-interface 'outline-path-completion
-                 org-outline-path-complete-in-steps nil))
+        org-outline-path-complete-in-steps nil))
 
 (use-package org-bullets                ; Fancy utf-8 bullets for org mode
   :hook ((org-mode . org-bullets-mode)))
