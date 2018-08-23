@@ -75,6 +75,14 @@
 
 (when *is-a-mac*
   ;; Modifier keys
+  ;;
+  ;; NOTE: this mapping assumes the default modifier key mapping for OS X. I've
+  ;; additionally added the following mappings:
+  ;;
+  ;;   Caps Lock (⇪) ➔ Control (^)
+  ;;   Return (⏎) ➔ Control (^) when used with another key
+  ;;
+  ;; Using Karabiner Elements (https://pqrs.org/osx/karabiner/).
   (setq mac-command-modifier 'meta      ; Command is Meta
         mac-option-modifier 'super      ; Alt/Option is Super
         mac-function-modifier 'none)    ; Reserve Function for OS X
@@ -184,17 +192,18 @@
 ;;; Fonts
 
 ;; Default font settings
-(defvar default-font-size-pt 12
+(defvar default-font-size-pt 14
   "Default font size, in points.")
 
 (set-face-attribute 'default nil
-                    :family "Iosevka"
-                    :height 120
+                    :family "Iosevka Pro" ; custom build of Iosevka with ligatures
+
+                    :height 140
                     :weight 'regular)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans"
-                    :height 140
+                    :height 150
                     :weight 'regular)
 
 ;; Global font resizing, taken from https://github.com/kaushalmodi/.emacs.d
@@ -935,7 +944,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package markdown-mode              ; Major mode for editing Markdown/GFM files
   :commands (markdown-mode gfm-mode)
-  :mode (("\\README\\.md\\'" . gfm-mode)
+  :mode (("\\README\\.md\\'"  . gfm-mode)
          ("\\.md\\'"          . markdown-mode)
          ("\\.markdown\\'"    . markdown-mode))
   :init
