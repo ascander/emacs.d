@@ -284,9 +284,10 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
   :config
   (load-theme 'solarized-dark 'no-confirm))
 
-(use-package dimmer                     ; Highlight the current buffer
+(use-package dimmer                     ; Dim buffers other than the current one
   :init
-  (add-hook 'after-init-hook #'dimmer-mode))
+  (add-hook 'after-init-hook #'dimmer-mode)
+  (setq dimmer-fraction 0.4))
 
 (use-package stripe-buffer              ; Striped backgorund in `dired'
   :defer t
@@ -939,6 +940,53 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package htmlize                    ; Convert buffer text/decorations into HTML
   :defer t)
+
+(use-package company                    ; Text completion framework for Emacs
+  :defer 3
+  :delight company-mode "Ⓒ"
+  :config
+  ;; Basic settings
+  (setq company-dabbrev-ignore-case nil
+        company-dabbrev-code-ignore-case nil
+        company-dabbrev-downcase nil
+        company-idle-delay 0.5
+        company-tooltip-align-annotations t
+        company-tooltip-flip-when-above t
+        company-show-numbers t)
+
+  ;; Add YASnippet support for all company backends
+  ;; See: https://github.com/syl20bnr/spacemacs/pull/179
+  (defvar company-mode-enable-yas t "Enable YASnippet for all company backends.")
+
+  (defun ad|company-mode-backend-with-yas (backend)
+    (if (or (not company-mode-enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
+        backend
+      (append (if (consp backend) backend (list backend))
+              '(:with company-yasnippet))))
+
+  (setq company-backends
+        (mapcar #'ad|company-mode-backend-with-yas company-backends))
+
+  ;; Turn off company support for markdown mode
+  (add-hook 'markdown-mode-hook '(lambda () (company-mode -1)))
+
+  ;; Leave TAB for YASnippet
+  (define-key company-active-map (kbd "TAB") nil)
+  (define-key company-active-map (kbd "<tab>") nil)
+  (define-key company-active-map [tab] nil)
+
+  (global-company-mode 1))
+
+(use-package company-statistics         ; Sort company completions SMRT
+  :after company
+  :config (company-statistics-mode 1))
+
+(use-package company-quickhelp          ; Show popup documentation for company candidates
+  ;; Disabled because the tooltip can't be styled on a Mac.
+  ;; See: https://github.com/expez/company-quickhelp/issues/36
+  :disabled t
+  :after company
+  :config (company-quickhelp-mode 1))
 
 ;;; Markdown support
 
