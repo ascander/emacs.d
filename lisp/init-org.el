@@ -131,11 +131,7 @@
   (setq org-agenda-compact-blocks nil)
 
   ;; Agenda files
-  (setq org-agenda-files '("~/org/refile.org"
-                                    "~/org/work.org"
-                                    "~/org/home.org"
-                                    "~/org/emacs.org"
-                                    "~/org/reminders.org"))
+  (setq org-agenda-files '("~/org"))
 
   ;; === Utility functions for agenda view ===
   (defun ad|is-project-p ()
@@ -284,7 +280,7 @@ Skip project and sub-project tasks, habits, and project related tasks."
   :hook ((org-mode . org-bullets-mode)))
 
 (use-package org-cliplink               ;   insert links from the clipboard
-  :bind ("C-c o i" . org-cliplink))
+  :bind ("C-c L" . org-cliplink))
 
 (provide 'init-org)
 ;;; init-org.el ends here

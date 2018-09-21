@@ -96,7 +96,7 @@
   :ensure t
   :config
   (progn
-    (validate-setq exec-path-from-shell-check-startup-files nil
+    (setq exec-path-from-shell-check-startup-files nil
                    exec-path-from-shell-variables
                    '("JAVA_OPTS"        ; Java options
                      "SBT_OPTS"         ; SBT options
@@ -182,6 +182,9 @@
 (global-hl-line-mode)                              ; Highlight the current line
 (line-number-mode)                                 ; Display line number in the mode line
 (column-number-mode)                               ; Display column number in the mode line
+
+;; Use ESC as a universal "get me out of here" command
+(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 
 ;; Make the Emacs shell ('M-x shell') interactive, and disable echoing each
 ;; terminal command as it's entered on the command line.
@@ -282,6 +285,15 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
         solarized-height-plus-3 1.0
         solarized-height-plus-4 1.0)
   :config
+  ;; Create an `after-load-theme-hook' so that we can set faces after switching
+  ;; themes interactively as well.
+  ;; See: https://github.com/pkkm/.emacs.d/blob/e86c9e541a9b18f40292d32dc431557d0ca3e62b/conf/view/color-theme.el#L5-L9
+  (defvar after-load-theme-hook nil
+    "Hook run after a color theme is loaded using `load-theme'.")
+  (defadvice load-theme (after run-after-load-theme-hook activate)
+    "Run `after-load-theme-hook'."
+    (run-hooks 'after-load-theme-hook))
+
   (load-theme 'solarized-dark 'no-confirm))
 
 (use-package dimmer                     ; Dim buffers other than the current one
@@ -291,10 +303,9 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 
 (use-package stripe-buffer              ; Striped backgorund in `dired'
   :defer t
-  :init
-  ;; NOTE: the face for `stripe-hl-line' is customized via the customization
-  ;; interface. It would be good to figure out how to set this here.
-  (add-hook 'dired-mode-hook #'stripe-listify-buffer))
+  :hook (dired-mode . stripe-listify-buffer)
+  :config
+  (set-face-attribute 'stripe-hl-line nil :inherit #'region))
 
 ;;; Package manager and init development
 
@@ -643,6 +654,12 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
            ("s-n" . next-buffer)
            ("s-k" . kill-this-buffer))
 
+;; Split and manage windows easily
+(global-set-key (kbd "M-1") (kbd "C-x 1")) ; ⌘-1 kill other windows (keep this one)
+(global-set-key (kbd "M-2") (kbd "C-x 2")) ; ⌘-2 split horizontally
+(global-set-key (kbd "M-3") (kbd "C-x 3")) ; ⌘-3 split vertically
+(global-set-key (kbd "M-0") (kbd "C-x 0")) ; ⌘-0 kill this window
+
 ;;; Org
 
 (use-package init-org                   ; The almighty Org mode
@@ -749,6 +766,12 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         ivy-initial-inputs-alist nil
         ivy-count-format "")
 
+  ;; Make the `ivy-current-match' face a bit more distinct
+  (set-face-attribute 'ivy-current-match nil :inherit #'warning)
+  (add-hook 'after-load-theme-hook
+            '(lambda () (set-face-attribute
+                    'ivy-current-match nil :inherit #'warning)))
+  
   (ivy-mode 1))
 
 (use-package ivy-hydra                  ; A useful hydra for the Ivy minibuffer
@@ -802,6 +825,8 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :load-path "site-lisp/counsel-projectile"
   :after (counsel projectile)
   :config
+  
+  
   ;; TODO: remap `projectile-ag' to `counsel-projectile-rg'
   (counsel-projectile-mode 1))
 
@@ -877,7 +902,16 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (smartparens-global-mode 1)
   (show-smartparens-global-mode 1))
 
+(use-package unfill                     ; The inverse of Emacs' fill
+  :defer t)
+
 ;;; Programming Settings
+
+(use-package shell-pop                  ; Use a shell easily on Emacs
+  :config
+  (custom-set-variables
+   '(shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
+   '(shell-pop-universal-key "M-=")))
 
 ;; Make symbols pretty in programming contexts
 (when (fboundp 'global-prettify-symbols-mode)
@@ -908,6 +942,33 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package deadgrep                   ; Fast, beautiful text search
   :bind ("s-g" . deadgrep))
+
+(use-package multiple-cursors           ; Edit text with multiple cursors
+  :defer 4
+  :bind (("C-c o <SPC>" . mc/vertical-align-with-space)
+         ("C-c o a"     . mc/vertical-align)
+         ("C-c o e"     . mc/mark-more-like-this-extended)
+         ("C-c o h"     . mc/mark-all-like-this-dwim)
+         ("C-c o i n"   . mc/insert-numbers)
+         ("C-c o i l"   . mc/insert-letters)
+         ("C-c o l"     . mc/edit-lines)
+         ("C-c o n"     . mc/mark-next-like-this)
+         ("C-c o p"     . mc/mark-previous-like-this)
+         ("C-c o r"     . vr/mc-mark)
+         ("C-c o C-a"   . mc/edit-beginnings-of-lines)
+         ("C-c o C-e"   . mc/edit-ends-of-lines)
+         ("C-c o C-s"   . mc/mark-all-in-region))
+  :config
+  (setq
+   mc/mode-line
+   ;; Simplify the MC mode line indicator
+   '(:propertize (:eval (concat " " (number-to-string (mc/num-cursors))))
+                 face font-lock-warning-face)))
+
+(use-package expand-region              ; Expand region by semantic units
+  :ensure t
+  :bind (("C-c v" . er/expand-region)))
+
 
 (use-package expand-region              ; Expand the selected region by semantic units
   :bind ("C-=" . er/expand-region))
@@ -967,8 +1028,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (setq company-backends
         (mapcar #'ad|company-mode-backend-with-yas company-backends))
 
-  ;; Turn off company support for markdown mode
-  (add-hook 'markdown-mode-hook '(lambda () (company-mode -1)))
+  ;; Turn off company support for certain modes
+  (dolist (hook '(markdown-mode-hook org-mode-hoo))
+    (add-hook hook '(lambda () (company-mode -1))))
 
   ;; Leave TAB for YASnippet
   (define-key company-active-map (kbd "TAB") nil)
@@ -1081,7 +1143,6 @@ argument, select the REPL in a new frame instead."
    'minibuffer-complete-word
    'self-insert-command
    minibuffer-local-completion-map))
-
 
 (provide 'init)
 ;;; init.el ends here
