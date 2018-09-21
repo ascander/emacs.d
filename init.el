@@ -761,11 +761,19 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
          ("s-J" . ivy-switch-buffer-other-window)
          ("s-r" . ivy-resume))
   :config
+  (use-package flx)
+  
   ;; Basic settings
   (setq ivy-use-virtual-buffers t
         ivy-initial-inputs-alist nil
         ivy-count-format "")
 
+  ;; Enable fuzzy searching everywhere except for Swiper
+  (setq ivy-re-builders-alist
+        '((swiper            . ivy--regex-plus)
+          (ivy-switch-buffer . ivy--regex-plus)
+          (t                 . ivy--regex-fuzzy)))
+  
   ;; Make the `ivy-current-match' face a bit more distinct
   (set-face-attribute 'ivy-current-match nil :inherit #'warning)
   (add-hook 'after-load-theme-hook
