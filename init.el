@@ -704,7 +704,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         magit-branch-prefer-remote-upstream '("master")
         magit-branch-adjust-remote-upstream-alist '(("origin/master" "master"))
         magit-revision-show-gravatars nil
-        magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+        magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
 
   ;; Show refined hunks during diffs
   (set-default 'magit-diff-refine-hunk t)
@@ -757,8 +757,8 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package ivy                        ; Generic completion mechanism for Emacs
   :delight ivy-mode
   :demand t
-  :bind (("s-j" . ivy-switch-buffer)
-         ("s-J" . ivy-switch-buffer-other-window)
+  :bind (("s-b" . ivy-switch-buffer)
+         ("s-B" . ivy-switch-buffer-other-window)
          ("s-r" . ivy-resume))
   :config
   (use-package flx)
@@ -872,6 +872,12 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 ;;; Basic editing
 
+;; Use super+j|k|i|l for navigation  instead of C-f|n|p|b
+(global-set-key (kbd "s-j") #'left-char)
+(global-set-key (kbd "s-i") #'previous-line)
+(global-set-key (kbd "s-k") #'next-line)
+(global-set-key (kbd "s-l") #'right-char)
+
 ;; Display line numbers when they matter; namely, when navigating to a specific
 ;; line via `goto-line'.
 (defun ad|goto-line-with-numbers ()
@@ -918,7 +924,8 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package shell-pop                  ; Use a shell easily on Emacs
   :config
   (custom-set-variables
-   '(shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
+   '(shell-pop-shell-type
+     (quote ("term" "*terminal*" (lambda nil (term shell-pop-term-shell)))))
    '(shell-pop-universal-key "M-=")))
 
 ;; Make symbols pretty in programming contexts
@@ -1112,6 +1119,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     #'ad|scala-mode-newline-comments))
 
 (use-package sbt-mode                   ; Interactive support for Satan's Build Tool
+  :disabled t
   :after scala-mode
   :commands (sbt:buffer-name sbt:run-sbt sbt-start sbt-command)
   :bind (:map scala-mode-map
