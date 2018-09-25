@@ -277,7 +277,7 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
         solarized-use-more-italic nil
         solarized-distinct-doc-face t
         solarized-emphasize-indicators nil
-        solarized-high-contrast-mode-line t)
+        solarized-high-contrast-mode-line nil)
   ;; Avoid all font size changes
   (setq solarized-height-minus-1 1.0
         solarized-height-plus-1 1.0
@@ -294,6 +294,15 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
     "Run `after-load-theme-hook'."
     (run-hooks 'after-load-theme-hook))
 
+  ;; Tweak treatment of modeline for Moody
+  ;; See https://github.com/tarsius/moody#tabs-and-ribbons-for-the-mode-line
+  (let ((line (face-attribute 'mode-line :underline)))
+    (set-face-attribute 'mode-line          nil :overline line)
+    (set-face-attribute 'mode-line-inactive nil :overline line)
+    (set-face-attribute 'mode-line-inactive nil :underline line)
+    (set-face-attribute 'mode-line          nil :box nil)
+    (set-face-attribute 'mode-line-inactive nil :box nil))
+
   (load-theme 'solarized-dark 'no-confirm))
 
 (use-package dimmer                     ; Dim buffers other than the current one
@@ -306,6 +315,47 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
   :hook (dired-mode . stripe-listify-buffer)
   :config
   (set-face-attribute 'stripe-hl-line nil :inherit #'region))
+
+;;; Modeline improvements
+
+(use-package moody                      ; Tabs and Ribbons for the mode line
+  :config
+  (setq x-underline-at-descent-line t)
+
+  ;; pl functions copied from powerline
+  ;; https://github.com/milkypostman/powerline/blob/master/powerline-separators.el
+  (defun pl/color-xyz-to-apple-rgb (X Y Z)
+    "Convert CIE X Y Z colors to Apple RGB color space."
+    (let ((r (+ (* 3.2404542 X) (* -1.5371385 Y) (* -0.4985314 Z)))
+          (g (+ (* -0.9692660 X) (* 1.8760108 Y) (* 0.0415560 Z)))
+          (b (+ (* 0.0556434 X) (* -0.2040259 Y) (* 1.0572252 Z))))
+      (list (expt r (/ 1.8)) (expt g (/ 1.8)) (expt b (/ 1.8)))))
+
+  (defun pl/color-srgb-to-apple-rgb (red green blue)
+    "Convert RED GREEN BLUE colors from sRGB color space to Apple RGB.
+  RED, GREEN and BLUE should be between 0.0 and 1.0, inclusive."
+    (apply 'pl/color-xyz-to-apple-rgb (color-srgb-to-xyz red green blue)))
+
+  (use-package minions
+    :config (minions-mode 1))
+
+  (defun ad|hex-to-apple-rgb-hex (hex)
+    (apply #'color-rgb-to-hex
+           (apply #'pl/color-srgb-to-apple-rgb (color-name-to-rgb hex))))
+  
+  (defun ad|moody-slant (direction c1 c2 c3 &optional height)
+    (apply
+     #'moody-slant
+     direction
+     (ad|hex-to-apple-rgb-hex c1)
+     (ad|hex-to-apple-rgb-hex c2)
+     (ad|hex-to-apple-rgb-hex c3)
+     height))
+
+  (setq moody-slant-function 'ad|moody-slant)
+ 
+  (moody-replace-mode-line-buffer-identification)
+  (moody-replace-vc-mode))
 
 ;;; Package manager and init development
 
@@ -1092,7 +1142,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package elisp-mode                 ; Major mode for editing Emacs Lisp files
   :ensure nil
-  :delight emacs-lisp-mode "ξ"
   :bind (:map emacs-lisp-mode-map
               ("C-c m e r" . eval-region)
               ("C-c m e b" . eval-buffer)
