@@ -319,43 +319,17 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 ;;; Modeline improvements
 
 (use-package moody                      ; Tabs and Ribbons for the mode line
+  :load-path "site-lisp/moody"
   :config
-  (setq x-underline-at-descent-line t)
+  (setq x-underline-at-descent-line t
+        moody-slant-function #'moody-slant-apple-rgb)
 
-  ;; pl functions copied from powerline
-  ;; https://github.com/milkypostman/powerline/blob/master/powerline-separators.el
-  (defun pl/color-xyz-to-apple-rgb (X Y Z)
-    "Convert CIE X Y Z colors to Apple RGB color space."
-    (let ((r (+ (* 3.2404542 X) (* -1.5371385 Y) (* -0.4985314 Z)))
-          (g (+ (* -0.9692660 X) (* 1.8760108 Y) (* 0.0415560 Z)))
-          (b (+ (* 0.0556434 X) (* -0.2040259 Y) (* 1.0572252 Z))))
-      (list (expt r (/ 1.8)) (expt g (/ 1.8)) (expt b (/ 1.8)))))
-
-  (defun pl/color-srgb-to-apple-rgb (red green blue)
-    "Convert RED GREEN BLUE colors from sRGB color space to Apple RGB.
-  RED, GREEN and BLUE should be between 0.0 and 1.0, inclusive."
-    (apply 'pl/color-xyz-to-apple-rgb (color-srgb-to-xyz red green blue)))
-
-  (use-package minions
-    :config (minions-mode 1))
-
-  (defun ad|hex-to-apple-rgb-hex (hex)
-    (apply #'color-rgb-to-hex
-           (apply #'pl/color-srgb-to-apple-rgb (color-name-to-rgb hex))))
-  
-  (defun ad|moody-slant (direction c1 c2 c3 &optional height)
-    (apply
-     #'moody-slant
-     direction
-     (ad|hex-to-apple-rgb-hex c1)
-     (ad|hex-to-apple-rgb-hex c2)
-     (ad|hex-to-apple-rgb-hex c3)
-     height))
-
-  (setq moody-slant-function 'ad|moody-slant)
- 
   (moody-replace-mode-line-buffer-identification)
   (moody-replace-vc-mode))
+
+(use-package minions                    ; A minor-mode menu for the mode line
+  :after moody
+  :config (minions-mode 1))
 
 ;;; Package manager and init development
 
