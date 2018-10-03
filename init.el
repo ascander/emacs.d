@@ -83,8 +83,8 @@
   ;;   Return (⏎) ➔ Control (^) when used with another key
   ;;
   ;; Using Karabiner Elements (https://pqrs.org/osx/karabiner/).
-  (setq mac-command-modifier 'meta      ; Command is Meta
-        mac-option-modifier 'super      ; Alt/Option is Super
+  (setq mac-command-modifier 'super     ; Command is Super
+        mac-option-modifier 'meta       ; Alt/Option is Meta
         mac-function-modifier 'none)    ; Reserve Function for OS X
 
   ;; Reuse existing frame for opening new files
@@ -271,8 +271,7 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 (use-package solarized-theme            ; I always come back to you
   :init
   ;; Basic settings - disprefer bold and italics, use high contrast
-  (setq x-underline-at-descent-line t   ; Fixes the box around the mode line
-        solarized-use-variable-pitch nil
+  (setq solarized-use-variable-pitch nil
         solarized-use-less-bold t
         solarized-use-more-italic nil
         solarized-distinct-doc-face t
@@ -285,6 +284,8 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
         solarized-height-plus-3 1.0
         solarized-height-plus-4 1.0)
   :config
+  (load-theme 'solarized-dark t)
+
   ;; Create an `after-load-theme-hook' so that we can set faces after switching
   ;; themes interactively as well.
   ;; See: https://github.com/pkkm/.emacs.d/blob/e86c9e541a9b18f40292d32dc431557d0ca3e62b/conf/view/color-theme.el#L5-L9
@@ -297,13 +298,14 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
   ;; Tweak treatment of modeline for Moody
   ;; See https://github.com/tarsius/moody#tabs-and-ribbons-for-the-mode-line
   (let ((line (face-attribute 'mode-line :underline)))
-    (set-face-attribute 'mode-line          nil :overline line)
-    (set-face-attribute 'mode-line-inactive nil :overline line)
+    (set-face-attribute 'mode-line          nil :overline  line)
+    (set-face-attribute 'mode-line-inactive nil :overline  line)
     (set-face-attribute 'mode-line-inactive nil :underline line)
-    (set-face-attribute 'mode-line          nil :box nil)
-    (set-face-attribute 'mode-line-inactive nil :box nil))
+    (set-face-attribute 'mode-line          nil :box       nil)
+    (set-face-attribute 'mode-line-inactive nil :box       nil)))
 
-  (load-theme 'solarized-dark 'no-confirm))
+(use-package material-theme             ; Google Material Design theme for Emacs
+  :defer t)
 
 (use-package dimmer                     ; Dim buffers other than the current one
   :init
@@ -621,7 +623,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
                        (ibuffer-do-sort-by-alphabetic)))))
 
 (use-package ace-window                 ; Fast window switching
-  :bind (("M-o" . ace-window))
+  :bind (("s-;" . ace-window))
   :init
   :config
   ;; Set face for `aw-leading-char-face'
@@ -666,12 +668,15 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package winner                     ; Undo/redo window configuration changes
   :config (winner-mode 1))
 
-(use-package windmove                   ; Navigate windows using arrow keys
+(use-package windmove                   ; Navigate windows
   :config
-  ;; Wrap around the edge of the frame, and user Super instead of Shift, because
-  ;; the Shift key causes conflicts in `org-mode'.
   (setq windmove-wrap-around t)
-  (windmove-default-keybindings 'super))
+
+  ;; Set up common MacOS keybindings for window navigation (like in iTerm)
+  (global-set-key (kbd "s-[") #'windmove-left)
+  (global-set-key (kbd "s-]") #'windmove-right)
+  (global-set-key (kbd "s-{") #'windmove-up)
+  (global-set-key (kbd "s-}") #'windmove-up))
 
 ;; Quicker buffer cycling commands
 (bind-keys ("s-p" . previous-buffer)    ; TODO: conflicts with projectile command prefix
@@ -679,10 +684,10 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
            ("s-k" . kill-this-buffer))
 
 ;; Split and manage windows easily
-(global-set-key (kbd "M-1") (kbd "C-x 1")) ; ⌘-1 kill other windows (keep this one)
-(global-set-key (kbd "M-2") (kbd "C-x 2")) ; ⌘-2 split horizontally
-(global-set-key (kbd "M-3") (kbd "C-x 3")) ; ⌘-3 split vertically
-(global-set-key (kbd "M-0") (kbd "C-x 0")) ; ⌘-0 kill this window
+(global-set-key (kbd "s-1") (kbd "C-x 1")) ; ⌘-1 kill other windows (keep this one)
+(global-set-key (kbd "s-2") (kbd "C-x 2")) ; ⌘-2 split horizontally
+(global-set-key (kbd "s-3") (kbd "C-x 3")) ; ⌘-3 split vertically
+(global-set-key (kbd "s-0") (kbd "C-x 0")) ; ⌘-0 kill this window
 
 ;;; Org
 
@@ -896,11 +901,30 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 ;;; Basic editing
 
+;; Common MacOS keybindings; taken from https://github.com/freetonik/castlemacs
+(global-set-key (kbd "s-s") 'save-buffer)             ; save
+(global-set-key (kbd "s-S") 'write-file)              ; save as
+(global-set-key (kbd "s-q") 'save-buffers-kill-emacs) ; quit
+(global-set-key (kbd "s-a") 'mark-whole-buffer)       ; select all
+
 ;; Use super+j|k|i|l for navigation  instead of C-f|n|p|b
 (global-set-key (kbd "s-j") #'left-char)
 (global-set-key (kbd "s-i") #'previous-line)
 (global-set-key (kbd "s-k") #'next-line)
 (global-set-key (kbd "s-l") #'right-char)
+
+;; Common ⌘-[arrow] keybindings for navigation/selection
+(global-set-key (kbd "s-<right>") #'move-end-of-line)   ; end of line
+(global-set-key (kbd "s-S-<right>") (kbd "C-S-e"))      ; select to end of line
+(global-set-key (kbd "s-<left>") #'back-to-indentation) ; beginning (first non-blank) of line
+(global-set-key (kbd "s-S-<left>") (kbd "M-S-m"))       ; select to beginning of line
+
+(global-set-key (kbd "s-<up>") #'beginning-of-buffer)   ; first line
+(global-set-key (kbd "s-<down>") #'end-of-buffer)       ; last line
+
+;; Killing; note 'M-<backspace>' kills the word backwards
+(global-set-key (kbd "s-<backspace>") #'kill-whole-line) ; kill line backwards
+(global-set-key (kbd "M-S-<backspace>") #'kill-word)     ; kill word forwards
 
 ;; Display line numbers when they matter; namely, when navigating to a specific
 ;; line via `goto-line'.
@@ -943,7 +967,24 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package unfill                     ; The inverse of Emacs' fill
   :defer t)
 
+(use-package undo-tree                  ; Replace the confusing Emacs undo system
+  :delight undo-tree-mode
+  :init
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/.undo"))
+        undo-tree-auto-save-history t
+        undo-tree-visualizer-timestamps t
+        undo-tree-visualizer-diff t)
+  :config
+  (global-undo-tree-mode 1)
+
+  ;; Use familiar MacOS keybindings for undo/redo
+  (global-set-key (kbd "s-z") 'undo-tree-undo)
+  (global-set-key (kbd "s-Z") 'undo-tree-redo))
+
 ;;; Programming Settings
+
+;; Use the familiar MacOS keybinding for commenting
+(global-set-key (kbd "s-/") #'comment-dwim)
 
 (use-package shell-pop                  ; Use a shell easily on Emacs
   :config
@@ -1006,11 +1047,8 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package expand-region              ; Expand region by semantic units
   :ensure t
-  :bind (("C-c v" . er/expand-region)))
-
-
-(use-package expand-region              ; Expand the selected region by semantic units
-  :bind ("C-=" . er/expand-region))
+  :bind (("s-'"  . er/expand-region)
+         ("s-\"" . er/contract-region)))
 
 (use-package dumb-jump                  ; Jump to definition dumbly
   :hook ((prog-mode . dumb-jump-mode))
@@ -1182,6 +1220,13 @@ argument, select the REPL in a new frame instead."
    'minibuffer-complete-word
    'self-insert-command
    minibuffer-local-completion-map))
+
+;;; Python support
+
+(use-package elpy                       ; Emacs Lisp Python environment
+  :defer 4
+  :init (setq elpy-rpc-backend "jedi")
+  :config (elpy-enable))
 
 (provide 'init)
 ;;; init.el ends here
