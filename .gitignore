@@ -1,54 +1,11 @@
-# Elisp byte code
-*.elc
-
-# Customization settings. We ignore these because they are automatically
-# generated, and sometimes contain “local” information (e.g. safe themes,
-# automatically installed packages). And all of my real settings are in init.el
-# anyway
-/etc/custom.el
-
-# Installed packages
-/elpa/
-
-# Recovery and backup directories
-/auto-save-list/
-/.backup/
-
-# Cache files and settings for packages
-.#*
-.org-id-locations
-.historian
-recentf~
-network-security.data
-/tutorial/
-/.emacs.desktop*
-/.mc-lists.el
-/smex-items
 /bookmarks
-/history
-/ido.last
-/places
+/elpa/
+/paradox-token.el
 /projectile-bookmarks.eld
-/projectile.cache
 /recentf
-/semanticdb/
-/session.*
-/tramp
-/tramp-auto-save
-/url/
-/var/
-/abbrev_defs
-/cider-repl-history
-/eww-bookmarks
-/.sx
-/eshell/
+/smex-items
 /company-statistics-cache.el
-/fixes/
-/helm-adaptive-history
-/el-get/
 /site-lisp/
-/request/
-/.cask/
-/autosave/
-/backup/
-/ensime/
+/.markdown-preview.html
+
+

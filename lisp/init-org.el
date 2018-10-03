@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-(use-package org			; the almighty Org mode
+(use-package org                        ; The almighty Org mode
   :ensure org-plus-contrib
   :pin org
   :mode (("\\.org$" . org-mode))
@@ -34,7 +34,7 @@
          ("C-c C-j"     . counsel-org-goto))
   :config
   ;; Defaults
-  (validate-setq
+  (setq
    org-src-fontify-natively t           ; fontify text in code blocks
    org-log-done 'time                   ; timestamp done states
    org-use-fast-todo-selection t        ; fast-select TODO states
@@ -131,11 +131,7 @@
   (setq org-agenda-compact-blocks nil)
 
   ;; Agenda files
-  (validate-setq org-agenda-files '("~/org/refile.org"
-                                    "~/org/work.org"
-                                    "~/org/home.org"
-                                    "~/org/emacs.org"
-                                    "~/org/reminders.org"))
+  (setq org-agenda-files '("~/org"))
 
   ;; === Utility functions for agenda view ===
   (defun ad|is-project-p ()
@@ -274,28 +270,17 @@ Skip project and sub-project tasks, habits, and project related tasks."
                                 (org-tags-match-list-sublevels nil)))))))
 
   ;; Archiving
-  (validate-setq org-archive-location "~/org/archive.org::* From %s")
+  (setq org-archive-location "~/org/archive.org::* From %s")
 
   ;; Navigate by headings, using Ivy
-  (validate-setq org-goto-interface 'outline-path-completion
-                 org-outline-path-complete-in-steps nil)
+  (setq org-goto-interface 'outline-path-completion
+        org-outline-path-complete-in-steps nil))
 
+(use-package org-bullets                ; Fancy utf-8 bullets for org mode
+  :hook ((org-mode . org-bullets-mode)))
 
-  )
-
-(use-package org-bullets		; fancy utf-8 bullets for org mode
-  :ensure t
-  :defer t
-  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-
-(use-package org-cliplink            ; insert links from the clipboard
-  :ensure t
-  :bind ("C-c o i" . org-cliplink))
-
-(use-package toc-org                    ; Maintain a ToC in org files
-  :ensure t
-  :defer t
-  :init (add-hook 'org-mode-hook (lambda () (toc-org-enable))))
+(use-package org-cliplink               ;   insert links from the clipboard
+  :bind ("C-c L" . org-cliplink))
 
 (provide 'init-org)
 ;;; init-org.el ends here
