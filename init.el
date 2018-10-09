@@ -744,12 +744,13 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package projectile                 ; Project management for Emacs
   :defer 2
   :delight projectile-mode
-  :bind-keymap ("s-p" . projectile-command-map)
+  :bind-keymap ("M-p" . projectile-command-map)
   :config
   ;; Basic settings
   (setq projectile-completion-system 'ivy
         projectile-find-dir-includes-top-level t
-        projectile-switch-project-action #'projectile-dired)
+        projectile-switch-project-action #'projectile-dired
+        projectile-indexing-method 'turbo-alien)
 
   ;; Remove dead projects when Emacs is idle
   (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
@@ -765,6 +766,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package magit                      ; The one and only Git front end
   :bind (("C-c g c" . magit-clone)
          ("C-c g s" . magit-status)
+         ("s-G"     . magit-status)
          ("C-c g b" . magit-blame)
          ("C-c g p" . magit-pull))
   :config
@@ -875,6 +877,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :demand t
   :delight counsel-mode
   :bind (([remap execute-extended-command] . counsel-M-x)
+         ("s-P"                            . counsel-M-x) ; familiar command palette keybinding for MacOS
          ([remap find-file]                . counsel-find-file)
          ([remap describe-face]            . counsel-describe-face)
          ([remap describe-function]        . counsel-describe-function)
@@ -900,11 +903,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (counsel-mode 1))
 
 (use-package counsel-projectile         ; Counsel integration with Projectile
-  :load-path "site-lisp/counsel-projectile"
   :after (counsel projectile)
+  :bind (("s-p" . counsel-projectile-find-file)) ; Find file in current project with
   :config
-  
-  
   ;; TODO: remap `projectile-ag' to `counsel-projectile-rg'
   (counsel-projectile-mode 1))
 
@@ -1062,7 +1063,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :hook (eval-expression-minibuffer-setup . eldoc-mode))
 
 (use-package deadgrep                   ; Fast, beautiful text search
-  :bind ("s-g" . deadgrep))
+  :bind ("s-F" . deadgrep))             ; MacOS familiar ⌘-shift-f binding
 
 (use-package multiple-cursors           ; Edit text with multiple cursors
   :defer 4
