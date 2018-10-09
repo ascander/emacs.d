@@ -269,6 +269,44 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 
 ;;; Color theme and looks
 
+;; Advise the `load-theme' function to disable all existing themes first. This
+;; avoids pollution from a past theme that isn't overriden by the current theme.
+(defun ad|disable-all-themes (&rest args)
+  "Disables all currently active themes."
+  (interactive)
+  (mapc #'disable-theme custom-enabled-themes))
+
+(advice-add #'load-theme :before #'ad|disable-all-themes)
+
+;; Pretty hydra entry point for thme switching
+(defhydra hydra-theme-selector (:hint nil :color pink)
+  "
+Theme
+
+^Solarized^    ^Material^
+------------------------------------------
+_s_: Dark      _m_: Dark       _DEL_: none
+_S_: Light     _M_: Light
+"
+  ("s" (load-theme 'solarized-dark t))
+  ("S" (load-theme 'solarized-light t))
+  ("m" (load-theme 'material t))
+  ("M" (load-theme 'material-light t))
+  ("DEL" (ad|disable-all-themes))
+  ("RET" nil "done" :color blue))
+
+(bind-keys ("C-c w t" . hydra-theme-selector/body))
+
+;; Create an `after-load-theme-hook' so that we can set faces after switching
+;; themes interactively as well.
+;; See: https://github.com/pkkm/.emacs.d/blob/e86c9e541a9b18f40292d32dc431557d0ca3e62b/conf/view/color-theme.el#L5-L9
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+
+(defadvice load-theme (after run-after-load-theme-hook activate)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
+
 (use-package solarized-theme            ; I always come back to you
   :init
   ;; Basic settings - disprefer bold and italics, use high contrast
@@ -285,25 +323,13 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
         solarized-height-plus-3 1.0
         solarized-height-plus-4 1.0)
   :config
-  (load-theme 'solarized-dark t)
-
-  ;; Create an `after-load-theme-hook' so that we can set faces after switching
-  ;; themes interactively as well.
-  ;; See: https://github.com/pkkm/.emacs.d/blob/e86c9e541a9b18f40292d32dc431557d0ca3e62b/conf/view/color-theme.el#L5-L9
-  (defvar after-load-theme-hook nil
-    "Hook run after a color theme is loaded using `load-theme'.")
-  (defadvice load-theme (after run-after-load-theme-hook activate)
-    "Run `after-load-theme-hook'."
-    (run-hooks 'after-load-theme-hook))
-
-  ;; Tweak treatment of modeline for Moody
-  ;; See https://github.com/tarsius/moody#tabs-and-ribbons-for-the-mode-line
-  (let ((line (face-attribute 'mode-line :underline)))
-    (set-face-attribute 'mode-line          nil :overline  line)
-    (set-face-attribute 'mode-line-inactive nil :overline  line)
-    (set-face-attribute 'mode-line-inactive nil :underline line)
-    (set-face-attribute 'mode-line          nil :box       nil)
-    (set-face-attribute 'mode-line-inactive nil :box       nil)))
+  ;; Conditionally load the default theme based on whether we're running the Emacs daemon.
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (select-frame frame)
+                  (load-theme 'solarized-dark t)))
+    (load-theme 'solarized-dark t)))
 
 (use-package material-theme             ; Google Material Design theme for Emacs
   :defer t)
