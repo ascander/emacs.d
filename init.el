@@ -182,6 +182,7 @@
 (global-hl-line-mode)                              ; Highlight the current line
 (line-number-mode)                                 ; Display line number in the mode line
 (column-number-mode)                               ; Display column number in the mode line
+(setq confirm-kill-emacs 'y-or-n-p)                ; Because I keep hitting 's-q' accidentally
 
 ;; Use ESC as a universal "get me out of here" command
 (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
