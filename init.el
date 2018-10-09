@@ -348,7 +348,21 @@ _S_: Light     _M_: Light
 ;;; Modeline improvements
 
 (use-package moody                      ; Tabs and Ribbons for the mode line
-  :load-path "site-lisp/moody"
+  :init
+  ;; Advise `load-theme' to set mode-line face attributes correctly
+  ;; TODO: link to project README for discussion
+  (defun ad|set-mode-line-faces-moody (&rest args)
+    "Unset the :box attribute for the `mode-line' face, and make
+:overline and :underline the same value."
+    (interactive)
+    (let ((line (face-attribute 'mode-line :underline)))
+      (set-face-attribute 'mode-line          nil :overline  line)
+      (set-face-attribute 'mode-line-inactive nil :overline  line)
+      (set-face-attribute 'mode-line-inactive nil :underline line)
+      (set-face-attribute 'mode-line          nil :box       nil)
+      (set-face-attribute 'mode-line-inactive nil :box       nil)))
+
+  (advice-add #'load-theme :after #'ad|set-mode-line-faces-moody)
   :config
   (setq x-underline-at-descent-line t
         moody-slant-function #'moody-slant-apple-rgb)
