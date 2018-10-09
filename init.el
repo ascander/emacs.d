@@ -131,11 +131,11 @@
 
 ;;; Customization and packages
 
-(use-package cus-edit                   ; The Customization UI
-  :ensure nil
-  :config
-  (setq custom-file (locate-user-emacs-file "custom.el"))
-  (load custom-file 'no-error 'no-message))
+;; (use-package cus-edit                   ; The Customization UI
+;;   :ensure nil
+;;   :config
+;;   (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+;;   (load custom-file 'no-error 'no-message))
 
 ;;; Basic UI settings
 
@@ -393,9 +393,33 @@ _S_: Light     _M_: Light
 
 ;;; File handling
 
-;; Keep auto-save and backup files out of the way
-(setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
-      auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+(use-package no-littering               ; Help keep '~/.emacs.d' clean
+  :config
+  ;; Exclude no-littering files from `recentf'
+  (require 'recentf)
+  (add-to-list 'recentf-exclude no-littering-var-directory)
+  (add-to-list 'recentf-exclude no-littering-etc-directory)
+
+  ;; Version backups
+  ;; See: https://github.com/manuel-uberti/.emacs.d/blob/c065a68ee7facf677da8495b628e0f83f1271903/init.el#L89-L93
+  (setq create-lockfiles nil
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t)
+
+  ;; Include auto-save and backup files
+  (setq backup-directory-alist
+        `((".*" . ,(no-littering-expand-var-file-name "backup/")))
+        auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+  (add-hook 'after-init-hook (lambda () (load custom-file 'noerror 'nomessage))))
+
+;; ;; Keep auto-save and backup files out of the way
+;; (setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
+;;       auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
 
 ;; Use UTF-8 wherever possible
 (setq locale-coding-system 'utf-8)
@@ -834,7 +858,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
          ("s-r" . ivy-resume))
   :config
   (use-package flx)
-  
+
   ;; Basic settings
   (setq ivy-use-virtual-buffers t
         ivy-initial-inputs-alist nil
@@ -845,13 +869,13 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         '((swiper            . ivy--regex-plus)
           (ivy-switch-buffer . ivy--regex-plus)
           (t                 . ivy--regex-fuzzy)))
-  
+
   ;; Make the `ivy-current-match' face a bit more distinct
   (set-face-attribute 'ivy-current-match nil :inherit #'warning)
   (add-hook 'after-load-theme-hook
             '(lambda () (set-face-attribute
                     'ivy-current-match nil :inherit #'warning)))
-  
+
   (ivy-mode 1))
 
 (use-package ivy-hydra                  ; A useful hydra for the Ivy minibuffer

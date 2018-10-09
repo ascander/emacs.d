@@ -8,5 +8,6 @@
 /site-lisp/
 /.markdown-preview.html
 /.mc-lists.el
-
+/var/
+/etc/
 
