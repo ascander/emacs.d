@@ -910,6 +910,11 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
 (use-package git-timemachine            ; Go back in Git time
   :bind (("C-c g t" . git-timemachine)))
 
+(use-package git-link                   ; Create github links from buffers
+  :disabled t                           ; Does NOT work with ssh-config hosts
+  :config
+  (add-to-list 'git-link-remote-alist '("^ghe?" git-link-github)))
+
 ;;; Completion
 
 (use-package hydra                      ; Make Emacs bindings that stick around
