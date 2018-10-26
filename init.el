@@ -414,10 +414,7 @@ _S_: Light     _M_: Light
         auto-save-file-name-transforms
         `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
-  ;; Set up some locations for common files
   (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
-  (setq bookmark-default-file (no-littering-expand-var-file-name "bookmarks"))
-
   (add-hook 'after-init-hook (lambda () (load custom-file 'noerror 'nomessage))))
 
 ;; ;; Keep auto-save and backup files out of the way
@@ -1109,8 +1106,7 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
 (use-package undo-tree                  ; Replace the confusing Emacs undo system
   :delight undo-tree-mode
   :init
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/.undo"))
-        undo-tree-auto-save-history t
+  (setq undo-tree-auto-save-history t
         undo-tree-visualizer-timestamps t
         undo-tree-visualizer-diff t)
   :config
