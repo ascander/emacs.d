@@ -83,8 +83,8 @@
   ;;   Return (⏎) ➔ Control (^) when used with another key
   ;;
   ;; Using Karabiner Elements (https://pqrs.org/osx/karabiner/).
-  (setq mac-command-modifier 'meta      ; Command is Meta
-        mac-option-modifier 'super      ; Alt/Option is Super
+  (setq mac-command-modifier 'super     ; Command is Super
+        mac-option-modifier 'meta       ; Alt/Option is Meta
         mac-function-modifier 'none)    ; Reserve Function for OS X
 
   ;; Reuse existing frame for opening new files
@@ -131,11 +131,11 @@
 
 ;;; Customization and packages
 
-(use-package cus-edit                   ; The Customization UI
-  :ensure nil
-  :config
-  (setq custom-file (locate-user-emacs-file "custom.el"))
-  (load custom-file 'no-error 'no-message))
+;; (use-package cus-edit                   ; The Customization UI
+;;   :ensure nil
+;;   :config
+;;   (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+;;   (load custom-file 'no-error 'no-message))
 
 ;;; Basic UI settings
 
@@ -182,6 +182,7 @@
 (global-hl-line-mode)                              ; Highlight the current line
 (line-number-mode)                                 ; Display line number in the mode line
 (column-number-mode)                               ; Display column number in the mode line
+(setq confirm-kill-emacs 'y-or-n-p)                ; Because I keep hitting 's-q' accidentally
 
 ;; Use ESC as a universal "get me out of here" command
 (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
@@ -268,11 +269,48 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 
 ;;; Color theme and looks
 
+;; Advise the `load-theme' function to disable all existing themes first. This
+;; avoids pollution from a past theme that isn't overriden by the current theme.
+(defun ad|disable-all-themes (&rest args)
+  "Disables all currently active themes."
+  (interactive)
+  (mapc #'disable-theme custom-enabled-themes))
+
+(advice-add #'load-theme :before #'ad|disable-all-themes)
+
+;; Pretty hydra entry point for thme switching
+(defhydra hydra-theme-selector (:hint nil :color pink)
+  "
+Theme
+
+^Solarized^    ^Material^
+------------------------------------------
+_s_: Dark      _m_: Dark       _DEL_: none
+_S_: Light     _M_: Light
+"
+  ("s" (load-theme 'solarized-dark t))
+  ("S" (load-theme 'solarized-light t))
+  ("m" (load-theme 'material t))
+  ("M" (load-theme 'material-light t))
+  ("DEL" (ad|disable-all-themes))
+  ("RET" nil "done" :color blue))
+
+(bind-keys ("C-c w t" . hydra-theme-selector/body))
+
+;; Create an `after-load-theme-hook' so that we can set faces after switching
+;; themes interactively as well.
+;; See: https://github.com/pkkm/.emacs.d/blob/e86c9e541a9b18f40292d32dc431557d0ca3e62b/conf/view/color-theme.el#L5-L9
+(defvar after-load-theme-hook nil
+  "Hook run after a color theme is loaded using `load-theme'.")
+
+(defadvice load-theme (after run-after-load-theme-hook activate)
+  "Run `after-load-theme-hook'."
+  (run-hooks 'after-load-theme-hook))
+
 (use-package solarized-theme            ; I always come back to you
   :init
   ;; Basic settings - disprefer bold and italics, use high contrast
-  (setq x-underline-at-descent-line t   ; Fixes the box around the mode line
-        solarized-use-variable-pitch nil
+  (setq solarized-use-variable-pitch nil
         solarized-use-less-bold t
         solarized-use-more-italic nil
         solarized-distinct-doc-face t
@@ -285,25 +323,16 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
         solarized-height-plus-3 1.0
         solarized-height-plus-4 1.0)
   :config
-  ;; Create an `after-load-theme-hook' so that we can set faces after switching
-  ;; themes interactively as well.
-  ;; See: https://github.com/pkkm/.emacs.d/blob/e86c9e541a9b18f40292d32dc431557d0ca3e62b/conf/view/color-theme.el#L5-L9
-  (defvar after-load-theme-hook nil
-    "Hook run after a color theme is loaded using `load-theme'.")
-  (defadvice load-theme (after run-after-load-theme-hook activate)
-    "Run `after-load-theme-hook'."
-    (run-hooks 'after-load-theme-hook))
+  ;; Conditionally load the default theme based on whether we're running the Emacs daemon.
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  (select-frame frame)
+                  (load-theme 'solarized-dark t)))
+    (load-theme 'solarized-dark t)))
 
-  ;; Tweak treatment of modeline for Moody
-  ;; See https://github.com/tarsius/moody#tabs-and-ribbons-for-the-mode-line
-  (let ((line (face-attribute 'mode-line :underline)))
-    (set-face-attribute 'mode-line          nil :overline line)
-    (set-face-attribute 'mode-line-inactive nil :overline line)
-    (set-face-attribute 'mode-line-inactive nil :underline line)
-    (set-face-attribute 'mode-line          nil :box nil)
-    (set-face-attribute 'mode-line-inactive nil :box nil))
-
-  (load-theme 'solarized-dark 'no-confirm))
+(use-package material-theme             ; Google Material Design theme for Emacs
+  :defer t)
 
 (use-package dimmer                     ; Dim buffers other than the current one
   :init
@@ -319,7 +348,21 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 ;;; Modeline improvements
 
 (use-package moody                      ; Tabs and Ribbons for the mode line
-  :load-path "site-lisp/moody"
+  :init
+  ;; Advise `load-theme' to set mode-line face attributes correctly
+  ;; TODO: link to project README for discussion
+  (defun ad|set-mode-line-faces-moody (&rest args)
+    "Unset the :box attribute for the `mode-line' face, and make
+:overline and :underline the same value."
+    (interactive)
+    (let ((line (face-attribute 'mode-line :underline)))
+      (set-face-attribute 'mode-line          nil :overline  line)
+      (set-face-attribute 'mode-line-inactive nil :overline  line)
+      (set-face-attribute 'mode-line-inactive nil :underline line)
+      (set-face-attribute 'mode-line          nil :box       nil)
+      (set-face-attribute 'mode-line-inactive nil :box       nil)))
+
+  (advice-add #'load-theme :after #'ad|set-mode-line-faces-moody)
   :config
   (setq x-underline-at-descent-line t
         moody-slant-function #'moody-slant-apple-rgb)
@@ -350,9 +393,33 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 
 ;;; File handling
 
-;; Keep auto-save and backup files out of the way
-(setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
-      auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+(use-package no-littering               ; Help keep '~/.emacs.d' clean
+  :config
+  ;; Exclude no-littering files from `recentf'
+  (require 'recentf)
+  (add-to-list 'recentf-exclude no-littering-var-directory)
+  (add-to-list 'recentf-exclude no-littering-etc-directory)
+
+  ;; Version backups
+  ;; See: https://github.com/manuel-uberti/.emacs.d/blob/c065a68ee7facf677da8495b628e0f83f1271903/init.el#L89-L93
+  (setq create-lockfiles nil
+        delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t)
+
+  ;; Include auto-save and backup files
+  (setq backup-directory-alist
+        `((".*" . ,(no-littering-expand-var-file-name "backup/")))
+        auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+  (add-hook 'after-init-hook (lambda () (load custom-file 'noerror 'nomessage))))
+
+;; ;; Keep auto-save and backup files out of the way
+;; (setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
+;;       auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
 
 ;; Use UTF-8 wherever possible
 (setq locale-coding-system 'utf-8)
@@ -621,7 +688,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
                        (ibuffer-do-sort-by-alphabetic)))))
 
 (use-package ace-window                 ; Fast window switching
-  :bind (("M-o" . ace-window))
+  :bind (("s-;" . ace-window))
   :init
   :config
   ;; Set face for `aw-leading-char-face'
@@ -666,12 +733,15 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package winner                     ; Undo/redo window configuration changes
   :config (winner-mode 1))
 
-(use-package windmove                   ; Navigate windows using arrow keys
+(use-package windmove                   ; Navigate windows
   :config
-  ;; Wrap around the edge of the frame, and user Super instead of Shift, because
-  ;; the Shift key causes conflicts in `org-mode'.
   (setq windmove-wrap-around t)
-  (windmove-default-keybindings 'super))
+
+  ;; Set up common MacOS keybindings for window navigation (like in iTerm)
+  (global-set-key (kbd "s-[") #'windmove-left)
+  (global-set-key (kbd "s-]") #'windmove-right)
+  (global-set-key (kbd "s-{") #'windmove-up)
+  (global-set-key (kbd "s-}") #'windmove-up))
 
 ;; Quicker buffer cycling commands
 (bind-keys ("s-p" . previous-buffer)    ; TODO: conflicts with projectile command prefix
@@ -679,10 +749,10 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
            ("s-k" . kill-this-buffer))
 
 ;; Split and manage windows easily
-(global-set-key (kbd "M-1") (kbd "C-x 1")) ; ⌘-1 kill other windows (keep this one)
-(global-set-key (kbd "M-2") (kbd "C-x 2")) ; ⌘-2 split horizontally
-(global-set-key (kbd "M-3") (kbd "C-x 3")) ; ⌘-3 split vertically
-(global-set-key (kbd "M-0") (kbd "C-x 0")) ; ⌘-0 kill this window
+(global-set-key (kbd "s-1") (kbd "C-x 1")) ; ⌘-1 kill other windows (keep this one)
+(global-set-key (kbd "s-2") (kbd "C-x 2")) ; ⌘-2 split horizontally
+(global-set-key (kbd "s-3") (kbd "C-x 3")) ; ⌘-3 split vertically
+(global-set-key (kbd "s-0") (kbd "C-x 0")) ; ⌘-0 kill this window
 
 ;;; Org
 
@@ -698,12 +768,78 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package projectile                 ; Project management for Emacs
   :defer 2
   :delight projectile-mode
-  :bind-keymap ("s-p" . projectile-command-map)
+  :bind-keymap ("M-p" . projectile-command-map)
+  :bind (("M-P" . hydra-projectile/body))
+  :init
+  (defhydra hydra-projectile-other-window (:color teal)
+    "projectile-other-window"
+    ("f"  projectile-find-file-other-window        "file")
+    ("g"  projectile-find-file-dwim-other-window   "file dwim")
+    ("d"  projectile-find-dir-other-window         "dir")
+    ("b"  projectile-switch-to-buffer-other-window "buffer")
+    ("q"  nil                                      "cancel" :color blue))
+
+  (defhydra hydra-projectile (:color teal
+                                     :hint nil)
+    "
+     PROJECTILE: %(projectile-project-root)
+
+     Find File            Search/Tags          Buffers                Cache
+------------------------------------------------------------------------------------------
+_s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
+ _ff_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project
+ _fd_: file curr dir   _o_: multi-occur     _s-k_: Kill all buffers  _X_: cleanup non-existing
+  _r_: recent file                                               ^^^^_z_: cache current
+  _d_: dir
+
+"
+    ("a"   projectile-ag)
+    ("b"   projectile-switch-to-buffer)
+    ("c"   projectile-invalidate-cache)
+    ("d"   projectile-find-dir)
+    ("s-f" projectile-find-file)
+    ("ff"  projectile-find-file-dwim)
+    ("fd"  projectile-find-file-in-directory)
+    ("g"   ggtags-update-tags)
+    ("s-g" ggtags-update-tags)
+    ("i"   projectile-ibuffer)
+    ("K"   projectile-kill-buffers)
+    ("s-k" projectile-kill-buffers)
+    ("m"   projectile-multi-occur)
+    ("o"   projectile-multi-occur)
+    ("s-p" projectile-switch-project "switch project")
+    ("p"   projectile-switch-project)
+    ("s"   projectile-switch-project)
+    ("r"   projectile-recentf)
+    ("x"   projectile-remove-known-project)
+    ("X"   projectile-cleanup-known-projects)
+    ("z"   projectile-cache-current-file)
+    ("`"   hydra-projectile-other-window/body "other window")
+    ("q"   nil "cancel" :color blue))
+;; (defhydra hydra-projectile (:color teal
+;;                                      :columns 4)
+;;     "Projectile"
+;;     ("f"   projectile-find-file                "Find File")
+;;     ("r"   projectile-recentf                  "Recent Files")
+;;     ("z"   projectile-cache-current-file       "Cache Current File")
+;;     ("x"   projectile-remove-known-project     "Remove Known Project")
+
+;;     ("d"   projectile-find-dir                 "Find Directory")
+;;     ("b"   projectile-switch-to-buffer         "Switch to Buffer")
+;;     ("c"   projectile-invalidate-cache         "Clear Cache")
+;;     ("X"   projectile-cleanup-known-projects   "Cleanup Known Projects")
+
+;;     ("o"   projectile-multi-occur              "Multi Occur")
+;;     ("s"   projectile-switch-project           "Switch Project")
+;;     ("k"   projectile-kill-buffers             "Kill Buffers")
+;;     ("q"   nil "Cancel" :color blue))
   :config
   ;; Basic settings
   (setq projectile-completion-system 'ivy
         projectile-find-dir-includes-top-level t
-        projectile-switch-project-action #'projectile-dired)
+        projectile-switch-project-action #'projectile-dired
+        projectile-indexing-method 'turbo-alien
+        projectile-switch-project-action 'projectile-dired)
 
   ;; Remove dead projects when Emacs is idle
   (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
@@ -719,6 +855,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package magit                      ; The one and only Git front end
   :bind (("C-c g c" . magit-clone)
          ("C-c g s" . magit-status)
+         ("s-G"     . magit-status)
          ("C-c g b" . magit-blame)
          ("C-c g p" . magit-pull))
   :config
@@ -773,6 +910,11 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package git-timemachine            ; Go back in Git time
   :bind (("C-c g t" . git-timemachine)))
 
+(use-package git-link                   ; Create github links from buffers
+  :disabled t                           ; Does NOT work with ssh-config hosts
+  :config
+  (add-to-list 'git-link-remote-alist '("^ghe?" git-link-github)))
+
 ;;; Completion
 
 (use-package hydra                      ; Make Emacs bindings that stick around
@@ -786,7 +928,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
          ("s-r" . ivy-resume))
   :config
   (use-package flx)
-  
+
   ;; Basic settings
   (setq ivy-use-virtual-buffers t
         ivy-initial-inputs-alist nil
@@ -797,13 +939,13 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         '((swiper            . ivy--regex-plus)
           (ivy-switch-buffer . ivy--regex-plus)
           (t                 . ivy--regex-fuzzy)))
-  
+
   ;; Make the `ivy-current-match' face a bit more distinct
   (set-face-attribute 'ivy-current-match nil :inherit #'warning)
   (add-hook 'after-load-theme-hook
             '(lambda () (set-face-attribute
                     'ivy-current-match nil :inherit #'warning)))
-  
+
   (ivy-mode 1))
 
 (use-package ivy-hydra                  ; A useful hydra for the Ivy minibuffer
@@ -829,6 +971,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :demand t
   :delight counsel-mode
   :bind (([remap execute-extended-command] . counsel-M-x)
+         ("s-P"                            . counsel-M-x) ; familiar command palette keybinding for MacOS
          ([remap find-file]                . counsel-find-file)
          ([remap describe-face]            . counsel-describe-face)
          ([remap describe-function]        . counsel-describe-function)
@@ -854,11 +997,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (counsel-mode 1))
 
 (use-package counsel-projectile         ; Counsel integration with Projectile
-  :load-path "site-lisp/counsel-projectile"
   :after (counsel projectile)
+  :bind (("s-p" . counsel-projectile-find-file)) ; Find file in current project with
   :config
-  
-  
   ;; TODO: remap `projectile-ag' to `counsel-projectile-rg'
   (counsel-projectile-mode 1))
 
@@ -896,11 +1037,30 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 ;;; Basic editing
 
-;; Use super+j|k|i|l for navigation  instead of C-f|n|p|b
-(global-set-key (kbd "s-j") #'left-char)
-(global-set-key (kbd "s-i") #'previous-line)
-(global-set-key (kbd "s-k") #'next-line)
+;; Common MacOS keybindings; taken from https://github.com/freetonik/castlemacs
+(global-set-key (kbd "s-s") 'save-buffer)             ; save
+(global-set-key (kbd "s-S") 'write-file)              ; save as
+(global-set-key (kbd "s-q") 'save-buffers-kill-emacs) ; quit
+(global-set-key (kbd "s-a") 'mark-whole-buffer)       ; select all
+
+;; Use super+h|j|k|l for navigation  instead of C-f|n|p|b
+(global-set-key (kbd "s-h") #'left-char)
+(global-set-key (kbd "s-j") #'next-line)
+(global-set-key (kbd "s-k") #'previous-line)
 (global-set-key (kbd "s-l") #'right-char)
+
+;; Common ⌘-[arrow] keybindings for navigation/selection
+(global-set-key (kbd "s-<right>") #'move-end-of-line)   ; end of line
+(global-set-key (kbd "s-S-<right>") (kbd "C-S-e"))      ; select to end of line
+(global-set-key (kbd "s-<left>") #'back-to-indentation) ; beginning (first non-blank) of line
+(global-set-key (kbd "s-S-<left>") (kbd "M-S-m"))       ; select to beginning of line
+
+(global-set-key (kbd "s-<up>") #'beginning-of-buffer)   ; first line
+(global-set-key (kbd "s-<down>") #'end-of-buffer)       ; last line
+
+;; Killing; note 'M-<backspace>' kills the word backwards
+(global-set-key (kbd "s-<backspace>") #'kill-whole-line) ; kill line backwards
+(global-set-key (kbd "M-S-<backspace>") #'kill-word)     ; kill word forwards
 
 ;; Display line numbers when they matter; namely, when navigating to a specific
 ;; line via `goto-line'.
@@ -943,7 +1103,24 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package unfill                     ; The inverse of Emacs' fill
   :defer t)
 
+(use-package undo-tree                  ; Replace the confusing Emacs undo system
+  :delight undo-tree-mode
+  :init
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/.undo"))
+        undo-tree-auto-save-history t
+        undo-tree-visualizer-timestamps t
+        undo-tree-visualizer-diff t)
+  :config
+  (global-undo-tree-mode 1)
+
+  ;; Use familiar MacOS keybindings for undo/redo
+  (global-set-key (kbd "s-z") 'undo-tree-undo)
+  (global-set-key (kbd "s-Z") 'undo-tree-redo))
+
 ;;; Programming Settings
+
+;; Use the familiar MacOS keybinding for commenting
+(global-set-key (kbd "s-/") #'comment-dwim)
 
 (use-package shell-pop                  ; Use a shell easily on Emacs
   :config
@@ -980,7 +1157,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :hook (eval-expression-minibuffer-setup . eldoc-mode))
 
 (use-package deadgrep                   ; Fast, beautiful text search
-  :bind ("s-g" . deadgrep))
+  :bind ("s-F" . deadgrep))             ; MacOS familiar ⌘-shift-f binding
 
 (use-package multiple-cursors           ; Edit text with multiple cursors
   :defer 4
@@ -1006,11 +1183,8 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package expand-region              ; Expand region by semantic units
   :ensure t
-  :bind (("C-c v" . er/expand-region)))
-
-
-(use-package expand-region              ; Expand the selected region by semantic units
-  :bind ("C-=" . er/expand-region))
+  :bind (("s-'"  . er/expand-region)
+         ("s-\"" . er/contract-region)))
 
 (use-package dumb-jump                  ; Jump to definition dumbly
   :hook ((prog-mode . dumb-jump-mode))
@@ -1182,6 +1356,16 @@ argument, select the REPL in a new frame instead."
    'minibuffer-complete-word
    'self-insert-command
    minibuffer-local-completion-map))
+
+;;; Python support
+
+(use-package elpy                       ; Emacs Lisp Python environment
+  :defer 4
+  :init (setq elpy-rpc-backend "jedi"
+              python-shell-interpreter "ipython"
+              elpy-shell-echo-input nil
+              python-check-command "/usr/local/bin/flake8")
+  :config (elpy-enable))
 
 (provide 'init)
 ;;; init.el ends here
