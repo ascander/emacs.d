@@ -1,13 +1,20 @@
-/bookmarks
-/elpa/
-/paradox-token.el
-/projectile-bookmarks.eld
-/recentf
-/smex-items
-/company-statistics-cache.el
-/site-lisp/
-/.markdown-preview.html
-/.mc-lists.el
-/var/
-/etc/
+# Elisp byte code
+*.elc
+
+# Emacscollective no-littering directories
+/etc
+/var
+
+# Installed packages
+/elpa
+
+# Site-specific lisp code and settings; this includes cloned github repositories
+# for Emacs packages, private settings, and other stuff you typically wouldn't
+# want under version control
+/site-lisp
+
+
+
+
+
 
