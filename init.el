@@ -1038,10 +1038,10 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
 (global-set-key (kbd "s-q") 'save-buffers-kill-emacs) ; quit
 (global-set-key (kbd "s-a") 'mark-whole-buffer)       ; select all
 
-;; Use super+j|k|i|l for navigation  instead of C-f|n|p|b
-(global-set-key (kbd "s-j") #'left-char)
-(global-set-key (kbd "s-i") #'previous-line)
-(global-set-key (kbd "s-k") #'next-line)
+;; Use super+h|j|k|l for navigation  instead of C-f|n|p|b
+(global-set-key (kbd "s-h") #'left-char)
+(global-set-key (kbd "s-j") #'next-line)
+(global-set-key (kbd "s-k") #'previous-line)
 (global-set-key (kbd "s-l") #'right-char)
 
 ;; Common ⌘-[arrow] keybindings for navigation/selection
