@@ -1356,7 +1356,10 @@ argument, select the REPL in a new frame instead."
 
 (use-package elpy                       ; Emacs Lisp Python environment
   :defer 4
-  :init (setq elpy-rpc-backend "jedi")
+  :init (setq elpy-rpc-backend "jedi"
+              python-shell-interpreter "ipython"
+              elpy-shell-echo-input nil
+              python-check-command "/usr/local/bin/flake8")
   :config (elpy-enable))
 
 (provide 'init)
