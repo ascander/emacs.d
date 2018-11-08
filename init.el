@@ -417,10 +417,6 @@ _S_: Light     _M_: Light
   (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
   (add-hook 'after-init-hook (lambda () (load custom-file 'noerror 'nomessage))))
 
-;; ;; Keep auto-save and backup files out of the way
-;; (setq backup-directory-alist `((".*" . ,(locate-user-emacs-file ".backup")))
-;;       auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
-
 ;; Use UTF-8 wherever possible
 (setq locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
@@ -791,10 +787,16 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config
   ;; Basic settings
   (setq projectile-completion-system 'ivy
+        projectile-enable-caching t
         projectile-find-dir-includes-top-level t
-        projectile-switch-project-action #'projectile-dired
         projectile-indexing-method 'turbo-alien
         projectile-switch-project-action 'projectile-dired)
+
+  ;; Location of Projectile data files. This is actually set in `no-littering',
+  ;; but because we defer loading of Projectile, those paths are overwritten
+  ;; with Projectile defaults.
+  (setq projectile-cache-file
+        (no-littering-expand-var-file-name "projectile/cache.el"))
 
   ;; Remove dead projects when Emacs is idle
   (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
