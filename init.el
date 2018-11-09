@@ -789,7 +789,8 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (setq projectile-completion-system 'ivy
         projectile-enable-caching t
         projectile-find-dir-includes-top-level t
-        projectile-indexing-method 'turbo-alien
+        projectile-switch-project-action #'projectile-dired
+        projectile-indexing-method 'alien
         projectile-switch-project-action 'projectile-dired)
 
   ;; Location of Projectile data files. This is actually set in `no-littering',
