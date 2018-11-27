@@ -967,6 +967,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 ;;; Keys and keybindings
 
+(use-package evil                       ; Vim keybindings for Emacs
+  :config (evil-mode 1))
+
 (use-package which-key                  ; Display keybindings based on current command
   :defer 5
   :delight
