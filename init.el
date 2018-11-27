@@ -1328,5 +1328,10 @@ argument, select the REPL in a new frame instead."
               python-check-command "/usr/local/bin/flake8")
   :config (elpy-enable))
 
+;;; LaTeX with AUCTeX
+
+(use-package tex-site                   ; Site-specific code for AUCTeX
+  :ensure auctex)
+
 (provide 'init)
 ;;; init.el ends here
