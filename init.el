@@ -1333,5 +1333,36 @@ argument, select the REPL in a new frame instead."
 (use-package tex-site                   ; Site-specific code for AUCTeX
   :ensure auctex)
 
+(use-package tex                        ;TeX editing/processing
+  :ensure auctex
+  :defer t)
+
+(use-package tex-buf                    ; TeX buffer management
+  :ensure auctex
+  :defer t)
+
+(use-package tex-style                  ; TeX style
+  :ensure auctex
+  :defer t)
+
+(use-package tex-fold                   ; TeX folding
+  :ensure auctex
+  :defer t
+  :init (add-hook 'TeX-mode-hook #'TeX-fold-mode))
+
+(use-package tex-mode                   ; TeX editing mode
+  :ensure auctex
+  :defer t)
+
+(use-package latex                      ; LaTeX editing mode
+  :ensure auctex
+  :defer t
+  :init (add-hook 'LaTeX-mode-hook #'LaTeX-math-mode))
+
+(use-package auctex-latexmk             ; `latekmk' command for AUCTeX
+  :defer t
+  :after latex
+  :config (auctex-latexmk-setup))
+
 (provide 'init)
 ;;; init.el ends here
