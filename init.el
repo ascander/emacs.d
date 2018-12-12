@@ -145,7 +145,7 @@
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (when (and (not *is-a-mac*) (fboundp 'menu-bar-mode)) (menu-bar-mode -1))
 
-;; Display helpful line numbers when in `evil-mode'
+;; Display line numbers suitable for evil
 (setq-default display-line-numbers-type 'visual
               display-line-numbers-current-absolute t
               display-line-numbers-width 4
@@ -976,7 +976,22 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 ;;; Keys and keybindings
 
 (use-package evil                       ; Vim keybindings for Emacs
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil)
   :config (evil-mode 1))
+
+(use-package evil-collection            ; Evil bindings for Emacs modes
+  :after evil
+  :config (evil-collection-init))
+
+(use-package evil-escape                ; Customizable escape from insert state
+  :disabled t
+  :init (setq-default evil-escape-key-sequence "jk")
+  :config (evil-escape-mode 1))
+
+(use-package evil-magit                 ; Evil bindings for Magit
+  :after evil magit)
 
 (use-package which-key                  ; Display keybindings based on current command
   :defer 5
