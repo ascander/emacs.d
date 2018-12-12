@@ -986,7 +986,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config (evil-collection-init))
 
 (use-package evil-escape                ; Customizable escape from insert state
-  :disabled t
   :init (setq-default evil-escape-key-sequence "jk")
   :config (evil-escape-mode 1))
 
