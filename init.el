@@ -145,6 +145,14 @@
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (when (and (not *is-a-mac*) (fboundp 'menu-bar-mode)) (menu-bar-mode -1))
 
+;; Display helpful line numbers when in `evil-mode'
+(setq-default display-line-numbers-type 'visual
+              display-line-numbers-current-absolute t
+              display-line-numbers-width 4
+              display-line-numbers-widen t)
+(add-hook 'text-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+
 ;; Set some sensible defaults
 (setq-default
  blink-cursor-mode -1                ; No blinking
@@ -1022,18 +1030,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 ;; Killing; note 'M-<backspace>' kills the word backwards
 (global-set-key (kbd "s-<backspace>") #'kill-whole-line) ; kill line backwards
 (global-set-key (kbd "M-S-<backspace>") #'kill-word)     ; kill word forwards
-
-;; Display line numbers when they matter; namely, when navigating to a specific
-;; line via `goto-line'.
-(defun ad|goto-line-with-numbers ()
-  "Show line numbers while navigating to a specific line."
-  (interactive)
-  (unwind-protect
-      (progn
-        (display-line-numbers-mode 1)
-        (goto-line (read-number "Goto line: ")))
-    (display-line-numbers-mode -1)))
-(global-set-key [remap goto-line] #'ad|goto-line-with-numbers)
 
 (use-package writeroom-mode             ; Distraction free editing mode
   :bind (:map writeroom-mode-map
