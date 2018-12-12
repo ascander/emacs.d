@@ -173,8 +173,6 @@
  sentence-end-double-space nil       ; Single space after a sentence end
  require-final-newline t             ; Require a newline at file end
  show-trailing-whitespace nil        ; Don't display trailing whitespaces by default
- split-height-threshold nil          ; Disable vertical window splitting
- split-width-threshold nil           ; Disable horizontal window splitting
  uniquify-buffer-name-style 'forward ; Uniquify buffer names correctly
  window-combination-resize t         ; Resize windows proportionally
  frame-resize-pixelwise t            ; Resize frames by pixel (don't snap to char)
@@ -563,6 +561,12 @@ T - tag prefix
 (setq view-read-only t)
 
 ;;; Buffer, frame and window settings
+
+;; Always prefer splitting vertically
+;;
+;; See: https://stackoverflow.com/a/2081978
+(setq split-height-threshold nil
+      split-width-threshold 0)
 
 (use-package ibuffer                       ; A better buffer list
   :bind (([remap list-buffers] . ibuffer)  ; C-x C-b
