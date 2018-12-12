@@ -767,6 +767,15 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package ox-reveal                  ; Reveal.js back end for Org export
   :load-path "site-lisp/org-reveal")
 
+(use-package evil-org                   ; Evil bindings for Org mode
+  :after evil org
+  :config
+  (add-hook 'org-mode-hook #'evil-org-mode)
+  (add-hook 'evil-org-mode-hook (lambda () (evil-org-set-key-theme)))
+
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
 ;;; Project management
 
 (use-package projectile                 ; Project management for Emacs
@@ -986,6 +995,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config (evil-collection-init))
 
 (use-package evil-escape                ; Customizable escape from insert state
+  :after evil
   :init (setq-default evil-escape-key-sequence "jk")
   :config (evil-escape-mode 1))
 
