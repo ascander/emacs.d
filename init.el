@@ -25,13 +25,12 @@
 ;; Constants
 (defconst *is-a-mac* (eq system-type 'darwin) "Are we on a mac?")
 
-;; TODO: move this to a more reasonable place
 ;; Enter debugger on error, and keep more messages.
 (setq debug-on-error t)
 (setq message-log-max 10000)
 
-;; Increase GC threshold for faster startup, and set to a more
-;; reasonable value after startup.
+;; Increase GC threshold for faster startup, and set to a more reasonable value
+;; after startup.
 (let ((normal-gc-cons-threshold (* 20 1024 1024))
       (init-gc-cons-threshold (* 256 1024 1024)))
   (setq gc-cons-threshold init-gc-cons-threshold)
@@ -54,9 +53,10 @@
       package-enable-at-startup nil) ; explicitly initialize packages
 
 (setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("gnu"   . "http://elpa.gnu.org/packages/")
-        ("org"   . "https://orgmode.org/elpa/")))
+      '(("melpa"        . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")
+        ("gnu"          . "http://elpa.gnu.org/packages/")
+        ("org"          . "https://orgmode.org/elpa/")))
 (package-initialize)
 
 ;; Bootstrap `use-package'
@@ -129,14 +129,6 @@
   :config
   (osx-trash-setup))
 
-;;; Customization and packages
-
-;; (use-package cus-edit                   ; The Customization UI
-;;   :ensure nil
-;;   :config
-;;   (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
-;;   (load custom-file 'no-error 'no-message))
-
 ;;; Basic UI settings
 
 ;; Disable tool-bar, scroll-bar, and menu-bar. The menu bar cannot be
@@ -144,6 +136,14 @@
 (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (when (and (not *is-a-mac*) (fboundp 'menu-bar-mode)) (menu-bar-mode -1))
+
+;; Display line numbers suitable for evil
+(setq-default display-line-numbers-type 'visual
+              display-line-numbers-current-absolute t
+              display-line-numbers-width 4
+              display-line-numbers-widen t)
+(add-hook 'text-mode-hook #'display-line-numbers-mode)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
 ;; Set some sensible defaults
 (setq-default
@@ -165,8 +165,6 @@
  sentence-end-double-space nil       ; Single space after a sentence end
  require-final-newline t             ; Require a newline at file end
  show-trailing-whitespace nil        ; Don't display trailing whitespaces by default
- split-height-threshold nil          ; Disable vertical window splitting
- split-width-threshold nil           ; Disable horizontal window splitting
  uniquify-buffer-name-style 'forward ; Uniquify buffer names correctly
  window-combination-resize t         ; Resize windows proportionally
  frame-resize-pixelwise t            ; Resize frames by pixel (don't snap to char)
@@ -341,9 +339,7 @@ _S_: Light     _M_: Light
 
 (use-package stripe-buffer              ; Striped backgorund in `dired'
   :defer t
-  :hook (dired-mode . stripe-listify-buffer)
-  :config
-  (set-face-attribute 'stripe-hl-line nil :inherit #'region))
+  :hook (dired-mode . stripe-listify-buffer))
 
 ;;; Modeline improvements
 
@@ -556,6 +552,12 @@ T - tag prefix
 
 ;;; Buffer, frame and window settings
 
+;; Always prefer splitting vertically
+;;
+;; See: https://stackoverflow.com/a/2081978
+(setq split-height-threshold nil
+      split-width-threshold nil)
+
 (use-package ibuffer                       ; A better buffer list
   :bind (([remap list-buffers] . ibuffer)  ; C-x C-b
          :map ibuffer-mode-map
@@ -758,6 +760,15 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package ox-reveal                  ; Reveal.js back end for Org export
   :load-path "site-lisp/org-reveal")
+
+(use-package evil-org                   ; Evil bindings for Org mode
+  :after evil org
+  :config
+  (add-hook 'org-mode-hook #'evil-org-mode)
+  (add-hook 'evil-org-mode-hook (lambda () (evil-org-set-key-theme)))
+
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
 
 ;;; Project management
 
@@ -967,6 +978,25 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 ;;; Keys and keybindings
 
+(use-package evil                       ; Vim keybindings for Emacs
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil)
+  :config (evil-mode 1))
+
+(use-package evil-collection            ; Evil bindings for Emacs modes
+  :after evil
+  :init (setq evil-collection-setup-minibuffer t)
+  :config (evil-collection-init))
+
+(use-package evil-escape                ; Customizable escape from insert state
+  :after evil
+  :init (setq-default evil-escape-key-sequence "jk")
+  :config (evil-escape-mode 1))
+
+(use-package evil-magit                 ; Evil bindings for Magit
+  :after evil magit)
+
 (use-package which-key                  ; Display keybindings based on current command
   :defer 5
   :delight
@@ -1019,18 +1049,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 ;; Killing; note 'M-<backspace>' kills the word backwards
 (global-set-key (kbd "s-<backspace>") #'kill-whole-line) ; kill line backwards
 (global-set-key (kbd "M-S-<backspace>") #'kill-word)     ; kill word forwards
-
-;; Display line numbers when they matter; namely, when navigating to a specific
-;; line via `goto-line'.
-(defun ad|goto-line-with-numbers ()
-  "Show line numbers while navigating to a specific line."
-  (interactive)
-  (unwind-protect
-      (progn
-        (display-line-numbers-mode 1)
-        (goto-line (read-number "Goto line: ")))
-    (display-line-numbers-mode -1)))
-(global-set-key [remap goto-line] #'ad|goto-line-with-numbers)
 
 (use-package writeroom-mode             ; Distraction free editing mode
   :bind (:map writeroom-mode-map
@@ -1260,6 +1278,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package scala-mode                 ; Major mode for editing Scala files
   :defer t
+  :interpreter ("scala" . scala-mode)
   :config
   ;; Indentation preferences
   (setq scala-indent:default-run-on-strategy
@@ -1276,36 +1295,12 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     #'ad|scala-mode-newline-comments))
 
 (use-package sbt-mode                   ; Interactive support for Satan's Build Tool
-  :disabled t
   :after scala-mode
   :commands (sbt:buffer-name sbt:run-sbt sbt-start sbt-command)
   :bind (:map scala-mode-map
               ("C-c m b s" . sbt-start)
               ("C-c m b c" . sbt-command)
               ("C-c m b r" . sbt-run-previous-command))
-  :init
-  (defun ad|scala-pop-to-sbt (new-frame)
-    "Start an SBT REPL for this project, optionally in a NEW-FRAME.
-
-Select the SBT REPL for the current project in a new window, if
-one exists. If the REPL is not yet running, start it. With prefix
-argument, select the REPL in a new frame instead."
-    (interactive "P")
-    ;; Start SBT if it's not already running
-    (when (not (comint-check-proc (sbt:buffer-name)))
-      (sbt:run-sbt))
-
-    (let ((display-buffer-overriding-action
-           (if new-frame '(display-buffer-pop-up-frame) nil)))
-      (pop-to-buffer (sbt:buffer-name))))
-
-  (with-eval-after-load 'scala-mode
-    (bind-key "<f5>" #'ad|scala-pop-to-sbt scala-mode-map))
-
-  ;; Disable smartparens mode in SBT buffers, because it hangs while trying to
-  ;; find matching delimiters: LINK HERE
-  (add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
-                                   (smartparens-mode -1))))
   :config
   ;; Don't pop up SBT buffers automatically
   (setq sbt:display-command-buffer nil)
@@ -1316,6 +1311,26 @@ argument, select the REPL in a new frame instead."
    'minibuffer-complete-word
    'self-insert-command
    minibuffer-local-completion-map))
+
+(use-package flycheck
+  :config (global-flycheck-mode 1))
+
+(use-package lsp-mode
+  :config
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :config (setq lsp-ui-sideline-show-hover nil)))
+
+(use-package company-lsp
+  :after company lsp-mode
+  :config (add-to-list 'company-backends 'company-lsp)
+  :custom
+  (company-lsp-async t)
+  (company-lsp-enable-snippet t))
+
+(use-package lsp-scala
+  :load-path "site-lisp/lsp-scala"
+  :init (add-hook 'scala-mode-hook #'lsp-scala-enable))
 
 ;;; Python support
 
