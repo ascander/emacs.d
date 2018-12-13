@@ -25,13 +25,12 @@
 ;; Constants
 (defconst *is-a-mac* (eq system-type 'darwin) "Are we on a mac?")
 
-;; TODO: move this to a more reasonable place
 ;; Enter debugger on error, and keep more messages.
 (setq debug-on-error t)
 (setq message-log-max 10000)
 
-;; Increase GC threshold for faster startup, and set to a more
-;; reasonable value after startup.
+;; Increase GC threshold for faster startup, and set to a more reasonable value
+;; after startup.
 (let ((normal-gc-cons-threshold (* 20 1024 1024))
       (init-gc-cons-threshold (* 256 1024 1024)))
   (setq gc-cons-threshold init-gc-cons-threshold)
@@ -128,14 +127,6 @@
   :if *is-a-mac*
   :config
   (osx-trash-setup))
-
-;;; Customization and packages
-
-;; (use-package cus-edit                   ; The Customization UI
-;;   :ensure nil
-;;   :config
-;;   (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
-;;   (load custom-file 'no-error 'no-message))
 
 ;;; Basic UI settings
 
