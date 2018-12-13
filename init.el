@@ -564,7 +564,7 @@ T - tag prefix
 ;;
 ;; See: https://stackoverflow.com/a/2081978
 (setq split-height-threshold nil
-      split-width-threshold 0)
+      split-width-threshold nil)
 
 (use-package ibuffer                       ; A better buffer list
   :bind (([remap list-buffers] . ibuffer)  ; C-x C-b
