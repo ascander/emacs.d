@@ -53,9 +53,10 @@
       package-enable-at-startup nil) ; explicitly initialize packages
 
 (setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")
-        ("gnu"   . "http://elpa.gnu.org/packages/")
-        ("org"   . "https://orgmode.org/elpa/")))
+      '(("melpa"        . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")
+        ("gnu"          . "http://elpa.gnu.org/packages/")
+        ("org"          . "https://orgmode.org/elpa/")))
 (package-initialize)
 
 ;; Bootstrap `use-package'
@@ -1277,6 +1278,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package scala-mode                 ; Major mode for editing Scala files
   :defer t
+  :interpreter ("scala" . scala-mode)
   :config
   ;; Indentation preferences
   (setq scala-indent:default-run-on-strategy
@@ -1293,36 +1295,12 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     #'ad|scala-mode-newline-comments))
 
 (use-package sbt-mode                   ; Interactive support for Satan's Build Tool
-  :disabled t
   :after scala-mode
   :commands (sbt:buffer-name sbt:run-sbt sbt-start sbt-command)
   :bind (:map scala-mode-map
               ("C-c m b s" . sbt-start)
               ("C-c m b c" . sbt-command)
               ("C-c m b r" . sbt-run-previous-command))
-  :init
-  (defun ad|scala-pop-to-sbt (new-frame)
-    "Start an SBT REPL for this project, optionally in a NEW-FRAME.
-
-Select the SBT REPL for the current project in a new window, if
-one exists. If the REPL is not yet running, start it. With prefix
-argument, select the REPL in a new frame instead."
-    (interactive "P")
-    ;; Start SBT if it's not already running
-    (when (not (comint-check-proc (sbt:buffer-name)))
-      (sbt:run-sbt))
-
-    (let ((display-buffer-overriding-action
-           (if new-frame '(display-buffer-pop-up-frame) nil)))
-      (pop-to-buffer (sbt:buffer-name))))
-
-  (with-eval-after-load 'scala-mode
-    (bind-key "<f5>" #'ad|scala-pop-to-sbt scala-mode-map))
-
-  ;; Disable smartparens mode in SBT buffers, because it hangs while trying to
-  ;; find matching delimiters: LINK HERE
-  (add-hook 'sbt-mode-hook (lambda () (when (fboundp 'smartparens-mode)
-                                   (smartparens-mode -1))))
   :config
   ;; Don't pop up SBT buffers automatically
   (setq sbt:display-command-buffer nil)
@@ -1333,6 +1311,26 @@ argument, select the REPL in a new frame instead."
    'minibuffer-complete-word
    'self-insert-command
    minibuffer-local-completion-map))
+
+(use-package flycheck
+  :config (global-flycheck-mode 1))
+
+(use-package lsp-mode
+  :config
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :config (setq lsp-ui-sideline-show-hover nil)))
+
+(use-package company-lsp
+  :after company lsp-mode
+  :config (add-to-list 'company-backends 'company-lsp)
+  :custom
+  (company-lsp-async t)
+  (company-lsp-enable-snippet t))
+
+(use-package lsp-scala
+  :load-path "site-lisp/lsp-scala"
+  :init (add-hook 'scala-mode-hook #'lsp-scala-enable))
 
 ;;; Python support
 
