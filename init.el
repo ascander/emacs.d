@@ -60,7 +60,6 @@
 (package-initialize)
 
 ;; Bootstrap `use-package'
-;; TODO: this should also check/install `delight'
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package t))
@@ -68,7 +67,6 @@
 
 (eval-when-compile
   (require 'use-package))
-(require 'delight)
 (require 'bind-key)
 
 ;;; OS X settings
@@ -536,7 +534,6 @@ T - tag prefix
   :config (recentf-mode 1))
 
 (use-package autorevert
-  :delight auto-revert-mode
   :init
   ;; Basic settings
   (setq auto-revert-verbose nil                ; Autorevert quietly
@@ -725,7 +722,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     (add-to-list 'aw-dispatch-alist '(?\; hydra-window-frame/body) t)))
 
 (use-package focus-autosave-mode        ; Save buffers when Emacs loses focus
-  :delight focus-autosave-mode
   :config (focus-autosave-mode t))
 
 (use-package winner                     ; Undo/redo window configuration changes
@@ -774,7 +770,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package projectile                 ; Project management for Emacs
   :defer 2
-  :delight projectile-mode
   :bind-keymap ("M-p" . projectile-command-map)
   :bind (("M-P" . hydra-projectile/body))
   :init
@@ -890,7 +885,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :defer t)
 
 (use-package ivy                        ; Generic completion mechanism for Emacs
-  :delight ivy-mode
   :demand t
   :bind (("s-b" . ivy-switch-buffer)
          ("s-B" . ivy-switch-buffer-other-window)
@@ -938,7 +932,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (use-package counsel                    ; Ivy-enhanced versions of commands
   :after ivy
   :demand t
-  :delight counsel-mode
   :bind (([remap execute-extended-command] . counsel-M-x)
          ("s-P"                            . counsel-M-x) ; familiar command palette keybinding for MacOS
          ([remap find-file]                . counsel-find-file)
@@ -999,7 +992,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package which-key                  ; Display keybindings based on current command
   :defer 5
-  :delight
   :init
   (setq which-key-idle-delay 0.4
         which-key-sort-order 'which-key-prefix-then-key-order
@@ -1063,7 +1055,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (put 'narrow-to-defun 'disabled nil)
 
 (use-package smartparens                ; Deal with pairs in Emacs
-  :delight
   :config
   (require 'smartparens-config)
 
@@ -1080,7 +1071,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :defer t)
 
 (use-package undo-tree                  ; Replace the confusing Emacs undo system
-  :delight undo-tree-mode
   :init
   (setq undo-tree-auto-save-history t
         undo-tree-visualizer-timestamps t
@@ -1115,7 +1105,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package rainbow-mode               ; Fontify colors in buffers
   :bind (("C-c t r" . rainbow-mode))
-  :delight
   :hook prog-mode
   :init
   ;; Don't highlight color names (just color codes, thanks)
@@ -1123,11 +1112,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package whitespace-cleanup-mode    ; Intelligently clean up whitespace before buffers are saved
   :bind (("C-c x w" . whitespace-cleanup))
-  :hook (prog-mode text-mode conf-mode)
-  :delight)
+  :hook (prog-mode text-mode conf-mode))
 
 (use-package eldoc                      ; Print argument information in the echo area
-  :delight eldoc-mode
   :defer t
   :hook (eval-expression-minibuffer-setup . eldoc-mode))
 
@@ -1183,7 +1170,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package yasnippet                  ; Snippets
   :commands (yas-reload-all yas-minor-mode)
-  :delight yas-minor-mode "ⓨ"
   :hook ((prog-mode . yas-minor-mode))
   :config (yas-reload-all))
 
@@ -1195,7 +1181,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package company                    ; Text completion framework for Emacs
   :defer 3
-  :delight company-mode "Ⓒ"
   :config
   ;; Basic settings
   (setq company-dabbrev-ignore-case nil
