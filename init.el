@@ -88,39 +88,22 @@
   ;; Reuse existing frame for opening new files
   (setq ns-pop-up-frames nil))
 
-(use-package exec-path-from-shell       ; Fix $PATH on GUI Emacs
-  :disabled t
+(use-package exec-path-from-shell       ; Fix PATH on GUI Emacs
   :when *is-a-mac*
-  :ensure t
+  :init
+  (setq exec-path-from-shell-check-startup-files nil
+        exec-path-from-shell-variables
+        '(
+          "JAVA_OPTS"
+          "SBT_OPTS"
+          "METALS_ENABLED"
+          "EMAIL"
+          "PATH"
+          "LANG"
+          "LC_CTYPE"
+          ))
   :config
-  (progn
-    (setq exec-path-from-shell-check-startup-files nil
-                   exec-path-from-shell-variables
-                   '("JAVA_OPTS"        ; Java options
-                     "SBT_OPTS"         ; SBT options
-                     "EMAIL"            ; My email address
-                     "PATH"             ; Executables
-                     "MANPATH"          ; Man pages
-                     "INFOPATH"         ; Info directories
-                     "LANG"             ; Language
-                     "LC_CTYPE"         ; Character set
-                     ))
-
-    ;; Initialize Emacs' environment from the shell
-    (exec-path-from-shell-initialize)
-
-    ;; Tell Emacs who I am
-    (setq user-email-address (getenv "EMAIL")
-          user-full-name (getenv "FULLNAME"))
-
-    ;; Re-initialize the `info-directory-list' from $INFOPATH. Since
-    ;; `package.el' already initializes info, we need to explicitly
-    ;; add the $INFOPATH directories to `info-directory-list'. Reverse
-    ;; the list of info paths to prepend them in proper order.
-    (with-eval-after-load 'info
-      (dolist (dir (nreverse (parse-colon-path (getenv "INFOPATH"))))
-        (when dir
-          (add-to-list 'Info-directory-list dir))))))
+  (exec-path-from-shell-initialize))
 
 (use-package osx-trash
   :if *is-a-mac*
@@ -268,7 +251,7 @@ Font size:  _-_ decrease  _=_ increase  _0_ reset  _q_uit
 ;; Advise the `load-theme' function to disable all existing themes first. This
 ;; avoids pollution from a past theme that isn't overriden by the current theme.
 (defun ad|disable-all-themes (&rest args)
-  "Disables all currently active themes."
+  "Disable all currently active themes. ARGS is ignored."
   (interactive)
   (mapc #'disable-theme custom-enabled-themes))
 
@@ -904,10 +887,10 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
           (t                 . ivy--regex-fuzzy)))
 
   ;; Make the `ivy-current-match' face a bit more distinct
-  (set-face-attribute 'ivy-current-match nil :inherit #'warning)
-  (add-hook 'after-load-theme-hook
-            '(lambda () (set-face-attribute
-                    'ivy-current-match nil :inherit #'warning)))
+  ;; (set-face-attribute 'ivy-current-match nil :inherit #'warning)
+  ;; (add-hook 'after-load-theme-hook
+  ;;           '(lambda () (set-face-attribute
+  ;;                   'ivy-current-match nil :inherit #'warning)))
 
   (ivy-mode 1))
 
