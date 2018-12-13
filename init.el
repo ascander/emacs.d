@@ -347,9 +347,7 @@ _S_: Light     _M_: Light
 
 (use-package stripe-buffer              ; Striped backgorund in `dired'
   :defer t
-  :hook (dired-mode . stripe-listify-buffer)
-  :config
-  (set-face-attribute 'stripe-hl-line nil :inherit #'region))
+  :hook (dired-mode . stripe-listify-buffer))
 
 ;;; Modeline improvements
 
