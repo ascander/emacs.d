@@ -89,23 +89,23 @@
   (setq ns-pop-up-frames nil))
 
 (use-package exec-path-from-shell       ; Fix PATH on GUI Emacs
-  :when *is-a-mac*
+  :if *is-a-mac*
   :init
   (setq exec-path-from-shell-check-startup-files nil
         exec-path-from-shell-variables
         '(
-          "JAVA_OPTS"
-          "SBT_OPTS"
-          "METALS_ENABLED"
-          "EMAIL"
-          "PATH"
-          "LANG"
-          "LC_CTYPE"
+          "JAVA_OPTS"                   ; Java options
+          "SBT_OPTS"                    ; SBT options
+          "METALS_ENABLED"              ; Metals for Scala
+          "EMAIL"                       ; User email address
+          "PATH"                        ; Executables
+          "LANG"                        ; System language
+          "LC_CTYPE"                    ; System character set
           ))
   :config
   (exec-path-from-shell-initialize))
 
-(use-package osx-trash
+(use-package osx-trash                  ; Make deleting behave properly on OS X
   :if *is-a-mac*
   :config
   (osx-trash-setup))
@@ -214,9 +214,9 @@ applied relative to the current font size."
   ;; font size is equal to 100 in internal font size value.
   (set-face-attribute 'default nil :height (* font-size-pt 10)))
 
-(defun ad|global-font-size-incr () (interactive) (ad|global-font-size-adj +1))
-(defun ad|global-font-size-decr () (interactive) (ad|global-font-size-adj -1))
-(defun ad|global-font-size-reset () (interactive) (ad|global-font-size-adj 0))
+(defun ad|global-font-size-incr () "Increase." (interactive) (ad|global-font-size-adj +1))
+(defun ad|global-font-size-decr () "Decrease." (interactive) (ad|global-font-size-adj -1))
+(defun ad|global-font-size-reset () "Reset." (interactive) (ad|global-font-size-adj 0))
 
 ;; Initialize font-size-pt var to the default value
 (unless (boundp 'font-size-pt)
@@ -315,8 +315,8 @@ _S_: Light     _M_: Light
 
 (use-package dimmer                     ; Dim buffers other than the current one
   :init
-  (add-hook 'after-init-hook #'dimmer-mode)
-  (setq dimmer-fraction 0.4))
+  (setq dimmer-fraction 0.4)
+  (add-hook 'after-init-hook #'dimmer-mode))
 
 (use-package stripe-buffer              ; Striped backgorund in `dired'
   :defer t
@@ -756,8 +756,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :bind-keymap ("M-p" . projectile-command-map)
   :bind (("M-P" . hydra-projectile/body))
   :init
-  (defhydra hydra-projectile (:color teal
-                                     :columns 4)
+  (defhydra hydra-projectile (:color teal :columns 4)
     "Projectile"
     ("f"   projectile-find-file                "Find File")
     ("r"   projectile-recentf                  "Recent Files")
@@ -962,7 +961,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package evil-collection            ; Evil bindings for Emacs modes
   :after evil
-  :init (setq evil-collection-setup-minibuffer t)
   :config (evil-collection-init))
 
 (use-package evil-escape                ; Customizable escape from insert state
@@ -1188,7 +1186,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         (mapcar #'ad|company-mode-backend-with-yas company-backends))
 
   ;; Turn off company support for certain modes
-  (dolist (hook '(markdown-mode-hook org-mode-hoo))
+  (dolist (hook '(markdown-mode-hook org-mode-hook))
     (add-hook hook '(lambda () (company-mode -1))))
 
   ;; Leave TAB for YASnippet
@@ -1298,6 +1296,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package lsp-scala
   :load-path "site-lisp/lsp-scala"
+  :after (scala-mode lsp-mode)
   :init (add-hook 'scala-mode-hook #'lsp-scala-enable))
 
 ;;; Python support
