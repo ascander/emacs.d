@@ -180,7 +180,6 @@
 
 (set-face-attribute 'default nil
                     :family "Iosevka Pro" ; custom build of Iosevka with ligatures
-
                     :height 140
                     :weight 'regular)
 
@@ -191,7 +190,7 @@
 
 ;; Global font resizing, taken from https://github.com/kaushalmodi/.emacs.d
 (defun ad|global-font-size-adj (scale &optional absolute)
-  "Adjust the font sizes globally: in all the buffers, mode line, echo area, etc.
+  "Adjust the font sizes globally: in all buffers, mode line, echo area, etc.
 
 The built-in `text-scale-adjust' function does an excellent job
 of font resizing, but it does not change the font sizes of text
@@ -1244,7 +1243,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package scala-mode                 ; Major mode for editing Scala files
   :defer t
-  :interpreter ("scala" . scala-mode)
   :config
   ;; Indentation preferences
   (setq scala-indent:default-run-on-strategy
@@ -1261,12 +1259,10 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     #'ad|scala-mode-newline-comments))
 
 (use-package sbt-mode                   ; Interactive support for Satan's Build Tool
-  :after scala-mode
-  :commands (sbt:buffer-name sbt:run-sbt sbt-start sbt-command)
+  :commands (sbt-start sbt-command)
   :bind (:map scala-mode-map
               ("C-c m b s" . sbt-start)
-              ("C-c m b c" . sbt-command)
-              ("C-c m b r" . sbt-run-previous-command))
+              ("C-c m b c" . sbt-command))
   :config
   ;; Don't pop up SBT buffers automatically
   (setq sbt:display-command-buffer nil)
@@ -1282,13 +1278,14 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config (global-flycheck-mode 1))
 
 (use-package lsp-mode
-  :config
-  (use-package lsp-ui
-    :hook (lsp-mode . lsp-ui-mode)
-    :config (setq lsp-ui-sideline-show-hover nil)))
+  :pin melpa-stable)
+
+(use-package lsp-ui
+  :pin melpa-stable
+  :hook (lsp-mode . lsp-ui-mode))
 
 (use-package company-lsp
-  :after company lsp-mode
+  :after (company lsp-mode)
   :config (add-to-list 'company-backends 'company-lsp)
   :custom
   (company-lsp-async t)

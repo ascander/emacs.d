@@ -13,7 +13,8 @@
 # want under version control
 /site-lisp
 
-
+# Cask auto-generated directory
+/.cask
 
 
 
