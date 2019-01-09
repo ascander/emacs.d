@@ -202,21 +202,15 @@
 
 (advice-add #'load-theme :before #'ad|disable-all-themes)
 
-;; Pretty hydra entry point for thme switching
-(defhydra hydra-theme-selector (:hint nil :color pink)
-  "
-Theme
+;; Pretty hydra entry point for theme switching
+(defhydra hydra-theme-selector (:hint nil :color amaranth :columns 3)
+  "Theme"
+  ("s" (load-theme 'solarized-dark t) "solarized dark")
+  ("m" (load-theme 'material t) "material dark")
+  ("DEL" (ad|disable-all-themes) "none")
 
-^Solarized^    ^Material^
-------------------------------------------
-_s_: Dark      _m_: Dark       _DEL_: none
-_S_: Light     _M_: Light
-"
-  ("s" (load-theme 'solarized-dark t))
-  ("S" (load-theme 'solarized-light t))
-  ("m" (load-theme 'material t))
-  ("M" (load-theme 'material-light t))
-  ("DEL" (ad|disable-all-themes))
+  ("S" (load-theme 'solarized-light t) "solarized light")
+  ("M" (load-theme 'material-light t) "material light")
   ("RET" nil "done" :color blue))
 
 (bind-keys ("C-c w t" . hydra-theme-selector/body))
@@ -358,7 +352,7 @@ _S_: Light     _M_: Light
   :ensure nil
   :defer t
   :bind (:map dired-mode-map
-              ("." . #'hydra-dired/body))
+              ("s-." . #'hydra-dired/body))
   :init
   (when-let (gls (and *is-a-mac* (executable-find "gls")))
     (setq insert-directory-program gls))
@@ -477,16 +471,16 @@ T - tag prefix
 
 ;;; Buffer, frame and window settings
 
-;; Always prefer splitting vertically
-;;
-;; See: https://stackoverflow.com/a/2081978
-(setq split-height-threshold nil
-      split-width-threshold nil)
+;; ;; Always prefer splitting vertically
+;; ;;
+;; ;; See: https://stackoverflow.com/a/2081978
+;; (setq split-height-threshold nil
+;;       split-width-threshold nil)
 
 (use-package ibuffer                       ; A better buffer list
   :bind (([remap list-buffers] . ibuffer)  ; C-x C-b
          :map ibuffer-mode-map
-         ("." . #'hydra-ibuffer-main/body))
+         ("s-." . #'hydra-ibuffer-main/body))
   :init
   (defhydra hydra-ibuffer-main (:color pink :hint nil)
     "
