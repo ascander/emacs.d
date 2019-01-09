@@ -897,6 +897,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :init
   (setq evil-want-integration t
         evil-want-keybinding nil)
+
+  ;; Start things like commit message buffers in insert state
+  (add-hook 'with-editor-mode-hook #'evil-insert-state)
   :config (evil-mode 1))
 
 (use-package evil-collection            ; Evil bindings for Emacs modes
