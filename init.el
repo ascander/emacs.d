@@ -163,8 +163,8 @@
 (column-number-mode)                               ; Display column number in the mode line
 (setq confirm-kill-emacs 'y-or-n-p)                ; Because I keep hitting 's-q' accidentally
 
-;; Use ESC as a universal "get me out of here" command
-(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+;; ;; Use ESC as a universal "get me out of here" command
+;; (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 
 ;; Make the Emacs shell ('M-x shell') interactive, and disable echoing each
 ;; terminal command as it's entered on the command line.
@@ -719,10 +719,10 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   (global-set-key (kbd "s-{") #'windmove-up)
   (global-set-key (kbd "s-}") #'windmove-up))
 
-;; Quicker buffer cycling commands
-(bind-keys ("s-p" . previous-buffer)    ; TODO: conflicts with projectile command prefix
-           ("s-n" . next-buffer)
-           ("s-k" . kill-this-buffer))
+;; ;; Quicker buffer cycling commands
+;; (bind-keys ("s-p" . previous-buffer)    ; TODO: conflicts with projectile command prefix
+;;            ("s-n" . next-buffer)
+;;            ("s-k" . kill-this-buffer))
 
 ;; Split and manage windows easily
 (global-set-key (kbd "s-1") (kbd "C-x 1")) ; ⌘-1 kill other windows (keep this one)
