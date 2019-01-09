@@ -677,6 +677,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :ensure nil)
 
 (use-package ox-reveal                  ; Reveal.js back end for Org export
+  :defer t
   :load-path "site-lisp/org-reveal")
 
 (use-package evil-org                   ; Evil bindings for Org mode
