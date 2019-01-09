@@ -99,6 +99,10 @@
   (setq org-refile-targets '((nil :maxlevel . 5)
                              (org-agenda-files :maxlevel . 5)))
 
+  ;; Switch to insert state when capturing
+  (add-hook 'org-capture-mode-hook #'evil-insert-state)
+  (add-hook 'org-log-buffer-setup-hook #'evil-insert-state)
+
   ;; Include the filename in refile target paths; this allows refiling to the
   ;; top level of a target
   (setq org-refile-use-outline-path 'file)
@@ -131,7 +135,11 @@
   (setq org-agenda-compact-blocks nil)
 
   ;; Agenda files
-  (setq org-agenda-files '("~/org"))
+  (setq org-agenda-files '("~/org/work.org"
+                           "~/org/home.org"
+                           "~/org/refile.org"
+                           "~/org/reminders.org"
+                           "~/org/emacs.org"))
 
   ;; === Utility functions for agenda view ===
   (defun ad|is-project-p ()
