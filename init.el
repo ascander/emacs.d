@@ -211,7 +211,7 @@
 
   ("S" (load-theme 'solarized-light t) "solarized light")
   ("M" (load-theme 'material-light t) "material light")
-  ("RET" nil "done" :color blue))
+  ("q" nil "quit" :color blue))
 
 (bind-keys ("C-c w t" . hydra-theme-selector/body))
 
