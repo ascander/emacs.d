@@ -38,11 +38,14 @@
    org-src-fontify-natively t           ; fontify text in code blocks
    org-log-done 'time                   ; timestamp done states
    org-use-fast-todo-selection t        ; fast-select TODO states
-   org-startup-folded nil               ; don't start up folded
    org-startup-truncated nil            ; don't start up truncated
    org-tags-column 80                   ; indent tags to here
    org-enable-priority-commands nil     ; disable priority commands
    org-reverse-note-order t)            ; store new notes at the beginning
+
+  ;; Enable easy templates for code blocks, etc.
+  ;; See discussion at: https://lists.gnu.org/archive/html/emacs-orgmode/2018-04/msg00600.html
+  (require 'org-tempo)
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Tasks & States
