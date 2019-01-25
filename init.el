@@ -742,8 +742,8 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :bind (("C-c g c" . magit-clone)
          ("C-c g s" . magit-status)
          ("s-G"     . magit-status)
-         ("C-c g b" . magit-blame)
-         ("C-c g p" . magit-pull))
+         ("C-c g b" . magit-blame-addition)
+         ("C-c g p" . magit-pull-branch))
   :config
   ;; Basic settings
   (setq magit-save-repository-buffers 'dontask
@@ -775,7 +775,17 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
             #'ad|magit-set-repo-dirs-from-projectile)
 
   ;; Refresh `magit-status' after saving a buffer
-  (add-hook 'after-save-hook #'magit-after-save-refresh-status))
+  (add-hook 'after-save-hook #'magit-after-save-refresh-status)
+
+  ;; Redirect "git" command to "hub" for interactive use only.
+  ;; See: https://github.com/DarwinAwardWinner/dotemacs/blob/8ed1ae8244b5c23965799b81c2371e27217bae48/config.org#magit-itself
+  (defvar magit-hub-executable (when (executable-find "hub") "hub")
+    "Executable to use for calling hub.")
+  (define-advice magit-git-command (:around (orig-fun &rest args) use-hub)
+    "Use `hub' instead of `git' if available."
+    (let ((magit-git-executable
+           (or magit-hub-executable magit-git-executable)))
+      (apply orig-fun args))))
 
 (use-package git-commit                 ; git commit message mode
   :defer t
@@ -837,7 +847,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :after (ivy hydra)
   :defer t
   :config
-  (bind-key "C-o" #'hydra-ivy/body ivy-minibuffer-map))
+  (bind-key "s-." #'hydra-ivy/body ivy-minibuffer-map))
 
 (use-package ivy-rich
   :after ivy
