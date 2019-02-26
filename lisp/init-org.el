@@ -43,6 +43,9 @@
    org-enable-priority-commands nil     ; disable priority commands
    org-reverse-note-order t)            ; store new notes at the beginning
 
+  ;; Export backends
+  (setq org-export-backends '(md odt latex icalendar html ascii))
+
   ;; Enable easy templates for code blocks, etc.
   ;; See discussion at: https://lists.gnu.org/archive/html/emacs-orgmode/2018-04/msg00600.html
   (require 'org-tempo)
@@ -95,8 +98,8 @@
            "** %i%? :NOTE:\n %U")
           ("m" "Meeting" entry (file "~/org/refile.org")
            "** MEETING with %? :MEETING:\n %U")
-          ("r" "Reminder" entry (file "~/org/reminders.org")
-           "* %i%?\n %T")))
+          ("d" "Deadline" entry (file "~/org/reminders.org")
+           "* TODO %i%?\n DEADLINE:%T")))
 
   ;; Refile targets include this file and any agenda file - up to 5 levels deep
   (setq org-refile-targets '((nil :maxlevel . 5)
