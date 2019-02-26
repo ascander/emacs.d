@@ -1118,7 +1118,18 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (global-set-key (kbd "s-/") #'comment-dwim)
 
 (use-package shell-pop                  ; Use a shell easily on Emacs
+  :init
+  (setq shell-pop-window-size 40)
   :config
+  ;; Set `default-directory' to the projectile root dir, if available. This
+  ;; makes shell-pop in an SBT project tolerable
+  (add-hook 'shell-pop-in-hook '(lambda ()
+                                  (let ((root
+                                         (if
+                                             (fboundp 'projectile-project-root)
+                                             (or (projectile-project-root) default-directory))))
+                                    (setq default-directory root))))
+
   (custom-set-variables
    '(shell-pop-shell-type
      (quote ("term" "*terminal*" (lambda nil (term shell-pop-term-shell)))))
