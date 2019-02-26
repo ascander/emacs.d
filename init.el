@@ -952,8 +952,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config
   ;; Align virtual buffers, and abbreviate paths
   (setq ivy-virtual-abbreviate 'full
-        ivy-rich-path-style 'abbrev
-        ivy-rich-switch-buffer-align-virtual-buffer t)
+        ivy-rich-path-style 'abbrev)
 
   (ivy-set-display-transformer 'ivy-switch-buffer
                                'ivy-rich-switch-buffer-transformer)
@@ -983,8 +982,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     :config (smex-initialize))
 
   ;; Counsel-powered `org-goto' command
-  (setq counsel-org-goto-display-style 'path
-        counsel-org-goto-face-style 'org)
+  (setq counsel-outline-display-style 'path)
 
   (counsel-mode 1))
 
