@@ -83,6 +83,7 @@
   ;; Using Karabiner Elements (https://pqrs.org/osx/karabiner/).
   (setq mac-command-modifier 'super     ; Command is Super
         mac-option-modifier 'meta       ; Alt/Option is Meta
+        mac-right-option-modifier 'none ; Except on the right, just in case
         mac-function-modifier 'none)    ; Reserve Function for OS X
 
   ;; Reuse existing frame for opening new files
