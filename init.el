@@ -1321,9 +1321,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package sbt-mode                   ; Interactive support for Satan's Build Tool
   :commands (sbt-start sbt-command)
-  :bind (:map scala-mode-map
-              ("C-c m b s" . sbt-start)
-              ("C-c m b c" . sbt-command))
   :config
   ;; Don't pop up SBT buffers automatically
   (setq sbt:display-command-buffer nil)
@@ -1339,23 +1336,26 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config (global-flycheck-mode 1))
 
 (use-package lsp-mode
-  :pin melpa-stable)
+  :hook (scala-mode . lsp-mode)
+  :init
+  (evil-define-key '(normal visual) lsp-mode-map "gr" 'lsp-find-references))
 
 (use-package lsp-ui
-  :pin melpa-stable
   :hook (lsp-mode . lsp-ui-mode))
 
-(use-package company-lsp
-  :after (company lsp-mode)
-  :config (add-to-list 'company-backends 'company-lsp)
-  :custom
-  (company-lsp-async t)
-  (company-lsp-enable-snippet t))
+;; (use-package company-lsp
+;;   :after (company lsp-mode)
+;;   :config (add-to-list 'company-backends 'company-lsp)
+;;   :custom
+;;   (company-lsp-async t)
+;;   (company-lsp-enable-snippet t))
 
 (use-package lsp-scala
   :load-path "site-lisp/lsp-scala"
   :after (scala-mode lsp-mode)
-  :init (add-hook 'scala-mode-hook #'lsp-scala-enable))
+  :demand t
+  :hook (scala-mode . lsp)
+  :init (setq lsp-scala-server-command (executable-find "metals-emacs")))
 
 ;;; Python support
 
