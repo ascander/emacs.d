@@ -1235,7 +1235,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   ;; Add YASnippet support for all company backends
   ;; See: https://github.com/syl20bnr/spacemacs/pull/179
   (defvar company-mode-enable-yas t "Enable YASnippet for all company backends.")
-
+  
   (defun ad|company-mode-backend-with-yas (backend)
     (if (or (not company-mode-enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
         backend
@@ -1250,9 +1250,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     (add-hook hook '(lambda () (company-mode -1))))
 
   ;; Leave TAB for YASnippet
-  (define-key company-active-map (kbd "TAB") nil)
-  (define-key company-active-map (kbd "<tab>") nil)
-  (define-key company-active-map [tab] nil)
+  ;; (define-key company-active-map (kbd "TAB") nil)
+  ;; (define-key company-active-map (kbd "<tab>") nil)
+  ;; (define-key company-active-map [tab] nil)
 
   (global-company-mode 1))
 
