@@ -733,8 +733,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         projectile-enable-caching t
         projectile-find-dir-includes-top-level t
         projectile-switch-project-action #'projectile-dired
-        projectile-indexing-method 'alien
-        projectile-switch-project-action 'projectile-dired)
+        projectile-indexing-method 'alien)
 
   ;; Location of Projectile data files. This is actually set in `no-littering',
   ;; but because we defer loading of Projectile, those paths are overwritten
