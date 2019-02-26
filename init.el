@@ -242,22 +242,36 @@
         solarized-height-plus-4 1.0)
   :config
   ;; Conditionally load the default theme based on whether we're running the Emacs daemon.
+  ;; (if (daemonp)
+  ;;     (add-hook 'after-make-frame-functions
+  ;;               (lambda (frame)
+  ;;                 (select-frame frame)
+  ;;                 (load-theme 'solarized-dark t)))
+  ;;   (load-theme 'solarized-dark t))
+  )
+
+(use-package material-theme             ; Google Material Design theme for Emacs
+  :defer t)
+
+(use-package doom-themes                ; DOOM Emacs themes
+  :init
+  (setq doom-themes-enable-bold nil
+        doom-themes-enable-italic nil)
+  :config
   (if (daemonp)
       (add-hook 'after-make-frame-functions
                 (lambda (frame)
                   (select-frame frame)
-                  (load-theme 'solarized-dark t)))
-    (load-theme 'solarized-dark t)))
-
-(use-package material-theme             ; Google Material Design theme for Emacs
-  :defer t)
+                  (load-theme 'doom-city-lights t)))
+    (load-theme 'doom-city-lights t)))
 
 (use-package dimmer                     ; Dim buffers other than the current one
   :init
   (setq dimmer-fraction 0.4)
   (add-hook 'after-init-hook #'dimmer-mode))
 
-(use-package stripe-buffer              ; Striped backgorund in `dired'
+(use-package stripe-buffer              ; striped backgorund in `dired'
+  :disabled t                           ; bad interactions with evil cursor states
   :defer t
   :hook (dired-mode . stripe-listify-buffer))
 
