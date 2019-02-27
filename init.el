@@ -83,6 +83,7 @@
   ;; Using Karabiner Elements (https://pqrs.org/osx/karabiner/).
   (setq mac-command-modifier 'super     ; Command is Super
         mac-option-modifier 'meta       ; Alt/Option is Meta
+        mac-right-option-modifier 'none ; Except on the right, just in case
         mac-function-modifier 'none)    ; Reserve Function for OS X
 
   ;; Reuse existing frame for opening new files
@@ -242,22 +243,36 @@
         solarized-height-plus-4 1.0)
   :config
   ;; Conditionally load the default theme based on whether we're running the Emacs daemon.
+  ;; (if (daemonp)
+  ;;     (add-hook 'after-make-frame-functions
+  ;;               (lambda (frame)
+  ;;                 (select-frame frame)
+  ;;                 (load-theme 'solarized-dark t)))
+  ;;   (load-theme 'solarized-dark t))
+  )
+
+(use-package material-theme             ; Google Material Design theme for Emacs
+  :defer t)
+
+(use-package doom-themes                ; DOOM Emacs themes
+  :init
+  (setq doom-themes-enable-bold nil
+        doom-themes-enable-italic nil)
+  :config
   (if (daemonp)
       (add-hook 'after-make-frame-functions
                 (lambda (frame)
                   (select-frame frame)
-                  (load-theme 'solarized-dark t)))
-    (load-theme 'solarized-dark t)))
-
-(use-package material-theme             ; Google Material Design theme for Emacs
-  :defer t)
+                  (load-theme 'doom-city-lights t)))
+    (load-theme 'doom-city-lights t)))
 
 (use-package dimmer                     ; Dim buffers other than the current one
   :init
   (setq dimmer-fraction 0.4)
   (add-hook 'after-init-hook #'dimmer-mode))
 
-(use-package stripe-buffer              ; Striped backgorund in `dired'
+(use-package stripe-buffer              ; striped backgorund in `dired'
+  :disabled t                           ; bad interactions with evil cursor states
   :defer t
   :hook (dired-mode . stripe-listify-buffer))
 
@@ -718,8 +733,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
         projectile-enable-caching t
         projectile-find-dir-includes-top-level t
         projectile-switch-project-action #'projectile-dired
-        projectile-indexing-method 'alien
-        projectile-switch-project-action 'projectile-dired)
+        projectile-indexing-method 'alien)
 
   ;; Location of Projectile data files. This is actually set in `no-littering',
   ;; but because we defer loading of Projectile, those paths are overwritten
@@ -730,7 +744,83 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   ;; Remove dead projects when Emacs is idle
   (run-with-idle-timer 10 nil #'projectile-cleanup-known-projects)
 
-  (projectile-global-mode t))
+  (projectile-mode t))
+
+(use-package treemacs                   ; File explorer for Emacs
+  :defer t
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag))
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                 (if (executable-find "python") 3 0)
+          treemacs-deferred-git-apply-delay      0.5
+          treemacs-display-in-side-window        t
+          treemacs-file-event-delay              5000
+          treemacs-file-follow-delay             0.2
+          treemacs-follow-after-init             t
+          treemacs-git-command-pipe              ""
+          treemacs-goto-tag-strategy             'refetch-index
+          treemacs-indentation                   2
+          treemacs-indentation-string            " "
+          treemacs-is-never-other-window         nil
+          treemacs-max-git-entries               5000
+          treemacs-no-png-images                 nil
+          treemacs-no-delete-other-windows       t
+          treemacs-project-follow-cleanup        nil
+          treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-recenter-distance             0.1
+          treemacs-recenter-after-file-follow    nil
+          treemacs-recenter-after-tag-follow     nil
+          treemacs-recenter-after-project-jump   'always
+          treemacs-recenter-after-project-expand 'on-distance
+          treemacs-show-cursor                   nil
+          treemacs-show-hidden-files             t
+          treemacs-silent-filewatch              nil
+          treemacs-silent-refresh                nil
+          treemacs-sorting                       'alphabetic-desc
+          treemacs-space-between-root-nodes      t
+          treemacs-tag-follow-cleanup            t
+          treemacs-tag-follow-delay              1.5
+          treemacs-width                         35)
+
+    ;; Keep treemacs from showing files that are ignored by git
+    (add-to-list 'treemacs-pre-file-insert-predicates #'treemacs-is-file-git-ignored?)
+    
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode t)
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null (executable-find "python3"))))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))))
+
+(use-package treemacs-evil              ; Evil integration for treemacs
+  :after treemacs evil)
+
+(use-package treemacs-projectile        ; Projectile integration for treemacs
+  :after treemacs projectile)
+
+(use-package treemacs-icons-dired       ; Treemacs icons in dired buffers
+  :after treemacs dired
+  :config (treemacs-icons-dired-mode))
+
+(use-package treemacs-magit             ; Magit integration for Treemacs
+  :after treemacs magit)
 
 ;;; Version control
 
@@ -779,6 +869,14 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
   ;; Redirect "git" command to "hub" for interactive use only.
   ;; See: https://github.com/DarwinAwardWinner/dotemacs/blob/8ed1ae8244b5c23965799b81c2371e27217bae48/config.org#magit-itself
+  ;;
+  ;; Note: This requires configuring the `$EDITOR' environment variable to play
+  ;; nice with Emacs running in server mode. For Oh-my-zsh users (also using the
+  ;; Emacs plugin) this looks like:
+  ;;
+  ;; export EDITOR="$HOME/.oh-my-zsh/plugins/emacs/emacsclient.sh --no-wait"
+  ;;
+  ;; See: https://unix.stackexchange.com/a/9202
   (defvar magit-hub-executable (when (executable-find "hub") "hub")
     "Executable to use for calling hub.")
   (define-advice magit-git-command (:around (orig-fun &rest args) use-hub)
@@ -854,8 +952,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config
   ;; Align virtual buffers, and abbreviate paths
   (setq ivy-virtual-abbreviate 'full
-        ivy-rich-path-style 'abbrev
-        ivy-rich-switch-buffer-align-virtual-buffer t)
+        ivy-rich-path-style 'abbrev)
 
   (ivy-set-display-transformer 'ivy-switch-buffer
                                'ivy-rich-switch-buffer-transformer)
@@ -885,8 +982,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     :config (smex-initialize))
 
   ;; Counsel-powered `org-goto' command
-  (setq counsel-org-goto-display-style 'path
-        counsel-org-goto-face-style 'org)
+  (setq counsel-outline-display-style 'path)
 
   (counsel-mode 1))
 
@@ -1022,7 +1118,18 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 (global-set-key (kbd "s-/") #'comment-dwim)
 
 (use-package shell-pop                  ; Use a shell easily on Emacs
+  :init
+  (setq shell-pop-window-size 40)
   :config
+  ;; Set `default-directory' to the projectile root dir, if available. This
+  ;; makes shell-pop in an SBT project tolerable
+  (add-hook 'shell-pop-in-hook '(lambda ()
+                                  (let ((root
+                                         (if
+                                             (fboundp 'projectile-project-root)
+                                             (or (projectile-project-root) default-directory))))
+                                    (setq default-directory root))))
+
   (custom-set-variables
    '(shell-pop-shell-type
      (quote ("term" "*terminal*" (lambda nil (term shell-pop-term-shell)))))
@@ -1128,7 +1235,7 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   ;; Add YASnippet support for all company backends
   ;; See: https://github.com/syl20bnr/spacemacs/pull/179
   (defvar company-mode-enable-yas t "Enable YASnippet for all company backends.")
-
+  
   (defun ad|company-mode-backend-with-yas (backend)
     (if (or (not company-mode-enable-yas) (and (listp backend) (member 'company-yasnippet backend)))
         backend
@@ -1143,9 +1250,9 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
     (add-hook hook '(lambda () (company-mode -1))))
 
   ;; Leave TAB for YASnippet
-  (define-key company-active-map (kbd "TAB") nil)
-  (define-key company-active-map (kbd "<tab>") nil)
-  (define-key company-active-map [tab] nil)
+  ;; (define-key company-active-map (kbd "TAB") nil)
+  ;; (define-key company-active-map (kbd "<tab>") nil)
+  ;; (define-key company-active-map [tab] nil)
 
   (global-company-mode 1))
 
@@ -1214,9 +1321,6 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
 
 (use-package sbt-mode                   ; Interactive support for Satan's Build Tool
   :commands (sbt-start sbt-command)
-  :bind (:map scala-mode-map
-              ("C-c m b s" . sbt-start)
-              ("C-c m b c" . sbt-command))
   :config
   ;; Don't pop up SBT buffers automatically
   (setq sbt:display-command-buffer nil)
@@ -1232,23 +1336,26 @@ _t_: toggle    _._: toggle hydra _H_: help       C-o other win no-select
   :config (global-flycheck-mode 1))
 
 (use-package lsp-mode
-  :pin melpa-stable)
+  :hook (scala-mode . lsp-mode)
+  :init
+  (evil-define-key '(normal visual) lsp-mode-map "gr" 'lsp-find-references))
 
 (use-package lsp-ui
-  :pin melpa-stable
   :hook (lsp-mode . lsp-ui-mode))
 
-(use-package company-lsp
-  :after (company lsp-mode)
-  :config (add-to-list 'company-backends 'company-lsp)
-  :custom
-  (company-lsp-async t)
-  (company-lsp-enable-snippet t))
+;; (use-package company-lsp
+;;   :after (company lsp-mode)
+;;   :config (add-to-list 'company-backends 'company-lsp)
+;;   :custom
+;;   (company-lsp-async t)
+;;   (company-lsp-enable-snippet t))
 
 (use-package lsp-scala
   :load-path "site-lisp/lsp-scala"
   :after (scala-mode lsp-mode)
-  :init (add-hook 'scala-mode-hook #'lsp-scala-enable))
+  :demand t
+  :hook (scala-mode . lsp)
+  :init (setq lsp-scala-server-command (executable-find "metals-emacs")))
 
 ;;; Python support
 
